@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Models.Enchantments;
 
 
 namespace TheSolitary.Scripts;
@@ -17,7 +18,17 @@ public static class UpMySleeveConstructPatch
 {
     private static void Postfix(Anticipate __instance)
     {
-        ((DynamicVar)((CardModel)__instance).DynamicVars.Cards).BaseValue = 1m;
+        ((DynamicVar)((CardModel)__instance).DynamicVars.Cards).BaseValue = 2m;
+    }
+}
+
+[HarmonyPatch(typeof(UpMySleeve), "OnUpgrade")]
+public static class UpMySleeveOnUpgradePacth
+{
+    private static bool Prefix(UpMySleeve __instance)
+    {
+        ((CardModel)__instance).EnergyCost.UpgradeBy(-1);
+        return false;
     }
 }
 
@@ -38,7 +49,8 @@ public static class UpMySleeveOnPlayPatch
             ((CardModel)card).DynamicVars.Cards.IntValue), context: ctx, player: ((CardModel)card).Owner, filter: null, source: ((CardModel)card))).ToList();
         foreach (CardModel item in list)
         {
-            CardModel cardModel = ((CardModel)card).CombatState.CreateCard<Shiv>(((CardModel)card).Owner);
+            CardModel cardModel = ((CardModel)card).CombatState!.CreateCard<Shiv>(((CardModel)card).Owner);
+            CardCmd.Enchant<Swift>(cardModel, 1m);
             await CardCmd.Transform(item, cardModel);
         }
         ((CardModel)card).EnergyCost.AddThisCombat(-1);

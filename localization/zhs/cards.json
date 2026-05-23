@@ -1169,7 +1169,7 @@
   "UPPERCUT.title": "上勾拳",
   "UPROAR.description": "造成{Damage:diff()}点伤害两次。\n随机打出你的[gold]抽牌堆[/gold]中的1张攻击牌。",
   "UPROAR.title": "骚动",
-  "UP_MY_SLEEVE.description": "将最多{Cards:diff()}张牌变化为[gold]小刀[/gold]。\n这张牌的耗能减少1。",
+  "UP_MY_SLEEVE.description": "将最多{Cards:diff()}张牌变化为[blue]迅速[/blue][gold]小刀[/gold]。\n这张牌的耗能减少1。",
   "UP_MY_SLEEVE.title": "袖里乾坤",
   "UP_MY_SLEEVE.selectionScreenPrompt": "将最多{Amount}张牌变化为[gold]小刀[/gold]",
   "VEILPIERCER.description": "造成{Damage:diff()}点伤害。\n你打出的下一张[gold]虚无[/gold]牌耗能变为0{energyPrefix:energyIcons(1)}。",
