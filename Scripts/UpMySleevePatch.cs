@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -12,6 +13,21 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 
 
 namespace TheSolitary.Scripts;
+
+[HarmonyPatch(typeof(UpMySleeve), "ExtraHoverTips", MethodType.Getter)]
+public static class UpMySleeveHoverPatch
+{
+    [HarmonyPrefix]
+    public static bool Prefix(ref IEnumerable<IHoverTip> __result)
+    {
+        List<IHoverTip> list = new List<IHoverTip>();
+        list.Add(HoverTipFactory.FromCard<Shiv>());
+        list.AddRange(HoverTipFactory.FromEnchantment<Swift>());
+        __result = list;
+        return false;
+    }
+}
+
 
 [HarmonyPatch(typeof(UpMySleeve), MethodType.Constructor)]
 public static class UpMySleeveConstructPatch
