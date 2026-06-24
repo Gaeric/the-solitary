@@ -1,4 +1,5 @@
 ﻿
+using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
@@ -32,19 +33,34 @@ public static class UpMySleeveHoverPatch
 [HarmonyPatch(typeof(UpMySleeve), MethodType.Constructor)]
 public static class UpMySleeveConstructPatch
 {
-    private static void Postfix(Anticipate __instance)
+    private static void Postfix(UpMySleeve __instance)
     {
         ((DynamicVar)((CardModel)__instance).DynamicVars.Cards).BaseValue = 2m;
     }
 }
 
-[HarmonyPatch(typeof(UpMySleeve), "OnUpgrade")]
+// [HarmonyPatch(typeof(UpMySleeve), "OnUpgrade")]
 public static class UpMySleeveOnUpgradePacth
 {
     private static bool Prefix(UpMySleeve __instance)
     {
         ((CardModel)__instance).EnergyCost.UpgradeBy(-1);
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(UpMySleeve), MethodType.Constructor)]
+public static class UpMySleeveRatityPacth
+{
+    private static readonly FieldInfo RarityField =
+        typeof(CardModel).GetField("<Rarity>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+    private static void Postfix(Acrobatics __instance)
+    {
+        if (RarityField != null)
+        {
+            RarityField.SetValue(__instance, (CardRarity)2);
+        }
     }
 }
 
@@ -59,16 +75,23 @@ public static class UpMySleeveOnPlayPatch
 
     private static async Task CustomPlay(UpMySleeve card, PlayerChoiceContext ctx, CardPlay cardPlay)
     {
-        LocString locStr = new LocString("cards","UP_MY_SLEEVE.selectionScreenPrompt");
+        var locStr = new LocString("cards","UP_MY_SLEEVE.selectionScreenPrompt");
         await CreatureCmd.TriggerAnim(((CardModel)card).Owner.Creature, "Cast", ((CardModel)card).Owner.Character.CastAnimDelay);
-        List<CardModel> list = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(locStr, 0,
+        var list = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(locStr, 0,
             ((CardModel)card).DynamicVars.Cards.IntValue), context: ctx, player: ((CardModel)card).Owner, filter: null, source: ((CardModel)card))).ToList();
-        foreach (CardModel item in list)
+        foreach (var item in list)
         {
-            CardModel cardModel = ((CardModel)card).CombatState!.CreateCard<Shiv>(((CardModel)card).Owner);
-            CardCmd.Enchant<Swift>(cardModel, 1m);
-            await CardCmd.Transform(item, cardModel);
+            await CardCmd.Exhaust(ctx, item);
+            // CardModel cardModel = ((CardModel)card).CombatState!.CreateCard<Shiv>(((CardModel)card).Owner);
+            // CardCmd.Enchant<Swift>(cardModel, 1m);
+            // await CardCmd.Transform(item, cardModel);
         }
+        foreach (var item in await Shiv.CreateInHand(((CardModel)card).Owner, ((CardModel)card).DynamicVars.Cards.IntValue, ((CardModel)card).CombatState!))
+        {
+            CardCmd.Enchant<Swift>(item, 1m);
+        }
+
+
         ((CardModel)card).EnergyCost.AddThisCombat(-1);
     }
 }
