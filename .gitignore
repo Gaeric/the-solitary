@@ -5,3 +5,13 @@
 .idea
 TheSolitary.sln.DotSettings.user
 /sts2_src/
+
+# Local machine-specific build configuration
+config.mk
+
+# TheSolitary.csproj is generated from TheSolitary.csproj.template by the Makefile;
+# it contains local install paths and should not be committed.
+TheSolitary.csproj
+
+# Temporary csproj backup (legacy; no longer produced by the Makefile)
+*.bak
