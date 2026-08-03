@@ -15,3 +15,4 @@ TheSolitary.csproj
 
 # Temporary csproj backup (legacy; no longer produced by the Makefile)
 *.bak
+/watcher/
