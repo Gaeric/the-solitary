@@ -8,15 +8,15 @@ namespace TheSolitary.Scripts;
 [HarmonyPatch(typeof(Acrobatics), MethodType.Constructor)]
 public static class AcrobaticsChangeRarity
 {
-    // 静态缓存字段，只在第一次加载时反射一次
+    // Statically cached field; reflection is performed only once on first load
     private static readonly FieldInfo RarityField = 
         typeof(CardModel).GetField("<Rarity>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-    private static void Postfix(Acrobatics __instance) // Harmony 规范中建议实例使用 __instance 命名
+    private static void Postfix(Acrobatics __instance) // Harmony convention recommends naming the instance parameter __instance
     {
         if (RarityField != null)
         {
-            // 将稀有度修改为枚举值 2
+            // Set the rarity to enum value 2
             RarityField.SetValue(__instance, (CardRarity)2);
         }
     }

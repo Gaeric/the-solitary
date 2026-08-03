@@ -5,19 +5,19 @@ using MegaCrit.Sts2.Core.Modding;
 
 namespace TheSolitary.Scripts;
 
-// 必须要加的属性，用于注册Mod。字符串和初始化函数命名一致。
+// Required attribute for mod registration. The string must match the initializer method name.
 [ModInitializer(nameof(Init))]
 public class Entry
 {
-    // 初始化函数
+    // Initializer method
     public static void Init()
     {
-        // 打patch（即修改游戏代码的功能）用
-        // 传入参数随意，只要不和其他人撞车即可
+        // Used for patching (i.e. modifying game code).
+        // The argument can be arbitrary, just avoid collisions with other mods.
         var harmony = new Harmony("sts2.blaned.thesolitary");
         harmony.PatchAll();
-        // 使得tscn可以加载自定义脚本
+        // Allow .tscn scenes to load custom scripts
         ScriptManagerBridge.LookupScriptsInAssembly(typeof(Entry).Assembly);
-        Log.Info("Mod initialized!");
+        Log.Info("the-solitary mod initialized!");
     }
 }
