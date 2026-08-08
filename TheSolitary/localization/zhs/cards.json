@@ -23,5 +23,11 @@
   "THE_SOLITARY_CARD_POISON_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {PoisonPower:diff()} 层[gold]中毒[/gold]。",
   "THE_SOLITARY_CARD_DOOM_CHARM.title": "灾厄符",
   "THE_SOLITARY_CARD_DOOM_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {DoomPower:diff()} 层[gold]灾厄[/gold]。",
-  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {DoomPower:diff()} 层[gold]灾厄[/gold]。"
+  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {DoomPower:diff()} 层[gold]灾厄[/gold]。",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.title": "无尽符",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.description": "回合开始时，向手中加入一张随机[gold]减益符[/gold]。",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.smartDescription": "回合开始时，向手中加入一张随机[gold]减益符[/gold]。",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.title": "撒符",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.description": "将 {Cards:diff()} 张随机[gold]减益符[/gold]加入手牌。\n本场战斗中每打出一次，此牌费用 -1。",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.smartDescription": "将 {Cards:diff()} 张随机[gold]减益符[/gold]加入手牌。\n本场战斗中每打出一次，此牌费用 -1。"
 }

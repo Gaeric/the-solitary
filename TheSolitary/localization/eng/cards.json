@@ -23,5 +23,11 @@
   "THE_SOLITARY_CARD_POISON_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {PoisonPower:diff()} [gold]Poison[/gold].",
   "THE_SOLITARY_CARD_DOOM_CHARM.title": "Doom Charm",
   "THE_SOLITARY_CARD_DOOM_CHARM.description": "Deal {Damage:diff()} damage.\nApply {DoomPower:diff()} [gold]Doom[/gold].",
-  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {DoomPower:diff()} [gold]Doom[/gold]."
+  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {DoomPower:diff()} [gold]Doom[/gold].",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.title": "Endless Charm",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.description": "At the start of your turn, add a random [gold]Debuff Charm[/gold] to your hand.",
+  "THE_SOLITARY_CARD_ENDLESS_CHARM.smartDescription": "At the start of your turn, add a random [gold]Debuff Charm[/gold] to your hand.",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.title": "Scatter Charms",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.description": "Add {Cards:diff()} random [gold]Debuff Charms[/gold] to your hand.\nThis card costs 1 less each time it is played this combat.",
+  "THE_SOLITARY_CARD_SCATTER_CHARMS.smartDescription": "Add {Cards:diff()} random [gold]Debuff Charms[/gold] to your hand.\nThis card costs 1 less each time it is played this combat."
 }
