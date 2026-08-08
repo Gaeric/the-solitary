@@ -1,8 +1,11 @@
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Enchantments;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
@@ -12,16 +15,15 @@ namespace TheSolitary.Relics;
 // RegisterRelic 会把遗物注册进指定遗物池。
 // RegisterCharacterStarterRelic 会把它作为 TheSolitaryCharacter 的初始遗物。
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
-// [RegisterCharacterStarterRelic(typeof(TheSolitaryCharacter))]
-public sealed class TheSolitaryRelic : ModRelicTemplate
+[RegisterCharacterStarterRelic(typeof(TheSolitaryCharacter))]
+public sealed class SwiftCircuit : ModRelicTemplate
 {
     // 稀有度。
-    public override RelicRarity Rarity => RelicRarity.Common;
+    public override RelicRarity Rarity => RelicRarity.Starter;
 
-    // 遗物的数值。这里会替换本地化中的 {Cards}。
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
-        new CardsVar(1)
+        new CardsVar(3)
     ];
 
     // 图片资源统一放在 AssetProfile 里配置。
@@ -34,10 +36,13 @@ public sealed class TheSolitaryRelic : ModRelicTemplate
         // 大图标（原版 256x256）。
         BigIconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png");
 
-    // 每回合开始时，抽一张牌。
-    // 这里使用 DynamicVars.Cards.IntValue，保证效果和本地化显示保持一致。
-    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
+    public override async Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue, player);
+        if (card.Owner == base.Owner && base.DynamicVars.Cards.BaseValue > 0)
+        {
+            CardCmd.Enchant<Swift>(card, 1m);
+            base.DynamicVars.Cards.BaseValue--;
+        }
+
     }
 }
