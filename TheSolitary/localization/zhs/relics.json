@@ -1,5 +1,8 @@
 {
   "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.title": "模板遗物",
   "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.description": "每回合开始时，抽 [blue]{Cards}[/blue] 张牌。",
-  "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.flavor": "一个用于验证模板工程的示例遗物。"
+  "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.flavor": "一个用于验证模板工程的示例遗物。",
+  "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.title": "迅捷回路",
+  "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.description": "为你抽到的前[blue]{Cards}[/blue]张牌附魔[purple]迅捷[/purple]。",
+  "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.flavor": "这个遗物的细节将在未来揭晓……。"
 }
