@@ -8,5 +8,20 @@
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.title": "交换附魔",
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.description": "获得 {Block:diff()} 点格挡。交换手牌中两张牌的附魔。",
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.smartDescription": "获得 {Block:diff()} 点格挡。交换手牌中两张牌的附魔。",
-  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "选择两张牌以交换它们的附魔。"
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "选择两张牌以交换它们的附魔。",
+  "THE_SOLITARY_CARD_SLOW_CHARM.title": "缓慢符",
+  "THE_SOLITARY_CARD_SLOW_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {SlowPower:diff()} 层[gold]缓慢[/gold]。",
+  "THE_SOLITARY_CARD_SLOW_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {SlowPower:diff()} 层[gold]缓慢[/gold]。",
+  "THE_SOLITARY_CARD_WEAK_CHARM.title": "虚弱符",
+  "THE_SOLITARY_CARD_WEAK_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {WeakPower:diff()} 层[gold]虚弱[/gold]。",
+  "THE_SOLITARY_CARD_WEAK_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {WeakPower:diff()} 层[gold]虚弱[/gold]。",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.title": "易伤符",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {VulnerablePower:diff()} 层[gold]易伤[/gold]。",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {VulnerablePower:diff()} 层[gold]易伤[/gold]。",
+  "THE_SOLITARY_CARD_POISON_CHARM.title": "浸毒符",
+  "THE_SOLITARY_CARD_POISON_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {PoisonPower:diff()} 层[gold]中毒[/gold]。",
+  "THE_SOLITARY_CARD_POISON_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {PoisonPower:diff()} 层[gold]中毒[/gold]。",
+  "THE_SOLITARY_CARD_DOOM_CHARM.title": "灾厄符",
+  "THE_SOLITARY_CARD_DOOM_CHARM.description": "造成 {Damage:diff()} 点伤害。\n施加 {DoomPower:diff()} 层[gold]灾厄[/gold]。",
+  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "造成 {Damage:diff()} 点伤害。\n施加 {DoomPower:diff()} 层[gold]灾厄[/gold]。"
 }

@@ -8,5 +8,20 @@
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.title": "Swap Enchantments",
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.description": "Gain {Block:diff()} Block. Swap the enchantments of two cards in your hand.",
   "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.smartDescription": "Gain {Block:diff()} Block. Swap the enchantments of two cards in your hand.",
-  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "Select two cards to swap their enchantments."
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "Select two cards to swap their enchantments.",
+  "THE_SOLITARY_CARD_SLOW_CHARM.title": "Slow Charm",
+  "THE_SOLITARY_CARD_SLOW_CHARM.description": "Deal {Damage:diff()} damage.\nApply {SlowPower:diff()} [gold]Slow[/gold].",
+  "THE_SOLITARY_CARD_SLOW_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {SlowPower:diff()} [gold]Slow[/gold].",
+  "THE_SOLITARY_CARD_WEAK_CHARM.title": "Weak Charm",
+  "THE_SOLITARY_CARD_WEAK_CHARM.description": "Deal {Damage:diff()} damage.\nApply {WeakPower:diff()} [gold]Weak[/gold].",
+  "THE_SOLITARY_CARD_WEAK_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {WeakPower:diff()} [gold]Weak[/gold].",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.title": "Vulnerable Charm",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.description": "Deal {Damage:diff()} damage.\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold].",
+  "THE_SOLITARY_CARD_VULNERABLE_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold].",
+  "THE_SOLITARY_CARD_POISON_CHARM.title": "Poison Charm",
+  "THE_SOLITARY_CARD_POISON_CHARM.description": "Deal {Damage:diff()} damage.\nApply {PoisonPower:diff()} [gold]Poison[/gold].",
+  "THE_SOLITARY_CARD_POISON_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {PoisonPower:diff()} [gold]Poison[/gold].",
+  "THE_SOLITARY_CARD_DOOM_CHARM.title": "Doom Charm",
+  "THE_SOLITARY_CARD_DOOM_CHARM.description": "Deal {Damage:diff()} damage.\nApply {DoomPower:diff()} [gold]Doom[/gold].",
+  "THE_SOLITARY_CARD_DOOM_CHARM.smartDescription": "Deal {Damage:diff()} damage.\nApply {DoomPower:diff()} [gold]Doom[/gold]."
 }
