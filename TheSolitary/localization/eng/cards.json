@@ -1,0 +1,8 @@
+{
+  "THE_SOLITARY_CARD_THE_SOLITARY_STRIKE.title": "Template Strike",
+  "THE_SOLITARY_CARD_THE_SOLITARY_STRIKE.description": "Deal {Damage:diff()} damage.",
+  "THE_SOLITARY_CARD_THE_SOLITARY_STRIKE.smartDescription": "Deal {Damage:diff()} damage.",
+  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.title": "Template Defend",
+  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.description": "Gain {Block:diff()} Block.",
+  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.smartDescription": "Gain {Block:diff()} Block."
+}

@@ -1,0 +1,21 @@
+{
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.aromaPrinciple": "[sine][blue]新的旅程，从一份干净模板开始。[/blue][/sine]",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.banter.alive.endTurnPing": "回合结束。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.banter.dead.endTurnPing": "我先撤退。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.cardsModifierDescription": "模板角色的卡牌现在会出现在奖励和商店中。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.cardsModifierTitle": "模板卡牌",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.defeatMessage": "模板还需要继续调整。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.description": "一个用于验证 RitsuLib 模板工程的示例角色。\n复制模板后，把这里替换成你的角色设定。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.eventDeathPrevention": "模板角色继续坚持。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.flavor": "一份干净的模板，等待被改造成新的冒险。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.goldMonologue": "这些金币足够开始测试。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.possessiveAdjective": "他的",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.pronounObject": "他",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.pronounPossessive": "他的",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.pronounSubject": "他",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.selectMessage": "模板角色准备就绪。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.title": "模板角色",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.titleObject": "模板角色",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.unlockText": "用[pink]{Prerequisite}[/pink]进行一局游戏来解锁这个角色。",
+  "THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER.victoryMessage": "模板验证完成。"
+}
