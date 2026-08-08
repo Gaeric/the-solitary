@@ -4,5 +4,9 @@
   "THE_SOLITARY_CARD_THE_SOLITARY_STRIKE.smartDescription": "造成 {Damage:diff()} 点伤害。",
   "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.title": "模板防御",
   "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.description": "获得 {Block:diff()} 点格挡。",
-  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.smartDescription": "获得 {Block:diff()} 点格挡。"
+  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.smartDescription": "获得 {Block:diff()} 点格挡。",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.title": "交换附魔",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.description": "获得 {Block:diff()} 点格挡。交换手牌中两张牌的附魔。",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.smartDescription": "获得 {Block:diff()} 点格挡。交换手牌中两张牌的附魔。",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "选择两张牌以交换它们的附魔。"
 }

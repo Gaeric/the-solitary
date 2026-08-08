@@ -4,5 +4,9 @@
   "THE_SOLITARY_CARD_THE_SOLITARY_STRIKE.smartDescription": "Deal {Damage:diff()} damage.",
   "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.title": "Template Defend",
   "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.description": "Gain {Block:diff()} Block.",
-  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.smartDescription": "Gain {Block:diff()} Block."
+  "THE_SOLITARY_CARD_THE_SOLITARY_DEFEND.smartDescription": "Gain {Block:diff()} Block.",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.title": "Swap Enchantments",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.description": "Gain {Block:diff()} Block. Swap the enchantments of two cards in your hand.",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.smartDescription": "Gain {Block:diff()} Block. Swap the enchantments of two cards in your hand.",
+  "THE_SOLITARY_CARD_SWAP_ENCHANTMENTS.selectionScreenPrompt": "Select two cards to swap their enchantments."
 }
