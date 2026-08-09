@@ -1,5 +1,8 @@
 using Godot;
+using MegaCrit.Sts2.Core.Animation;
+using MegaCrit.Sts2.Core.Bindings.MegaSpine;
 using MegaCrit.Sts2.Core.Entities.Characters;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Characters;
@@ -74,6 +77,31 @@ public sealed class TheSolitaryCharacter : ModCharacterTemplate<TheSolitaryCardP
     {
         return RitsuGodotNodeFactories.CreateFromScenePath<NCreatureVisuals>(
             CharacterScenePath);
+    }
+
+    // 观者骨骼动画名与游戏标准名不同（Idle/Attack/Cast/Hit/Dead/relaxed），
+    // 通过 CreatureAnimator 把标准状态触发器映射到观者的动画名。
+    protected override CreatureAnimator? SetupCustomCreatureAnimator(MegaSprite controller)
+    {
+        AnimState idle = new("Idle", isLooping: true);
+        AnimState cast = new("Cast");
+        AnimState attack = new("Attack");
+        AnimState hit = new("Hit");
+        AnimState dead = new("Dead");
+        AnimState relaxed = new("relaxed", isLooping: true);
+
+        cast.NextState = idle;
+        attack.NextState = idle;
+        hit.NextState = idle;
+
+        CreatureAnimator animator = new(idle, controller);
+        animator.AddAnyState(CreatureAnimator.idleTrigger, idle);
+        animator.AddAnyState(CreatureAnimator.deathTrigger, dead);
+        animator.AddAnyState(CreatureAnimator.hitTrigger, hit);
+        animator.AddAnyState(CreatureAnimator.attackTrigger, attack);
+        animator.AddAnyState(CreatureAnimator.castTrigger, cast);
+        animator.AddAnyState("Relaxed", relaxed);
+        return animator;
     }
 
     // 攻击建筑师的攻击特效列表。

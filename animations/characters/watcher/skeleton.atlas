@@ -1,0 +1,71 @@
+the_watcher.png
+	size: 609, 609
+	filter: Linear, Linear
+1
+	bounds: 547, 232, 68, 59
+	offsets: 0, 1, 68, 60
+	rotate: 90
+11
+	bounds: 133, 222, 91, 301
+	rotate: 90
+14
+	bounds: 548, 302, 59, 305
+15
+	bounds: 437, 445, 97, 90
+16
+	bounds: 507, 30, 32, 44
+	offsets: 0, 2, 47, 90
+	rotate: 90
+2
+	bounds: 2, 445, 433, 162
+20
+	bounds: 441, 164, 73, 88
+	rotate: 90
+21
+	bounds: 437, 537, 109, 70
+	offsets: 1, 0, 116, 70
+22
+	bounds: 133, 152, 68, 306
+	rotate: 90
+23
+	bounds: 133, 315, 93, 301
+	rotate: 90
+24
+	bounds: 507, 64, 45, 41
+26
+	bounds: 2, 410, 544, 33
+27
+	bounds: 2, 25, 127, 93
+	offsets: 0, 0, 128, 93
+28
+	bounds: 191, 19, 46, 96
+	offsets: 7, 0, 53, 96
+	rotate: 90
+3
+	bounds: 133, 67, 212, 83
+4
+	bounds: 347, 32, 158, 118
+5
+	bounds: 2, 120, 129, 288
+	offsets: 20, 0, 149, 288
+7
+	bounds: 507, 107, 52, 39
+8
+	bounds: 289, 6, 49, 59
+	offsets: 0, 1, 49, 63
+9
+	bounds: 436, 239, 80, 169
+	offsets: 17, 3, 113, 172
+ba
+	bounds: 561, 104, 23, 42
+	offsets: 0, 0, 25, 43
+boob
+	bounds: 531, 148, 82, 65
+	rotate: 90
+h
+	bounds: 131, 2, 63, 58
+	rotate: 90
+shadow
+	bounds: 518, 264, 144, 27
+	offsets: 1, 1, 146, 28
+	rotate: 90

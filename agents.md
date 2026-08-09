@@ -19,6 +19,38 @@
 - STS2 游戏源码：**`../sts2`**（绝对路径 `d:\sts2_mods\sts2`）——查游戏 API 时参考这里
 - 反编译副本：`.tools/sts2_decomp/`（已在 `.gitignore`，仅供本地查阅）
 
+## 美术资源目录（WatcherBeautified）
+
+- **`../WatcherBeautified`**（绝对路径 `d:\sts2_mods\WatcherBeautified`）是**观者（Watcher）角色美化包**的完整 Godot 工程——由 GDRE Tools 2.5.0 从 Steam 创意工坊的 `WatcherBeautified.pck`（应用 2868840 / 物品 3747800917）导出，引擎 **Godot 4.5.1**，共 1425 个文件（导出记录见 `gdre_export.log`）。
+- **新增美术资源时，优先从这里取材**：把需要的 png / tres / tscn / ogg / skel 复制到本仓库 `TheSolitary/` 对应目录后再以 `res://TheSolitary/...` 引用。**不要**直接引用仓库外路径（不会进 pck）。
+
+### 目录速查
+
+| 资源 | 位置（相对 `../WatcherBeautified/`） | 说明 |
+|---|---|---|
+| 角色 Spine 骨骼动画 | `animations/characters/watcher/`（`skeleton.skel` / `skeleton.atlas` / `the_watcher.png` / `watcher_skel_data.tres`） | 战斗模型动画；选人界面版在 `animations/character_select/watcher/` |
+| 角色场景 | `scenes/creature_visuals/watcher.tscn`、`scenes/merchant/characters/watcher_merchant.tscn`、`scenes/rest_site/characters/watcher_rest_site.tscn`、`scenes/screens/char_select/char_select_bg_watcher.tscn`、`scenes/ui/character_icons/watcher_icon.tscn` | 与 TheSolitary 的 `scenes/characters/` 一一对应 |
+| 能量计数器 | `scenes/combat/energy_counters/watcher_energy_counter.tscn`、`scenes/vfx/energy/watcher/`、`images/ui/combat/energy_counters/watcher/`（能量球分层图） | TheSolitary 已有自己的能量球（5 层） |
+| 卡框 / 材质 | `materials/cards/frames/card_frame_purple_mat.tres`、`materials/transitions/watcher_transition_mat.tres` | 紫色系，契合 TheSolitary 主题 |
+| Power 图标 | `images/powers/*.png`（102 个）、`images/atlases/power_atlas.sprites/*.tres`（49 个） | png 可直接复制使用 |
+| 遗物图标 | `images/relics/*.png`（+ `large/` + `outline/` 两套变体） | 三规格 |
+| 药水图标 | `images/potions/*.png` | ambrosia / bottled_miracle / stance_potion |
+| UI | `images/ui/charSelect/`（角色立绘）、`images/ui/hands/`（多人手型）、`images/ui/top_panel/` | |
+| VFX | `images/vfx/`（divine_balance / stance / sts1 / sts1_eye）、`scenes/vfx/`（card_trail / energy vfx） | |
+| 音频 | `audio/watcher/*.ogg`（姿态音效）、`audio/combat/*.ogg` | |
+| 观者卡图（压缩纹理） | `Watcher/_imported/*.ctex`（434 个） | **观者全部卡图仅以 .ctex 压缩纹理存在**，需先转回 png 才能用作 `AssetProfile.PortraitPath`，不可直接引用 |
+
+### 注意事项
+
+- **角色模型是观者本体**（女性、长棍、紫色调）。TheSolitary 若直接套用会在视觉上「借用观者」，是否沿用由角色设计决定；但通用素材（Power/遗物/药水图标、卡框材质、UI、VFX、音频）可跨角色复用。
+- **角色 Spine 动画已按官方教程接入**（`04-15-2 角色动画` + `05 卡图&Spine`）：
+  - **Spine Godot Extension** 放在项目根目录 `bin/`（`spine_godot_extension.gdextension` + `windows/` dll），用**标准 Godot 4.5.1** 导出（`local.props` 的 `GodotExe` 已指回标准版；MegaDot 无法加载该扩展）。游戏自带的 `../sts2/addons/spine` 不要使用（会让编辑器崩溃）。
+  - 观者骨骼文件在**顶层 `res://animations/characters/watcher/`**（`skeleton.skel` / `skeleton.atlas` / `the_watcher.png` / `watcher_skel_data.tres`）。注意：spine-godot 扩展的 `fix_path` 对 `res://TheSolitary/...` 会生成错误的三重斜杠，因此必须放在这个顶层路径（与源美化包一致）。
+  - 战斗场景 `TheSolitary_character.tscn` 用 `SpineSprite` 节点；`TheSolitaryCharacter.SetupCustomCreatureAnimator` 用 `CreatureAnimator` 把标准状态映射到观者动画名 **`Idle`/`Attack`/`Cast`/`Hit`/`Dead`/`relaxed`**（注意大小写，与游戏标准 `idle_loop/attack/cast/hurt/die` 不同）。
+  - 若移除 `bin/` 或改用无 Spine 引擎，导出会因无法解析 `SpineSkeletonDataResource` 而失败；静态方案可用 `VisualCueSet`（教程 04-15-2 的第一种方式）替代。
+- 复制素材后，`*.png.import` / `*.uid` / `.godot` 由 Godot 重新生成（已在 `.gitignore`），**不要**把源工程的 `.import` 文件一起拷过来。
+- 该目录在本仓库之外（`.gitignore` 管不到），按需引用；素材版权归属原美化包作者，对外发布前需确认授权。
+
 ## Setup（首次构建前）
 
 1. 复制 `local.props.template` 为 `local.props` 并填写本机路径：
@@ -72,11 +104,12 @@ the-solitary/
 ├── TheSolitaryCode/          # C# 源码（Mod 逻辑）
 │   ├── Entry.cs              # Mod 入口 [ModInitializer]
 │   ├── Characters/           # TheSolitaryCharacter + 卡池/遗物池/药水池
-│   ├── Cards/                # 卡牌类（TheSolitaryStrike / TheSolitaryDefend）
+│   ├── Cards/                # 卡牌类（Strike/Defend/交换附魔/减益符/无尽符/撒符等）
+│   ├── Powers/               # Power 类（EndlessCharmPower 等）
 │   └── Relics/               # 遗物类（TheSolitaryRelic / SwiftCircuit）
 ├── TheSolitary/              # Godot 资源（images / localization / scenes），非 C#
 │   ├── localization/
-│   │   ├── eng/              # 英文：cards.json / characters.json / relics.json / ancients.json
+│   │   ├── eng/              # 英文：cards.json / characters.json / relics.json / powers.json / ancients.json
 │   │   └── zhs/              # 简体中文（同上）
 │   ├── images/               # 卡图 / 角色图 / 遗物图
 │   └── scenes/characters/    # 角色 tscn 场景
@@ -84,6 +117,8 @@ the-solitary/
 ├── TheSolitary.json          # Mod manifest（id / dependencies / min_game_version）
 ├── project.godot             # Godot 工程配置
 ├── local.props(.template)    # 本机路径配置（gitignored）
+├── bin/                      # Spine Godot Extension（spine_godot_extension.gdextension + windows/ dll），导出必需；已被 .gitignore，克隆后需重新放入
+├── animations/characters/watcher/  # 观者 Spine 骨骼（顶层路径，spine-godot 的 fix_path 需要）
 ├── character.org             # 角色设计文档（附魔/运转机制）
 └── README.md                 # 使用与版本兼容说明
 ```
@@ -108,4 +143,5 @@ the-solitary/
 - 三个 RitsuLib 包（主线 + Compat）**一次只能启用一个**；主线 `STS2.RitsuLib` 仅支持 STS2 0.105.0+。
 - `.csproj` 通过 `Krafs.Publicizer` 公开 sts2 内部成员；游戏 dll 从 `$(Sts2DataDir)` 引用（`0Harmony.dll` / `sts2.dll` / `Steamworks.NET.dll`）。
 - `local.props`、`.tools/`、`*.uid`、`*.import` 都在 `.gitignore` 中，不要提交。
+- 美术资源取材自 `../WatcherBeautified`（观者美化包，GDRE 导出的 Godot 工程），详见「美术资源目录」一节。
 - 查阅游戏 API 优先参考 `../sts2` 源码或 `.tools/sts2_decomp/` 反编译副本。

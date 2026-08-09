@@ -1,32 +1,35 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Texture2D" path="res://TheSolitary/images/characters/TheSolitary_character_select.png" id="1_character"]
+[ext_resource type="SpineSkeletonDataResource" path="res://animations/characters/watcher/watcher_skel_data.tres" id="1_skel"]
 
 [node name="TheSolitaryCharacter" type="Node2D"]
+metadata/_edit_group_ = true
 
-[node name="Visuals" type="Sprite2D" parent="."]
+[node name="Visuals" type="SpineSprite" parent="."]
+skeleton_data_res = ExtResource("1_skel")
+preview_skin = "default"
+preview_animation = "Idle"
 unique_name_in_owner = true
-position = Vector2(0, -92)
-scale = Vector2(1.25, 1.25)
-texture = ExtResource("1_character")
+position = Vector2(0, -22)
+scale = Vector2(0.75, 0.75)
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
-offset_left = -82.0
-offset_top = -214.0
-offset_right = 82.0
-offset_bottom = 14.0
-
-[node name="IntentPos" type="Marker2D" parent="."]
-unique_name_in_owner = true
-position = Vector2(24, -224)
+offset_left = -120.0
+offset_top = -280.0
+offset_right = 120.0
+mouse_filter = 2
 
 [node name="CenterPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -96)
+position = Vector2(0, -160)
+
+[node name="IntentPos" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(20, -340)
 
 [node name="TalkPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -184)
+position = Vector2(0, -280)
