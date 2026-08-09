@@ -29,7 +29,7 @@ public sealed class EndlessCharmPower : ModPowerTemplate
 		Flash();
 		for (int i = 0; i < base.Amount; i++)
 		{
-			await DebuffCharms.CreateRandomInHand(base.Owner.Player, combatState, player.RunState.Rng.CombatCardGeneration);
+			await DebuffCharms.CreateRandomInHand(base.Owner.Player, combatState, player.RunState.Rng.CombatCardGeneration, choiceContext);
 		}
 	}
 }

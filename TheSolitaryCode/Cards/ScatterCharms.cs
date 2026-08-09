@@ -61,7 +61,7 @@ public sealed class ScatterCharms : ModCardTemplate
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 		for (int i = 0; i < DynamicVars.Cards.IntValue; i++)
 		{
-			await DebuffCharms.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration);
+			await DebuffCharms.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext);
 			await Cmd.Wait(0.1f);
 		}
 
