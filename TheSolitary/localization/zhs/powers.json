@@ -1,5 +1,17 @@
 {
   "THE_SOLITARY_POWER_ENDLESS_CHARM_POWER.title": "无尽符",
   "THE_SOLITARY_POWER_ENDLESS_CHARM_POWER.description": "回合开始时，向手中加入一张随机[gold]减益符[/gold]。",
-  "THE_SOLITARY_POWER_ENDLESS_CHARM_POWER.smartDescription": "回合开始时，向手中加入一张随机[gold]减益符[/gold]。"
+  "THE_SOLITARY_POWER_ENDLESS_CHARM_POWER.smartDescription": "回合开始时，向手中加入一张随机[gold]减益符[/gold]。",
+  "THE_SOLITARY_POWER_LOOP_FORM_POWER.title": "环回形态",
+  "THE_SOLITARY_POWER_LOOP_FORM_POWER.description": "每当你的抽牌堆被打乱洗牌时，获得能量。",
+  "THE_SOLITARY_POWER_LOOP_FORM_POWER.smartDescription": "每当你的抽牌堆被打乱洗牌时，获得能量。",
+  "THE_SOLITARY_POWER_ENCHANTED_CREATION_POWER.title": "附魔造物",
+  "THE_SOLITARY_POWER_ENCHANTED_CREATION_POWER.description": "每当你生成一张牌时，使其获得一种随机附魔。",
+  "THE_SOLITARY_POWER_ENCHANTED_CREATION_POWER.smartDescription": "每当你生成一张牌时，使其获得一种随机附魔。",
+  "THE_SOLITARY_POWER_SOWING_POWER.title": "播种",
+  "THE_SOLITARY_POWER_SOWING_POWER.description": "当你前 [blue]2[/blue] 次洗牌时，选择一张手牌附魔[gold]播种[/gold]。",
+  "THE_SOLITARY_POWER_SOWING_POWER.smartDescription": "当你前 [blue]{Amount}[/blue] 次洗牌时，选择一张手牌附魔[gold]播种[/gold]。",
+  "THE_SOLITARY_POWER_STICKY_GRIMOIRE_POWER.title": "黏糊魔典",
+  "THE_SOLITARY_POWER_STICKY_GRIMOIRE_POWER.description": "战斗结束时，从你的[gold]牌组[/gold]中选择一张牌附魔[gold]黏糊[/gold]。",
+  "THE_SOLITARY_POWER_STICKY_GRIMOIRE_POWER.smartDescription": "战斗结束时，从你的[gold]牌组[/gold]中选择一张牌附魔[gold]黏糊[/gold]。"
 }

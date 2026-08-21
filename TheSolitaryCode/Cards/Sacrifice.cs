@@ -3,7 +3,6 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Enchantments;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
@@ -11,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 献祭（character.org 基础卡 #2）：1 费技能。
-// 选择一张手牌消耗。随机为手牌中另一张牌附魔（随机附魔池：锋利/动量/本能/涡旋/伶俐/灵巧）。
+// 选择一张手牌消耗。随机为手牌中另一张牌附魔（随机附魔池见 RandomEnchantPool）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Sacrifice : ModCardTemplate
 {
@@ -68,7 +67,7 @@ public sealed class Sacrifice : ModCardTemplate
 		CardModel? target = Owner.RunState.Rng.CombatCardSelection.NextItem(candidates);
 		if (target != null)
 		{
-			EnchantRandomly(target);
+			RandomEnchantPool.EnchantRandomly(Owner.RunState.Rng.CombatCardSelection, target);
 		}
 	}
 
@@ -77,59 +76,4 @@ public sealed class Sacrifice : ModCardTemplate
 	{
 		base.EnergyCost.UpgradeBy(-1);
 	}
-
-	/// <summary>
-	/// 随机附魔池（character.org 的随机附魔池）：锋利 / 动量 / 本能 / 涡旋 / 伶俐 / 灵巧。
-	/// 数值参考原版用法：锋利/灵巧/伶俐 2，动量/本能/涡旋 1。
-	/// </summary>
-	private static readonly RandomEnchantEntry[] RandomEnchantPool =
-	[
-		new(CanEnchant<Sharp>, ApplyEnchant<Sharp>, 2m),
-		new(CanEnchant<Momentum>, ApplyEnchant<Momentum>, 1m),
-		new(CanEnchant<Instinct>, ApplyEnchant<Instinct>, 1m),
-		new(CanEnchant<Spiral>, ApplyEnchant<Spiral>, 1m),
-		new(CanEnchant<Adroit>, ApplyEnchant<Adroit>, 2m),
-		new(CanEnchant<Nimble>, ApplyEnchant<Nimble>, 2m)
-	];
-
-	/// <summary>
-	/// 从随机附魔池中挑一个对该牌生效的附魔并施加。
-	/// </summary>
-	private void EnchantRandomly(CardModel target)
-	{
-		List<RandomEnchantEntry> valid = RandomEnchantPool
-			.Where(entry => entry.CanEnchant(target))
-			.ToList();
-		if (valid.Count == 0)
-		{
-			return;
-		}
-
-		RandomEnchantEntry? pick = Owner.RunState.Rng.CombatCardSelection.NextItem(valid);
-		if (pick != null)
-		{
-			pick.Apply(target, pick.Amount);
-		}
-	}
-
-	/// <summary>
-	/// 用与 CardCmd.Enchant 相同的方式检查该附魔能否作用于目标牌。
-	/// </summary>
-	private static bool CanEnchant<T>(CardModel card) where T : EnchantmentModel
-	{
-		return ModelDb.Enchantment<T>().ToMutable().CanEnchant(card);
-	}
-
-	/// <summary>
-	/// 对目标牌施加指定附魔。
-	/// </summary>
-	private static void ApplyEnchant<T>(CardModel card, decimal amount) where T : EnchantmentModel
-	{
-		CardCmd.Enchant<T>(card, amount);
-	}
-
-	/// <summary>
-	/// 随机附魔池条目：CanEnchant 判断可用性，Apply 施加附魔，Amount 为该附魔的数值。
-	/// </summary>
-	private sealed record RandomEnchantEntry(Func<CardModel, bool> CanEnchant, Action<CardModel, decimal> Apply, decimal Amount);
 }
