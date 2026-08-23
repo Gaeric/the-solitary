@@ -11,7 +11,7 @@ namespace TheSolitary.Cards;
 
 // 附魔风暴（character.org 蓝卡 #8）：1 费攻击。
 // 造成 8 点伤害，你每有一张附魔牌，造成额外 4 点伤害。
-// 计算结构参考灰烬打击 AshenStrike；附魔牌数量统计与附魔壁垒 EnchantedBulwark 共用 EnchantHelpers。
+// 计算结构参考灰烬打击 AshenStrike；附魔牌数量统计与共轭 Conjugate 共用 EnchantHelpers。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantStorm : ModCardTemplate
 {

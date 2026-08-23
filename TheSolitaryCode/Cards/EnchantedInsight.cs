@@ -10,9 +10,9 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔洞察（character.org 蓝卡 #31）：1 费技能。
+// 见往如来（character.org 蓝卡 #31）：1 费技能。
 // 抽 3 张牌；每抽到一张附魔牌，获得 5 点格挡（升级后 8 点）。
-// 实现参考附魔抽牌 EnchantedDraw（CardPileCmd.Draw 抽牌）＋ 附魔壁垒 EnchantedBulwark（格挡施加）。
+// 实现参考附魔抽牌 EnchantedDraw（CardPileCmd.Draw 抽牌）＋ 共轭 Conjugate（格挡施加）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantedInsight : ModCardTemplate
 {

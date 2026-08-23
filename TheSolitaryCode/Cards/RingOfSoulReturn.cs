@@ -87,7 +87,7 @@ public sealed class RingOfSoulReturn : ModCardTemplate
 		}
 	}
 
-	// 升级：获得固有（参考无尽符 EndlessCharm 的升级方式）。
+	// 升级：获得固有（参考能元妙术 ArtOfTheSource 的升级方式）。
 	protected override void OnUpgrade()
 	{
 		AddKeyword(CardKeyword.Innate);

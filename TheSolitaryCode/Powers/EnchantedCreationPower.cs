@@ -9,8 +9,10 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Powers;
 
-// 附魔造物的 Power（参考原版 PillarOfCreationPower / SmokestackPower 的 AfterCardGeneratedForCombat 钩子）：
-// 每当拥有者生成一张牌时，为它随机附魔（随机附魔池与献祭一致）。
+// 万物通元的 Power（参考原版 PillarOfCreationPower / SmokestackPower 的 AfterCardGeneratedForCombat 钩子）：
+// 每当拥有者生成一张牌时，为它随机附魔（随机附魔池与唤醒一致）。
+// 注：交换附魔/元能转置直接在原卡上交换附魔（不再通过 Transform 重建卡牌），
+// 不会触发生成牌钩子，因此不会对交换中的牌误附魔。
 [RegisterPower]
 public sealed class EnchantedCreationPower : ModPowerTemplate
 {
@@ -32,7 +34,9 @@ public sealed class EnchantedCreationPower : ModPowerTemplate
 
 	public override PowerType Type => PowerType.Buff;
 
-	public override PowerStackType StackType => PowerStackType.Counter;
+	// 不计数值的二进制类型：效果是「每张生成的牌都被附魔」，叠多层没有额外效果，
+	// 因此不显示层数（原版 Barricade / Corruption 同款 PowerStackType.Single）。
+	public override PowerStackType StackType => PowerStackType.Single;
 
 	// 只处理自己生成的牌；已附魔的牌与递归中的生成跳过。
 	public override Task AfterCardGeneratedForCombat(CardModel card, Player? creator)

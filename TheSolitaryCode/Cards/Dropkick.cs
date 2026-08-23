@@ -11,11 +11,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 乘虚而入（character.org 蓝卡 #32，原名"飞身踢"，按需求重命名）：1 费攻击。
+// 乘虚而入（character.org 蓝卡 #32，英文名 Dropkick）：1 费攻击。
 // 造成 5 点伤害；若目标有减益，获得 1 点能量并抽 1 张牌（升级后伤害 +3）。
 // 机制参考原版 MoltenFist / 本模组腐蚀之拳：枚举目标 Powers 判断减益类型。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class ExploitWeakness : ModCardTemplate
+public sealed class Dropkick : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
@@ -28,12 +28,12 @@ public sealed class ExploitWeakness : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public ExploitWeakness()
+	public Dropkick()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/ExploitWeakness.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Dropkick.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

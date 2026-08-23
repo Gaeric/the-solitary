@@ -9,13 +9,13 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔壁垒（character.org 蓝卡 #12）：1 费技能，防御终端。
+// 共轭（character.org 蓝卡 #12）：1 费技能，防御终端。
 // 你每有一张附魔牌，获得 2 点格挡（升级后每张 3 点）。
 // 注意：每张附魔牌逐次获得格挡，敏捷/灵巧作用于每张的 2/3 上（而非最终总数），
 // 战斗内预览由 PerCardCalculatedBlockVar 保证与实际行为一致。
 // 附魔牌数量统计与附魔风暴 EnchantStorm 共用 EnchantHelpers，避免两处逻辑漂移。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class EnchantedBulwark : ModCardTemplate
+public sealed class Conjugate : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
@@ -28,7 +28,7 @@ public sealed class EnchantedBulwark : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public EnchantedBulwark()
+	public Conjugate()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
@@ -36,7 +36,7 @@ public sealed class EnchantedBulwark : ModCardTemplate
 	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantedBulwark.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Conjugate.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

@@ -8,19 +8,19 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 术式回想（新卡）：1 费能力牌，升级后 0 费。
-// 每当你生成一张减益符时，使其获得重放（Replay：打出时额外打一次）。
+// 术式回想（新卡）：2 费能力牌，升级后 1 费。
+// 每当你生成一张术式时，使其获得重放（Replay：打出时额外打一次）。
 // 实现参考附魔造物 EnchantedCreation（Power 覆写 AfterCardGeneratedForCombat 钩子）＋
 // 原版变形 Transfigure（BaseReplayCount++ 施加重放）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class SpellRecall : ModCardTemplate
 {
 	// 基础耗能。
-	private const int BaseEnergyCost = 1;
+	private const int BaseEnergyCost = 2;
 	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
-	private const CardRarity CardRarityValue = CardRarity.Uncommon;
+	// 卡牌稀有度（金卡 = Rare）。
+	private const CardRarity CardRarityValue = CardRarity.Rare;
 	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
@@ -42,7 +42,7 @@ public sealed class SpellRecall : ModCardTemplate
 		await PowerCmd.Apply<SpellRecallPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
 	}
 
-	// 升级：费用 1 -> 0。
+	// 升级：费用 2 -> 1。
 	protected override void OnUpgrade()
 	{
 		base.EnergyCost.UpgradeBy(-1);

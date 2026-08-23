@@ -106,7 +106,7 @@ the-solitary/
 │   ├── Characters/           # TheSolitaryCharacter + 卡池/遗物池/药水池
 │   ├── Cards/                # 卡牌类（Strike/Defend/交换附魔/减益符/无尽符/撒符等）
 │   ├── Powers/               # Power 类（EndlessCharmPower 等）
-│   └── Relics/               # 遗物类（TheSolitaryRelic / SwiftCircuit）
+│   └── Relics/               # 遗物类（SwiftCircuit 等）
 ├── TheSolitary/              # Godot 资源（images / localization / scenes），非 C#
 │   ├── localization/
 │   │   ├── eng/              # 英文：cards.json / characters.json / relics.json / powers.json / ancients.json

@@ -3,12 +3,15 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes;
+using MegaCrit.Sts2.Core.Nodes.Vfx;
 
 namespace TheSolitary.Cards;
 
 // 共享工具：按附魔牌数量缩放效果的卡牌公用逻辑。
-// 供附魔风暴 EnchantStorm、附魔壁垒 EnchantedBulwark 等卡牌复用，避免两处统计逻辑漂移。
+// 供附魔风暴 EnchantStorm、共轭 Conjugate 等卡牌复用，避免两处统计逻辑漂移。
 public static class EnchantHelpers
 {
 	/// <summary>
@@ -89,9 +92,9 @@ public static class EnchantHelpers
 	/// 从手牌中选择两张牌并交换它们的附魔（蓝卡 #3 交换附魔 的完整交换逻辑，抽离为共享方法）。
 	/// 供交换附魔 SwapEnchantments 技能与蓝卡 #26 能力牌（回合开始时触发）复用。
 	/// 选择不足两张（取消选择 / 手牌不足两张）则无事发生。
-	/// 每张被选牌先还原为未附魔的基础态（保留升级等级，通过 CardCmd.Transform 原位替换），
-	/// 再以全新实例（初始运行状态：Status 复位、一次性标记清除）施加另一张牌的附魔，
-	/// 例如已触发的活力/荣光交换后会「重新充能」。无附魔的牌直接获得另一张牌的附魔。
+	/// 直接在两张原牌实例上交换附魔：先快照附魔为全新实例（初始运行状态：Status 复位、
+	/// 一次性标记清除），清除原附魔后施加另一张的附魔，例如已触发的活力/荣光交换后会「重新充能」。
+	/// 不重建卡牌（不使用 CardCmd.Transform），以保留卡牌自身的本场战斗状态（如掌中奇术的减费）。
 	/// </summary>
 	public static async Task SwapEnchantmentsBetweenTwoHandCards(
 		PlayerChoiceContext choiceContext,
@@ -114,31 +117,29 @@ public static class EnchantHelpers
 		CardModel first = selection[0];
 		CardModel second = selection[1];
 
-		// 先快照两张牌的附魔为全新实例（初始运行状态），再还原基础态，避免还原丢弃原始附魔。
+		// 先快照两张牌的附魔为全新实例（初始运行状态：Status 复位、一次性标记清除），
+		// 使交换后的附魔「重新充能」。
 		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
 		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
 
-		// 将两张牌还原为未附魔的基础态（保留升级等级）。
-		CardModel newFirst = ResetToUnEnchanted(first);
-		CardModel newSecond = ResetToUnEnchanted(second);
-
-		// 原位交换（同一牌堆、同一位置）。
-		await CardCmd.Transform(
-			new CardTransformation[2]
-			{
-				new CardTransformation(first, newFirst),
-				new CardTransformation(second, newSecond)
-			},
-			null);
+		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）：
+		// 附魔对卡牌数值的贡献是钩子式的（EnchantXAdditive / 自带 DynamicVars），清除后自动失效，
+		// 无需 CardCmd.Transform 重建——重建会丢失卡牌自身的本场战斗状态（如掌中奇术的减费），
+		// 也不会再触发生成牌钩子，因此附魔造物不会误触发。
+		CardCmd.ClearEnchantment(first);
+		CardCmd.ClearEnchantment(second);
 
 		// 无条件施加交换后的附魔（与游戏加载时重新施加附魔一致，绕过 CanEnchant）。
+		// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
 		if (secondEnchantment != null)
 		{
-			ApplyEnchantment(newFirst, secondEnchantment);
+			ApplyEnchantment(first, secondEnchantment);
+			PlayEnchantVfx(first);
 		}
 		if (firstEnchantment != null)
 		{
-			ApplyEnchantment(newSecond, firstEnchantment);
+			ApplyEnchantment(second, firstEnchantment);
+			PlayEnchantVfx(second);
 		}
 	}
 
@@ -167,20 +168,20 @@ public static class EnchantHelpers
 	}
 
 	/// <summary>
-	/// 创建一张未附魔的基础副本（保留升级等级），供 CardCmd.Transform 原位替换。
+	/// 播放原版附魔特效（NCardEnchantVfx）作为交换后的简单视觉反馈。
+	/// 卡牌无附魔时跳过（特效需要读取附魔图标）。
 	/// </summary>
-	private static CardModel ResetToUnEnchanted(CardModel original)
+	private static void PlayEnchantVfx(CardModel card)
 	{
-		CardModel replacement = original.CardScope!.CreateCard(original.CanonicalInstance, original.Owner);
-		replacement.FloorAddedToDeck = original.FloorAddedToDeck;
-
-		// 与 CardModel.FromSerializable 重新施加升级等级的方式一致。
-		for (int i = 0; i < original.CurrentUpgradeLevel; i++)
+		if (card.Enchantment == null)
 		{
-			replacement.UpgradeInternal();
-			replacement.FinalizeUpgradeInternal();
+			return;
 		}
-		return replacement;
+		NCardEnchantVfx? vfx = NCardEnchantVfx.Create(card);
+		if (vfx != null)
+		{
+			NRun.Instance?.GlobalUi.CardPreviewContainer.AddChildSafely(vfx);
+		}
 	}
 }
 

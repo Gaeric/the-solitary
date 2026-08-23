@@ -15,7 +15,7 @@ namespace TheSolitary.Cards;
 // 选择一张手牌消耗。获得格挡；若该牌有附魔，则额外再获得一次同数值格挡（升级后基础格挡 +3）。
 // 数值与描述参考邪眼 EvilEye：额外格挡 = 再次调用 GainBlock（而非固定值），
 // 使两次格挡都完整经过 Hook.ModifyBlock，额外数值同样受敏捷/灵巧/脆弱等修正影响。
-// 选择交互参考献祭 Sacrifice（CardSelectCmd.FromHand + ExhaustSelectionPrompt）。
+// 选择交互参考唤醒 Sacrifice（CardSelectCmd.FromHand + ExhaustSelectionPrompt）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Smelt : ModCardTemplate
 {

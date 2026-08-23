@@ -13,11 +13,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 符潮（自定义卡）：2 费攻击。
-// 造成“本场战斗中生成的减益符数量”点伤害；目标每有一种减益效果，就额外攻击一次。
-// 生成数由 DebuffCharmTrackerPower 在 DebuffCharms.CreateRandomInHand 中累计。
+// 奇点爆破（自定义卡）：2 费攻击（升级后 1 费）。
+// 敌人身上每有一种负面效果，就造成一次“本场战斗中生成的术式数量”点伤害。
+// 生成数由 ArtTrackerPower 在 Arts.CreateRandomInHand 中累计。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class CharmTorrent : ModCardTemplate
+public sealed class SingularityBurst : ModCardTemplate
 {
 	// 命中次数对应的 DynamicVar 键名。
 	private const string CalculatedHitsKey = "CalculatedHits";
@@ -33,27 +33,27 @@ public sealed class CharmTorrent : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public CharmTorrent()
+	public SingularityBurst()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/CharmTorrent.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
 	// 基础数值：
-	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗生成的减益符数量（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
-	// 命中次数 = 基础(0) + CalculationExtra(1) × (1 + 目标身上的减益类型数)（绑定 {CalculatedHits:diff()}）。
+	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗生成的术式数量（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
+	// 命中次数 = 基础(0) + CalculationExtra(1) × 目标身上的减益类型数（绑定 {CalculatedHits:diff()}）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new CalculationBaseVar(0m),
 		new ExtraDamageVar(1m),
 		new CalculationExtraVar(1m),
 		new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) =>
-			card.Owner.Creature.GetPowerAmount<DebuffCharmTrackerPower>()),
+			card.Owner.Creature.GetPowerAmount<ArtTrackerPower>()),
 		new CalculatedVar(CalculatedHitsKey).WithMultiplier(static (_, target) =>
-			1 + CountDistinctDebuffTypes(target))
+			CountDistinctDebuffTypes(target))
 	];
 
 	// 打出时：按“单次伤害 × 命中次数”进行多段攻击（参考原版 FlakCannon 的 WithHitCount 用法）。
@@ -70,10 +70,10 @@ public sealed class CharmTorrent : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 升级：每张减益符造成的伤害 1 -> 2。
+	// 升级：费用 2 -> 1（伤害机制不变）。
 	protected override void OnUpgrade()
 	{
-		DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+		base.EnergyCost.UpgradeBy(-1);
 	}
 
 	/// <summary>

@@ -1,4 +1,4 @@
-using MegaCrit.Sts2.Core.Commands;
+﻿using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 术式-枯萎（衍生减益符）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加 2 层虚弱。升级后伤害 4、虚弱 3。
+// 术式-枯萎（衍生术式）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加 2 层虚弱。升级后伤害 4、虚弱 3。
 // 注册进原版 TokenCardPool（与小刀 Shiv 同类），因此不会出现在奖励/商店/图鉴等获取途径中。
 [RegisterCard(typeof(TokenCardPool))]
 public sealed class ArtOfWilt : ModCardTemplate
@@ -42,7 +42,7 @@ public sealed class ArtOfWilt : ModCardTemplate
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new DamageVar(3m, ValueProp.Move),
-		new PowerVar<WeakPower>(2m)
+		new PowerVar<WeakPower>(1m)
 	];
 
 	// 打出时：先造成伤害，再施加虚弱。

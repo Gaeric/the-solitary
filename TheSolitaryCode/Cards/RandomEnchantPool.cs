@@ -7,7 +7,7 @@ using MegaCrit.Sts2.Core.Random;
 namespace TheSolitary.Cards;
 
 // 共享随机附魔池（character.org 的随机附魔池）：锋利 / 动量 / 本能 / 涡旋 / 伶俐 / 灵巧。
-// 供献祭 Sacrifice、附魔造物 EnchantedCreation 等需要“随机为一张牌附魔”的卡牌/能力复用。
+// 供唤醒 Sacrifice、附魔造物 EnchantedCreation 等需要“随机为一张牌附魔”的卡牌/能力复用。
 public static class RandomEnchantPool
 {
 	/// <summary>

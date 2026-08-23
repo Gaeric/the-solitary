@@ -8,10 +8,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 撒符（参考袖里乾坤 UpMySleeve）：2 费 Skill。
-// 将 3 张（升级后 4 张）随机减益符加入手牌；本场战斗每打出一次，本卡费用 -1。
+// 掌中奇术（参考袖里乾坤 UpMySleeve）：2 费 Skill。
+// 将 4 张随机术式加入手牌；本场战斗每打出一次，本卡费用 -1。
+// 升级后生成的术式变为升级版（术式+），数量保持 4 张。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class ScatterCharms : ModCardTemplate
+public sealed class ArtOfThePalm : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 2;
@@ -40,7 +41,7 @@ public sealed class ScatterCharms : ModCardTemplate
 		}
 	}
 
-	public ScatterCharms()
+	public ArtOfThePalm()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
@@ -49,19 +50,19 @@ public sealed class ScatterCharms : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：生成的减益符数量（绑定 {Cards:diff()} 占位符）。
+	// 基础数值：生成的术式数量（绑定 {Cards:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new CardsVar(3)
+		new CardsVar(4)
 	];
 
-	// 打出时：循环生成随机减益符加入手牌；随后本场战斗费用 -1（参考 UpMySleeve）。
+	// 打出时：循环生成随机术式加入手牌（本卡升级后生成升级版术式）；随后本场战斗费用 -1（参考 UpMySleeve）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 		for (int i = 0; i < DynamicVars.Cards.IntValue; i++)
 		{
-			await DebuffCharms.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext);
+			await Arts.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 			await Cmd.Wait(0.1f);
 		}
 
@@ -69,9 +70,8 @@ public sealed class ScatterCharms : ModCardTemplate
 		EnergyCost.AddThisCombat(-1);
 	}
 
-	// 升级后：多生成一张（3 -> 4）。
+	// 升级后：数量不变（仍为 4 张），升级效果由 OnPlay 中的 IsUpgraded 决定（生成术式+）。
 	protected override void OnUpgrade()
 	{
-		DynamicVars.Cards.UpgradeValueBy(1);
 	}
 }

@@ -8,41 +8,41 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 无尽符（参考无尽刀刃 InfiniteBlades）：1 费 Power。
-// 回合开始时获得一张随机减益符。升级后获得固有。
+// 元能转置（character.org 蓝卡 #26）：1 费能力牌，升级后 0 费。
+// 每回合开始时交换手牌中两张牌的附魔（技能效果参考交换附魔 SwapEnchantments）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class EndlessCharm : ModCardTemplate
+public sealed class Transposition : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（Power）。
+	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
 	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（Self）。
+	// 目标类型（Self：作用于己方）。
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public EndlessCharm()
+	public Transposition()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Transposition.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出时：播放 Power 施放动画，并给自己叠一层 EndlessCharmPower。
+	// 打出时：播放 Power 施放动画，并给自己叠一层 TranspositionPower。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "PowerUp", Owner.Character.PowerUpAnimDelay);
-		await PowerCmd.Apply<EndlessCharmPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
+		await PowerCmd.Apply<TranspositionPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
 	}
 
-	// 升级后获得固有（战斗开始时在手牌中）。
+	// 升级：费用 1 -> 0（参考环回形态/播种的升级方式）。
 	protected override void OnUpgrade()
 	{
-		AddKeyword(CardKeyword.Innate);
+		base.EnergyCost.UpgradeBy(-1);
 	}
 }

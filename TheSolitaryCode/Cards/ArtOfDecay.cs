@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 术式-凋零（衍生减益符）：0 费衍生牌（类似小刀），打出后消耗；造成 4 点伤害并施加 1 层缓慢。升级后伤害 5。
+// 术式-凋零（衍生术式）：0 费衍生牌（类似小刀），打出后消耗；造成 2 点伤害并施加 1 层缓慢。升级后伤害 3。
 // 注册进原版 TokenCardPool（与小刀 Shiv 同类），因此不会出现在奖励/商店/图鉴等获取途径中。
 [RegisterCard(typeof(TokenCardPool))]
 public sealed class ArtOfDecay : ModCardTemplate
@@ -41,7 +41,7 @@ public sealed class ArtOfDecay : ModCardTemplate
 	// 基础数值：伤害 + 缓慢层数。占位符 {SlowPower:diff()} 与 PowerVar<SlowPower> 绑定。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(4m, ValueProp.Move),
+		new DamageVar(2m, ValueProp.Move),
 		new PowerVar<SlowPower>(1m)
 	];
 
@@ -59,7 +59,7 @@ public sealed class ArtOfDecay : ModCardTemplate
 		await PowerCmd.Apply<SlowPower>(choiceContext, cardPlay.Target, DynamicVars["SlowPower"].BaseValue, Owner.Creature, this);
 	}
 
-	// 升级：伤害 4 -> 5（缓慢层数不变）。
+	// 升级：伤害 2 -> 3（缓慢层数不变）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Damage.UpgradeValueBy(1m);

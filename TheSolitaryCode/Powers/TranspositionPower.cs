@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.CardSelection;
-using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -10,18 +9,19 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Powers;
 
-// 附魔轮转的 Power（参考无尽刀刃 InfiniteBladesPower 的 BeforeHandDraw 钩子）：
-// 每回合开始（抽牌前的 BeforeHandDraw 钩子）交换手牌中两张牌的附魔。
+// 元能转置的 Power（AfterPlayerTurnStart 回合开始钩子）：
+// 每回合开始抽牌后（AfterPlayerTurnStart）交换手牌中两张牌的附魔。
+// 注意不能用 BeforeHandDraw（抽牌前手牌为空），否则“手牌不足两张”会永远成立、效果从不触发。
 // 交换逻辑复用 EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards（与交换附魔技能共用）。
 [RegisterPower]
-public sealed class EnchantRotationPower : ModPowerTemplate
+public sealed class TranspositionPower : ModPowerTemplate
 {
 	public override PowerType Type => PowerType.Buff;
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
-	// 回合开始时触发：手牌不足两张则跳过，否则选两张牌交换附魔。
-	public override async Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext, ICombatState combatState)
+	// 回合开始时触发（抽牌后，手牌已就绪）：手牌不足两张则跳过，否则选两张牌交换附魔。
+	public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
 	{
 		if (player != base.Owner.Player)
 		{
@@ -39,7 +39,7 @@ public sealed class EnchantRotationPower : ModPowerTemplate
 		await EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards(
 			choiceContext,
 			base.Owner.Player,
-			new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 2)
+			new CardSelectorPrefs(base.SelectionScreenPrompt, 2)
 			{
 				ShouldGlowGold = card => card.Enchantment != null
 			},

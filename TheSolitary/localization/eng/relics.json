@@ -1,7 +1,4 @@
 {
-  "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.title": "Template Relic",
-  "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.description": "At the start of each turn, draw [blue]{Cards}[/blue] card.",
-  "THE_SOLITARY_RELIC_THE_SOLITARY_RELIC.flavor": "A sample relic used to verify the template project.",
   "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.title": "Swift Circuit",
   "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.description": "Add the [purple]Swift[/purple] [gold]enchantment[/gold] to the first [blue]{Cards}[/blue] cards you draw.",
   "THE_SOLITARY_RELIC_SWIFT_CIRCUIT.flavor": "The details of this relic will be revealed in the future……."

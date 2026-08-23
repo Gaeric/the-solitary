@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 术式-灾引（衍生减益符）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加 4 层灾厄。升级后伤害 4、灾厄 6。
+// 术式-灾引（衍生术式）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加 4 层灾厄。升级后伤害 4、灾厄 6。
 // 注册进原版 TokenCardPool（与小刀 Shiv 同类），因此不会出现在奖励/商店/图鉴等获取途径中。
 [RegisterCard(typeof(TokenCardPool))]
 public sealed class ArtOfDoom : ModCardTemplate
