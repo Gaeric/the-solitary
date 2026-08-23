@@ -191,7 +191,7 @@ public sealed class XxxCard : ModCardTemplate
 }
 ```
 
-### 1. 单目标：造成伤害 + 施加 debuff（缓慢符 SlowCharm / 虚弱符 / 瘟疫 Pestilence）
+### 1. 单目标：造成伤害 + 施加 debuff（术式-凋零 ArtOfDecay / 术式-枯萎 ArtOfWilt / 瘟疫 Pestilence）
 
 ```csharp
 await DamageCmd.Attack(DynamicVars.Damage.BaseValue)

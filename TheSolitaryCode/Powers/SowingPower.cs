@@ -12,7 +12,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Powers;
 
 // 播种的 Power（参考计策 StratagemPower 的 AfterShuffle 钩子）：
-// 当拥有者的抽牌堆被打乱洗牌时（前 Amount 次，即前 2 次），选择一张手牌附魔播种
+// 当拥有者的抽牌堆被打乱洗牌时（前 Amount 次，即前 2 次），从抽牌堆（牌组）中选择一张牌附魔播种
 // （Sown：每场战斗第一次打出时获得 Amount 点能量）。Amount 即剩余触发次数，每次触发 -1。
 [RegisterPower]
 public sealed class SowingPower : ModPowerTemplate
@@ -40,13 +40,15 @@ public sealed class SowingPower : ModPowerTemplate
 
 		Flash();
 
-		// 选择一张能附魔播种的手牌（过滤掉无法附魔的牌；没有可选牌时 FromHand 直接返回空，不弹选择界面）。
-		CardModel? target = (await CardSelectCmd.FromHand(
+		// 从抽牌堆（牌组）中选择一张可附魔播种的牌；时机与方法参考计策（Stratagem）：
+		// 触发时机 = 抽牌堆被打乱洗牌（AfterShuffle 钩子）；选择来源 = 抽牌堆 FromCombatPile(Draw)。
+		// 没有可选牌时 FromCombatPile 返回空，不会弹选择界面。
+		CardModel? target = (await CardSelectCmd.FromCombatPile(
 			context: choiceContext,
+			pile: PileType.Draw.GetPile(base.Owner.Player),
 			player: base.Owner.Player,
 			prefs: new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1),
-			filter: CanEnchantSown,
-			source: this)).FirstOrDefault();
+			filter: CanEnchantSown)).FirstOrDefault();
 
 		if (target != null)
 		{

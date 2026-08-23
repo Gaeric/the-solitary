@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -6,8 +7,6 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
-using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.CardSelection;
 
 namespace TheSolitary.Cards;
 
@@ -46,113 +45,28 @@ public sealed class SwapEnchantments : ModCardTemplate
 
 	/// <summary>
 	/// Gain 5 Block, then swap the enchantments of two cards in your hand (character.org, blue card #3).
-	///
-	/// Each selected card is first reset to its un-enchanted base state (via Transform), then the other card's
-	/// enchantment is applied to it as a fresh instance: the enchantment's Id, Props and Amount are preserved, but
-	/// its runtime state is reset to its initial value (Status back to Normal, one-shot flags cleared), so e.g. a
-	/// Vigorous or Glam that was already used is "recharged" after being swapped. A card that had no enchantment
-	/// simply gains the other card's enchantment.
+	/// 交换逻辑已抽离为 EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards，与蓝卡 #26 能力牌共用。
 	/// </summary>
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
-		// Design doc (character.org, blue card #3): gain 5 Block first.
+		// 设计文档（character.org 蓝卡 #3）：先获得 5 点格挡，再交换两张手牌附魔。
 		await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
 
-		// Choose exactly two cards from your hand. Enchanted cards glow to make the swap easier to plan.
-		List<CardModel> selection = (await CardSelectCmd.FromHand(
-			prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, 2)
+		// 选择恰好两张手牌；附魔牌发光辅助规划。选择不足两张则无事发生。
+		await EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards(
+			choiceContext,
+			Owner,
+			new CardSelectorPrefs(base.SelectionScreenPrompt, 2)
 			{
 				ShouldGlowGold = card => card.Enchantment != null
 			},
-			context: choiceContext,
-			player: base.Owner,
-			filter: null,
-			source: this)).ToList();
-
-		if (selection.Count < 2)
-		{
-			return;
-		}
-
-		CardModel first = selection[0];
-		CardModel second = selection[1];
-
-		// Snapshot both enchantments as fresh instances (initial runtime state) BEFORE resetting the cards,
-		// since resetting discards the originals.
-		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
-		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
-
-		// Reset both cards to their un-enchanted base state, preserving their upgrade level.
-		CardModel newFirst = ResetToUnEnchanted(first);
-		CardModel newSecond = ResetToUnEnchanted(second);
-
-		// Swap both cards in place (same pile, same positions).
-		await CardCmd.Transform(
-			new CardTransformation[2]
-			{
-				new CardTransformation(first, newFirst),
-				new CardTransformation(second, newSecond)
-			},
-			null);
-
-		// Apply the swapped enchantments. This is unconditional (mirroring how the game re-applies enchantments
-		// on load): the enchantment is attached even if CanEnchant would normally reject the target card.
-		if (secondEnchantment != null)
-		{
-			ApplyEnchantment(newFirst, secondEnchantment);
-		}
-		if (firstEnchantment != null)
-		{
-			ApplyEnchantment(newSecond, firstEnchantment);
-		}
+			this);
 	}
 
 	// Upgraded: the card becomes free (Block and the swap effect keep their base values).
 	protected override void OnUpgrade()
 	{
 		base.EnergyCost.UpgradeBy(-1);
-	}
-
-	/// <summary>
-	/// Rebuild an enchantment from its serialized form so the swapped copy has a fresh initial runtime state
-	/// (Status reset to Normal, one-shot flags cleared) while keeping its Id, Props and Amount.
-	/// </summary>
-	private static EnchantmentModel? RebuildEnchantment(EnchantmentModel? enchantment)
-	{
-		if (enchantment == null)
-		{
-			return null;
-		}
-		return EnchantmentModel.FromSerializable(enchantment.ToSerializable());
-	}
-
-	/// <summary>
-	/// Apply an enchantment to a card using the internal path, mirroring the steps CardCmd.Enchant takes after
-	/// EnchantInternal (but bypassing the CanEnchant check, since a swap is unconditional).
-	/// </summary>
-	private static void ApplyEnchantment(CardModel card, EnchantmentModel enchantment)
-	{
-		card.EnchantInternal(enchantment, enchantment.Amount);
-		enchantment.ModifyCard();
-		card.FinalizeUpgradeInternal();
-	}
-
-	/// <summary>
-	/// Create a fresh base copy of the card (no enchantment, no OnEnchant body changes, no affliction) preserving
-	/// its upgrade level. CardCmd.Transform later inserts the copy into the original card's pile.
-	/// </summary>
-	private CardModel ResetToUnEnchanted(CardModel original)
-	{
-		CardModel replacement = original.CardScope!.CreateCard(original.CanonicalInstance, original.Owner);
-		replacement.FloorAddedToDeck = original.FloorAddedToDeck;
-
-		// Mirror how CardModel.FromSerializable re-applies upgrade levels to a fresh card.
-		for (int i = 0; i < original.CurrentUpgradeLevel; i++)
-		{
-			replacement.UpgradeInternal();
-			replacement.FinalizeUpgradeInternal();
-		}
-		return replacement;
 	}
 }
 

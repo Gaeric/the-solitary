@@ -2,18 +2,18 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
-using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 减益符（浸毒）：0 费衍生牌（类似小刀），打出后消耗；造成 2 点伤害并施加等量（2 层）中毒。
-// RegisterCard 让 RitsuLib 注册这张牌；Token 稀有度 + ShowInCardLibrary=false 使它不出现在奖励/商店/图鉴中。
-[RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class PoisonCharm : ModCardTemplate
+// 术式-浸毒（衍生减益符）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加 3 层中毒。升级后伤害 4、中毒 4。
+// 注册进原版 TokenCardPool（与小刀 Shiv 同类），因此不会出现在奖励/商店/图鉴等获取途径中。
+[RegisterCard(typeof(TokenCardPool))]
+public sealed class ArtOfVenom : ModCardTemplate
 {
 	// 基础耗能（衍生牌为 0 费）。
 	private const int BaseEnergyCost = 0;
@@ -26,26 +26,26 @@ public sealed class PoisonCharm : ModCardTemplate
 	// 衍生牌不出现在卡牌图鉴中。
 	private const bool ShowInCardLibrary = false;
 
-	public PoisonCharm()
+	public ArtOfVenom()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/ArtOfVenom.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
 	// 打出后自动消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-	// 基础数值：伤害 + 中毒层数（等量）。占位符 {PoisonPower:diff()} 与 PowerVar<PoisonPower> 绑定。
+	// 基础数值：伤害 + 中毒层数。占位符 {PoisonPower:diff()} 与 PowerVar<PoisonPower> 绑定。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(2m, ValueProp.Move),
-		new PowerVar<PoisonPower>(2m)
+		new DamageVar(3m, ValueProp.Move),
+		new PowerVar<PoisonPower>(3m)
 	];
 
-	// 打出时：先造成伤害，再施加等量中毒。
+	// 打出时：先造成伤害，再施加中毒。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -56,5 +56,12 @@ public sealed class PoisonCharm : ModCardTemplate
 			.Execute(choiceContext);
 
 		await PowerCmd.Apply<PoisonPower>(choiceContext, cardPlay.Target, DynamicVars.Poison.BaseValue, Owner.Creature, this);
+	}
+
+	// 升级：伤害 3 -> 4，中毒 3 -> 4。
+	protected override void OnUpgrade()
+	{
+		DynamicVars.Damage.UpgradeValueBy(1m);
+		DynamicVars.Poison.UpgradeValueBy(1m);
 	}
 }

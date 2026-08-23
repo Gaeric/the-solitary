@@ -2,18 +2,18 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
-using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 减益符（灾厄）：0 费衍生牌（类似小刀），打出后消耗；造成 3 点伤害并施加等量（3 层）灾厄。
-// RegisterCard 让 RitsuLib 注册这张牌；Token 稀有度 + ShowInCardLibrary=false 使它不出现在奖励/商店/图鉴中。
-[RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class DoomCharm : ModCardTemplate
+// 术式-凋零（衍生减益符）：0 费衍生牌（类似小刀），打出后消耗；造成 4 点伤害并施加 1 层缓慢。升级后伤害 5。
+// 注册进原版 TokenCardPool（与小刀 Shiv 同类），因此不会出现在奖励/商店/图鉴等获取途径中。
+[RegisterCard(typeof(TokenCardPool))]
+public sealed class ArtOfDecay : ModCardTemplate
 {
 	// 基础耗能（衍生牌为 0 费）。
 	private const int BaseEnergyCost = 0;
@@ -26,26 +26,26 @@ public sealed class DoomCharm : ModCardTemplate
 	// 衍生牌不出现在卡牌图鉴中。
 	private const bool ShowInCardLibrary = false;
 
-	public DoomCharm()
+	public ArtOfDecay()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/ArtOfDecay.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
 	// 打出后自动消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-	// 基础数值：伤害 + 灾厄层数（等量）。占位符 {DoomPower:diff()} 与 PowerVar<DoomPower> 绑定。
+	// 基础数值：伤害 + 缓慢层数。占位符 {SlowPower:diff()} 与 PowerVar<SlowPower> 绑定。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(3m, ValueProp.Move),
-		new PowerVar<DoomPower>(3m)
+		new DamageVar(4m, ValueProp.Move),
+		new PowerVar<SlowPower>(1m)
 	];
 
-	// 打出时：先造成伤害，再施加等量灾厄。
+	// 打出时：先造成伤害，再施加缓慢。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -55,6 +55,13 @@ public sealed class DoomCharm : ModCardTemplate
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
 
-		await PowerCmd.Apply<DoomPower>(choiceContext, cardPlay.Target, DynamicVars.Doom.BaseValue, Owner.Creature, this);
+		// DynamicVarSet 没有 Slow 访问器，缓慢层数用索引器取值（与 CanonicalVars 中的 PowerVar 保持一致）。
+		await PowerCmd.Apply<SlowPower>(choiceContext, cardPlay.Target, DynamicVars["SlowPower"].BaseValue, Owner.Creature, this);
+	}
+
+	// 升级：伤害 4 -> 5（缓慢层数不变）。
+	protected override void OnUpgrade()
+	{
+		DynamicVars.Damage.UpgradeValueBy(1m);
 	}
 }

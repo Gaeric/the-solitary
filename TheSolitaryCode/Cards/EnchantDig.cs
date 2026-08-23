@@ -2,6 +2,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -9,11 +10,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔风暴（character.org 蓝卡 #8）：1 费攻击。
-// 造成 8 点伤害，你每有一张附魔牌，造成额外 4 点伤害。
-// 计算结构参考灰烬打击 AshenStrike；附魔牌数量统计与附魔壁垒 EnchantedBulwark 共用 EnchantHelpers。
+// 附魔挖掘（character.org 蓝卡 #11）：1 费攻击。
+// 造成 6 点伤害（升级后 9 点）；抽牌直到抽到一张附魔牌。
+// 抽牌直到逻辑参考原版 劫掠 Pillage（do-while 逐张抽，附带手牌上限保护）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class EnchantStorm : ModCardTemplate
+public sealed class EnchantDig : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
@@ -26,39 +27,46 @@ public sealed class EnchantStorm : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public EnchantStorm()
+	public EnchantDig()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantStorm.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantDig.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：计算伤害 = 基础(8) + 附魔牌数量 × ExtraDamage(4)。
-	// 绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()} 占位符（参考原版 AshenStrike 的结构）。
+	// 基础数值：伤害 6（升级后 9），绑定 {Damage:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new CalculationBaseVar(8m),
-		new ExtraDamageVar(3m),
-		new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) =>
-			EnchantHelpers.CountEnchantedCardsInAllPiles(card.Owner))
+		new DamageVar(6m, ValueProp.Move)
 	];
 
-	// 打出时：按计算出的总伤害攻击目标。
+	// 打出时：先造成伤害，再抽牌直到抽到一张附魔牌。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
 
-		await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+		// 1. 造成 6 点伤害。
+		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
 			.FromCard(this, cardPlay)
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
+
+		// 2. 抽牌直到抽到一张附魔牌（参考原版 劫掠 Pillage 的 do-while 逐张抽循环；
+		//    附带手牌上限保护；抽牌堆/弃牌堆都抽空后 Draw 返回 null 则停止）。
+		CardModel? drawn;
+		do
+		{
+			drawn = await CardPileCmd.Draw(choiceContext, Owner);
+		}
+		while (drawn != null && drawn.Enchantment == null
+		       && CardPile.GetCards(Owner, PileType.Hand).Count() < CardPile.MaxCardsInHand);
 	}
 
-	// 升级：每张附魔牌造成的额外伤害 4 -> 6。
+	// 升级：伤害 6 -> 9（参考劫掠 Pillage 的升级方式）。
 	protected override void OnUpgrade()
 	{
-		DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+		DynamicVars.Damage.UpgradeValueBy(3m);
 	}
 }

@@ -15,11 +15,11 @@ public static class RandomEnchantPool
 	/// </summary>
 	private sealed record Entry(Func<CardModel, bool> CanEnchant, Action<CardModel, decimal> Apply, decimal Amount);
 
-	// character.org 随机附魔池。数值参考原版用法：锋利/灵巧/伶俐 2，动量/本能/涡旋 1。
+	// character.org 随机附魔池。
 	private static readonly Entry[] Pool =
 	[
-		new(CanEnchant<Sharp>, ApplyEnchant<Sharp>, 2m),
-		new(CanEnchant<Momentum>, ApplyEnchant<Momentum>, 1m),
+		new(CanEnchant<Sharp>, ApplyEnchant<Sharp>, 3m),
+		new(CanEnchant<Momentum>, ApplyEnchant<Momentum>, 3m),
 		new(CanEnchant<Instinct>, ApplyEnchant<Instinct>, 1m),
 		new(CanEnchant<Spiral>, ApplyEnchant<Spiral>, 1m),
 		new(CanEnchant<Adroit>, ApplyEnchant<Adroit>, 2m),

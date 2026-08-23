@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 播种（character.org 蓝卡 #4）：1 费能力牌。
-// 当你前 2 次洗牌时，选择一张手牌附魔播种（Sown：每场战斗第一次打出时获得 1 点能量）。
+// 当你前 2 次洗牌时，从牌组中选择一张卡牌附魔播种（Sown：每场战斗第一次打出时获得 1 点能量）。
 // 升级后 0 费。实现参考计策（Stratagem）：能力牌打出后给自己施加 Power，
 // 通过 Power 的 AfterShuffle 钩子响应“抽牌堆被打乱洗牌”事件。
 [RegisterCard(typeof(TheSolitaryCardPool))]

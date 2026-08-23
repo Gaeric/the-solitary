@@ -18,12 +18,15 @@ namespace TheSolitary.Relics;
 [RegisterCharacterStarterRelic(typeof(TheSolitaryCharacter))]
 public sealed class SwiftCircuit : ModRelicTemplate
 {
+    // 每场战斗开始时重置的附魔次数（给抽到的前 N 张牌附魔迅捷）。
+    private const int StartingCharges = 3;
+
     // 稀有度。
     public override RelicRarity Rarity => RelicRarity.Starter;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
-        new CardsVar(3)
+        new CardsVar(StartingCharges)
     ];
 
     // 图片资源统一放在 AssetProfile 里配置。
@@ -36,13 +39,24 @@ public sealed class SwiftCircuit : ModRelicTemplate
         // 大图标（原版 256x256）。
         BigIconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png");
 
+    // 遗物实例跨整局运行存在，充能计数只在 AfterCardDrawn 里递减、从不恢复，
+    // 导致第一场战斗用完后就永远不再触发。游戏在每场战斗开始、回合初始抽牌之前
+    // 派发 BeforeCombatStart 给全场模型，这里把充能重置回满。
+    public override Task BeforeCombatStart()
+    {
+        base.DynamicVars.Cards.BaseValue = StartingCharges;
+        return Task.CompletedTask;
+    }
+
     public override async Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
-        if (card.Owner == base.Owner && base.DynamicVars.Cards.BaseValue > 0)
+        // 只有能被迅捷附魔的卡牌（非状态/诅咒、未被其他附魔占用等）才添加迅捷并消耗充能。
+        // CardCmd.Enchant 内部会再次调用 CanEnchant，若卡牌不可附魔会直接抛异常，因此必须先检查。
+        if (card.Owner == base.Owner && base.DynamicVars.Cards.BaseValue > 0
+            && ModelDb.Enchantment<Swift>().ToMutable().CanEnchant(card))
         {
             CardCmd.Enchant<Swift>(card, 1m);
             base.DynamicVars.Cards.BaseValue--;
         }
-
     }
 }
