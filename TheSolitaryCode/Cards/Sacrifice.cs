@@ -12,13 +12,14 @@ namespace TheSolitary.Cards;
 // 献祭（character.org 基础卡 #2）：1 费技能。
 // 选择一张手牌消耗。随机为手牌中另一张牌附魔（随机附魔池见 RandomEnchantPool）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
+[RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 1)]
 public sealed class Sacrifice : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
 	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（设计文档的“基础牌”档位，与符击一致）。
+	// 卡牌稀有度（设计文档的“基础牌”档位，与匣中术一致）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
 	// 目标类型（Self：只作用于己方手牌）。
 	private const TargetType CardTarget = TargetType.Self;

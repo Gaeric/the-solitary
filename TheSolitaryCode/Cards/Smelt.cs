@@ -12,7 +12,9 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 熔炼（character.org 白卡 #16）：1 费技能。
-// 选择一张手牌消耗。获得 8 点格挡；若该牌有附魔，额外获得 8 点格挡（升级后基础格挡 +3）。
+// 选择一张手牌消耗。获得格挡；若该牌有附魔，则额外再获得一次同数值格挡（升级后基础格挡 +3）。
+// 数值与描述参考邪眼 EvilEye：额外格挡 = 再次调用 GainBlock（而非固定值），
+// 使两次格挡都完整经过 Hook.ModifyBlock，额外数值同样受敏捷/灵巧/脆弱等修正影响。
 // 选择交互参考献祭 Sacrifice（CardSelectCmd.FromHand + ExhaustSelectionPrompt）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Smelt : ModCardTemplate
@@ -27,10 +29,6 @@ public sealed class Smelt : ModCardTemplate
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
-	// 附魔额外格挡的 DynamicVar 键名（绑定 {EnchantedBonus:diff()} 占位符）。
-	private const string EnchantedBonusKey = "EnchantedBonus";
-	// 附魔牌的额外格挡。
-	private const int EnchantedBonus = 8;
 
 	public Smelt()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
@@ -44,11 +42,10 @@ public sealed class Smelt : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：基础格挡 8 + 附魔额外格挡 8（绑定 {Block:diff()} / {EnchantedBonus:diff()} 占位符）。
+	// 基础数值：基础格挡 8（绑定 {Block:diff()} 占位符）。额外格挡与基础格挡同值，见 OnPlay。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new BlockVar(8m, ValueProp.Move),
-		new DynamicVar(EnchantedBonusKey, EnchantedBonus)
+		new BlockVar(8m, ValueProp.Move)
 	];
 
 	// 打出时：选择一张手牌消耗；获得格挡；若该牌带附魔则额外获得格挡。
@@ -74,17 +71,16 @@ public sealed class Smelt : ModCardTemplate
 
 		await CardCmd.Exhaust(choiceContext, exhausted);
 
-		// 2. 获得基础格挡。
-		await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-
-		// 3. 若被消耗的牌带附魔，额外获得格挡。
-		if (wasEnchanted)
+		// 2. 参考邪眼 EvilEye：根据条件决定格挡次数，每次都传 DynamicVars.Block 完整走一次 GainBlock，
+		//    每次都会经过 Hook.ModifyBlock，因此额外格挡同样受敏捷/灵巧/脆弱等修正影响。
+		int blockGains = wasEnchanted ? 2 : 1;
+		for (int i = 0; i < blockGains; i++)
 		{
-			await CreatureCmd.GainBlock(Owner.Creature, DynamicVars[EnchantedBonusKey].BaseValue, ValueProp.Move, cardPlay);
+			await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
 		}
 	}
 
-	// 升级：基础格挡 8 -> 11。
+	// 升级：基础格挡 8 -> 11（额外格挡随基础格挡一同提升）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(3m);

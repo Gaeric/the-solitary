@@ -35,7 +35,8 @@ public static class DebuffCharms
 	/// <param name="rng">用于随机挑选符的 RNG（建议传入 RunState.Rng.CombatCardGeneration）。</param>
 	/// <param name="choiceContext">用于施加计数器 Power 的选择上下文。</param>
 	/// <param name="creator">生成来源（用于统计/来源记录，缺省为 owner）。</param>
-	public static async Task<CardModel> CreateRandomInHand(Player owner, ICombatState combatState, Rng rng, PlayerChoiceContext choiceContext, Player? creator = null)
+	/// <param name="upgraded">是否生成升级版术式（术式+），参考 Largesse / ManifestAuthority 的升级判定模式。</param>
+	public static async Task<CardModel> CreateRandomInHand(Player owner, ICombatState combatState, Rng rng, PlayerChoiceContext choiceContext, Player? creator = null, bool upgraded = false)
 	{
 		// 只要存在一个可命中敌人没有缓慢，就保留术式-凋零作为候选；否则排除它。
 		bool anyHittableEnemyWithoutSlow = combatState.HittableEnemies.Any(e => !e.HasPower<SlowPower>());
@@ -45,6 +46,11 @@ public static class DebuffCharms
 
 		CardModel canonical = rng.NextItem(candidates)!;
 		CardModel card = combatState.CreateCard(canonical, owner);
+		// 升级后的术式：在加入战斗前对生成的实例调用 CardCmd.Upgrade（与 Largesse 生成升级无色牌同款）。
+		if (upgraded)
+		{
+			CardCmd.Upgrade(card);
+		}
 		await CardPileCmd.AddGeneratedCardsToCombat([card], PileType.Hand, creator ?? owner);
 
 		// 记录本场战斗为该玩家生成的减益符数量 +1（供“造成生成数伤害”的卡牌使用）。

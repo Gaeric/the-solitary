@@ -9,10 +9,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 符击（character.org 基础卡 #1）：1 费攻击。
-// 造成 3 点伤害，并获得一张随机减益符加入手牌。
+// 匣中术（character.org 基础卡 #1）：1 费攻击。
+// 造成 3 点伤害，将 2 张随机术式加入手牌；升级后伤害 5，生成的术式变为升级版（术式+）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class CharmStrike : ModCardTemplate
+[RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 1)]
+public sealed class ArtOfTheBox : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
@@ -25,7 +26,7 @@ public sealed class CharmStrike : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public CharmStrike()
+	public ArtOfTheBox()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
@@ -34,13 +35,14 @@ public sealed class CharmStrike : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：伤害（绑定 {Damage:diff()} 占位符）。
+	// 基础数值：伤害 + 生成的术式数量（绑定 {Damage:diff()} / {Cards:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(3m, ValueProp.Move)
+		new DamageVar(3m, ValueProp.Move),
+		new CardsVar(2)
 	];
 
-	// 打出时：先造成伤害，再获得一张随机减益符加入手牌。
+	// 打出时：先造成伤害，再循环生成随机术式加入手牌（本卡升级后生成升级版术式）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -50,10 +52,14 @@ public sealed class CharmStrike : ModCardTemplate
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
 
-		await DebuffCharms.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext);
+		for (int i = 0; i < DynamicVars.Cards.IntValue; i++)
+		{
+			await DebuffCharms.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
+			await Cmd.Wait(0.1f);
+		}
 	}
 
-	// 升级后：伤害 3 -> 5。
+	// 升级后：伤害 3 -> 5（生成的术式数量不变，但变为升级版，由 IsUpgraded 控制）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Damage.UpgradeValueBy(2);
