@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Godot;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -6,6 +11,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes;
+using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
 
 namespace TheSolitary.Cards;
@@ -91,7 +97,8 @@ public static class EnchantHelpers
 	/// <summary>
 	/// 从手牌中选择两张牌并交换它们的附魔（蓝卡 #3 交换附魔 的完整交换逻辑，抽离为共享方法）。
 	/// 供交换附魔 SwapEnchantments 技能与蓝卡 #26 能力牌（回合开始时触发）复用。
-	/// 选择不足两张（取消选择 / 手牌不足两张）则无事发生。
+	/// 选择不足两张（取消选择 / 手牌不足两张）则无事发生；
+	/// 手牌没有附魔牌时跳过选择过程；选中的两张牌都没有附魔时跳过交换。
 	/// 直接在两张原牌实例上交换附魔：先快照附魔为全新实例（初始运行状态：Status 复位、
 	/// 一次性标记清除），清除原附魔后施加另一张的附魔，例如已触发的活力/荣光交换后会「重新充能」。
 	/// 不重建卡牌（不使用 CardCmd.Transform），以保留卡牌自身的本场战斗状态（如掌中奇术的减费）。
@@ -102,6 +109,12 @@ public static class EnchantHelpers
 		CardSelectorPrefs prefs,
 		AbstractModel source)
 	{
+		// 手里没有任何附魔牌时，交换没有意义，直接跳过选择过程。
+		if (player.PlayerCombatState!.Hand.Cards.All(card => card.Enchantment == null))
+		{
+			return;
+		}
+
 		List<CardModel> selection = (await CardSelectCmd.FromHand(
 			prefs: prefs,
 			context: choiceContext,
@@ -116,6 +129,12 @@ public static class EnchantHelpers
 
 		CardModel first = selection[0];
 		CardModel second = selection[1];
+
+		// 两张被选牌都没有附魔时，交换没有意义，跳过后续所有过程。
+		if (first.Enchantment == null && second.Enchantment == null)
+		{
+			return;
+		}
 
 		// 先快照两张牌的附魔为全新实例（初始运行状态：Status 复位、一次性标记清除），
 		// 使交换后的附魔「重新充能」。
@@ -169,7 +188,8 @@ public static class EnchantHelpers
 
 	/// <summary>
 	/// 播放原版附魔特效（NCardEnchantVfx）作为交换后的简单视觉反馈。
-	/// 卡牌无附魔时跳过（特效需要读取附魔图标）。
+	/// 原版动画内部固定约 2 秒（1s 补间 + 1s 等待），这里只展示约 0.5 秒后快速缩走，
+	/// 避免拖慢交换节奏。卡牌无附魔时跳过（特效需要读取附魔图标）。
 	/// </summary>
 	private static void PlayEnchantVfx(CardModel card)
 	{
@@ -178,10 +198,28 @@ public static class EnchantHelpers
 			return;
 		}
 		NCardEnchantVfx? vfx = NCardEnchantVfx.Create(card);
-		if (vfx != null)
+		if (vfx == null)
 		{
-			NRun.Instance?.GlobalUi.CardPreviewContainer.AddChildSafely(vfx);
+			return;
 		}
+		NRun.Instance?.GlobalUi.CardPreviewContainer.AddChildSafely(vfx);
+		TaskHelper.RunSafely(FadeOutAndFree(vfx));
+	}
+
+	/// <summary>
+	/// 短暂展示后快速缩走并释放附魔特效。
+	/// </summary>
+	private static async Task FadeOutAndFree(NCardEnchantVfx vfx)
+	{
+		await Cmd.Wait(0.5f);
+		if (!GodotObject.IsInstanceValid(vfx))
+		{
+			return;
+		}
+		Tween tween = vfx.CreateTween();
+		tween.TweenProperty(vfx, "scale", Vector2.Zero, 0.15f).SetEase(Tween.EaseType.In).SetTrans(Tween.TransitionType.Quad);
+		await tween.AwaitFinished(vfx);
+		vfx.QueueFreeSafely();
 	}
 }
 
