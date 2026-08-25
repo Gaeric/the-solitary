@@ -54,6 +54,8 @@ public sealed class TheSolitaryCharacter : ModCharacterTemplate<TheSolitaryCardP
             IconTexturePath: $"{ImageRoot}/TheSolitary_character_icon.png",
             // 人物头像轮廓。
             IconOutlineTexturePath: $"{ImageRoot}/TheSolitary_character_icon_outline.png",
+            // 游戏左上角头像、角色统计页头像、每日挑战角色头像。是场景不是图片。
+            IconPath: $"{SceneRoot}/TheSolitary_icon.tscn",
             // 人物选择背景。
             CharacterSelectBgPath: CharacterSelectBgScenePath,
             // 人物选择图标。

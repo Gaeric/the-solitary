@@ -1,0 +1,89 @@
+characterselect_watcher.png
+size: 2951,1790
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+r003
+  rotate: true
+  xy: 1925, 648
+  size: 1140, 1024
+  orig: 1144, 1027
+  offset: 3, 1
+  index: -1
+r007
+  rotate: false
+  xy: 2583, 36
+  size: 292, 381
+  orig: 295, 383
+  offset: 1, 1
+  index: -1
+r006
+  rotate: false
+  xy: 1926, 165
+  size: 319, 481
+  orig: 331, 485
+  offset: 11, 2
+  index: -1
+r002
+  rotate: true
+  xy: 2247, 2
+  size: 271, 334
+  orig: 273, 336
+  offset: 1, 1
+  index: -1
+r005
+  rotate: true
+  xy: 1926, 10
+  size: 153, 233
+  orig: 153, 233
+  offset: 0, 0
+  index: -1
+r000
+  rotate: false
+  xy: 2, 587
+  size: 1921, 1201
+  orig: 1923, 1203
+  offset: 1, 1
+  index: -1
+r009
+  rotate: false
+  xy: 2247, 275
+  size: 330, 371
+  orig: 330, 371
+  offset: 0, 0
+  index: -1
+r004
+  rotate: false
+  xy: 2803, 521
+  size: 127, 125
+  orig: 127, 125
+  offset: 0, 0
+  index: -1
+r010
+  rotate: false
+  xy: 2, 71
+  size: 64, 49
+  orig: 66, 52
+  offset: 1, 2
+  index: -1
+r008
+  rotate: false
+  xy: 2579, 419
+  size: 222, 227
+  orig: 224, 230
+  offset: 1, 2
+  index: -1
+r011
+  rotate: false
+  xy: 2161, 127
+  size: 62, 36
+  orig: 64, 38
+  offset: 1, 1
+  index: -1
+r001
+  rotate: false
+  xy: 2, 122
+  size: 1922, 463
+  orig: 1922, 463
+  offset: 0, 0
+  index: -1

@@ -1,38 +1,18 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Texture2D" path="res://TheSolitary/images/characters/TheSolitary_character_select.png" id="1_character"]
-[ext_resource type="Texture2D" path="res://TheSolitary/images/characters/TheSolitary_character_icon.png" id="2_icon"]
+[ext_resource type="SpineSkeletonDataResource" path="res://animations/character_select/watcher/characterselect_watcher_skel_data.tres" id="1_skel"]
+[ext_resource type="Script" path="res://TheSolitaryCode/Characters/TheSolitaryCharSelectAutoPlayer.cs" id="2_autoplay"]
+[ext_resource type="Texture2D" path="res://TheSolitary/images/vfx/timeline_bg_star_vfx.png" id="3_star"]
 
 [node name="TheSolitaryCharacterSelectBg" type="Control"]
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -960.0
-offset_top = -540.0
-offset_right = 1600.0
-offset_bottom = 660.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(1280, 600)
-
-[node name="Background" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -1280.0
-offset_top = -600.0
-offset_right = 640.0
-offset_bottom = 478.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="Background"]
+[node name="BgColor" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,30 +21,36 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.18, 0.24, 1)
 
-[node name="Character" type="TextureRect" parent="Background"]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -620.0
-offset_top = -360.0
-offset_right = -92.0
-offset_bottom = 420.0
-grow_horizontal = 0
-grow_vertical = 2
-texture = ExtResource("1_character")
-expand_mode = 1
-stretch_mode = 5
+[node name="TheSolitarySpine" type="SpineSprite" parent="."]
+position = Vector2(313, 102)
+scale = Vector2(0.87, 0.87)
+skeleton_data_res = ExtResource("1_skel")
 
-[node name="Icon" type="TextureRect" parent="Background"]
+[node name="TheSolitaryAutoPlayer" type="Node" parent="TheSolitarySpine"]
+script = ExtResource("2_autoplay")
+
+[node name="AmbientStars" type="CPUParticles2D" parent="."]
+position = Vector2(1280, 620)
+amount = 220
+texture = ExtResource("3_star")
+lifetime = 6.0
+preprocess = 6.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1500, 760)
+gravity = Vector2(0, -8)
+orbit_velocity_min = 0.03
+orbit_velocity_max = 0.05
+scale_amount_min = 0.05
+scale_amount_max = 0.18
+color = Color(0.42, 0.65, 0.72, 0.55)
+
+[node name="Portrait" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
-anchors_preset = 0
-offset_left = 120.0
-offset_top = 120.0
-offset_right = 288.0
-offset_bottom = 288.0
-texture = ExtResource("2_icon")
-expand_mode = 1
-stretch_mode = 5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 6

@@ -1,22 +1,24 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Texture2D" path="res://TheSolitary/images/characters/TheSolitary_character_select.png" id="1_character"]
+[ext_resource type="Script" path="res://TheSolitaryCode/Characters/TheSolitaryRestSiteAnimator.cs" id="1_animator"]
+[ext_resource type="SpineSkeletonDataResource" path="res://animations/characters/watcher/watcher_skel_data.tres" id="2_skel"]
 
-[node name="TheSolitaryCharacterRestSite" type="Node2D"]
+[node name="TheSolitaryRestSite" type="Node2D"]
+position = Vector2(-2, 42)
+scale = Vector2(1.0, 1.0)
 
-[node name="Visuals" type="Sprite2D" parent="."]
-position = Vector2(0, -96)
-scale = Vector2(1.25, 1.25)
-texture = ExtResource("1_character")
+[node name="SpineSprite" type="SpineSprite" parent="."]
+skeleton_data_res = ExtResource("2_skel")
+preview_skin = "default"
+preview_animation = "Idle"
+preview_frame = false
+preview_time = 0.0
+scale = Vector2(1.5, 1.5)
 
-[node name="Shadow" type="Sprite2D" parent="."]
-position = Vector2(75, -58)
-scale = Vector2(0.75, 0.75)
-modulate = Color(0.25, 0.25, 0.25, 0.45)
-texture = ExtResource("1_character")
+[node name="RestAnimator" type="Node" parent="."]
+script = ExtResource("1_animator")
 
 [node name="ControlRoot" type="Control" parent="."]
-unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
 
@@ -30,24 +32,27 @@ offset_bottom = 320.0
 
 [node name="Hitbox" type="Control" parent="ControlRoot"]
 unique_name_in_owner = true
+layout_mode = 3
 anchors_preset = 0
 offset_left = -155.0
-offset_top = -165.0
-offset_right = 154.0
-offset_bottom = 166.0
+offset_top = -351.0
+offset_right = 266.0
+offset_bottom = 332.0
 
 [node name="ThoughtBubbleRight" type="Control" parent="ControlRoot"]
 unique_name_in_owner = true
+layout_mode = 3
 anchors_preset = 0
-offset_left = 121.0
-offset_top = -125.0
-offset_right = 121.0
-offset_bottom = -125.0
+offset_left = 209.0
+offset_top = -317.0
+offset_right = 209.0
+offset_bottom = -317.0
 
 [node name="ThoughtBubbleLeft" type="Control" parent="ControlRoot"]
 unique_name_in_owner = true
+layout_mode = 3
 anchors_preset = 0
-offset_left = -113.0
-offset_top = -95.0
-offset_right = -113.0
-offset_bottom = -95.0
+offset_left = -74.0
+offset_top = -325.0
+offset_right = -74.0
+offset_bottom = -325.0
