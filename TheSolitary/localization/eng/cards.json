@@ -115,7 +115,7 @@
   "THE_SOLITARY_CARD_ENCHANT_BOOST.description": "Gain {Block:diff()} Block.\nChoose an [gold]Enchanted[/gold] card in your hand. Increase its [gold]Enchantment[/gold]'s value by 1 this combat.",
   "THE_SOLITARY_CARD_ENCHANT_BOOST.smartDescription": "Gain {Block:diff()} Block.\nChoose an [gold]Enchanted[/gold] card in your hand. Increase its [gold]Enchantment[/gold]'s value by 1 this combat.",
   "THE_SOLITARY_CARD_ENCHANT_BOOST.selectionScreenPrompt": "Choose an [gold]Enchanted[/gold] card in your hand to increase its value.",
-  "THE_SOLITARY_CARD_ENCHANT_ASCENSION.title": "Enchant Ascension",
+  "THE_SOLITARY_CARD_ENCHANT_ASCENSION.title": "Deposition",
   "THE_SOLITARY_CARD_ENCHANT_ASCENSION.description": "Increase the value of all [gold]Enchantments[/gold] on your cards by 1.",
   "THE_SOLITARY_CARD_ENCHANT_ASCENSION.smartDescription": "Increase the value of all [gold]Enchantments[/gold] on your cards by 1.",
   "THE_SOLITARY_CARD_RING_OF_SOUL_RETURN.title": "Ring of Soul Return",

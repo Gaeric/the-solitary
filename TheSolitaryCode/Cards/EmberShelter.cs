@@ -32,6 +32,9 @@ public sealed class EmberShelter : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
+	// 消耗：升级前后都消耗（关键字作用于基础卡，升级不会移除）。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
+
 	public EmberShelter()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{

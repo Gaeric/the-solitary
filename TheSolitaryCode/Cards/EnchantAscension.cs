@@ -8,7 +8,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔升华（character.org 金卡 #4）：1 费技能，升级后 0 费。
+// 凝华 Deposition（原「附魔升华」，character.org 金卡 #4）：1 费技能，升级后 0 费，升级前后均消耗。
 // 使牌组中所有附魔数值 +1，本局游戏全局生效（永久附魔跨战斗保留；战斗中的临时附魔仅本场战斗 +1）。
 // 实现时区分临时附魔与永久附魔（由 EnchantHelpers.IncreaseEnchantmentValue 的 DeckVersion 判空天然区分）：
 // - 永久附魔（牌组中真实存在的附魔）：战斗副本与牌组版本同步 +1，本局游戏永久生效；
@@ -26,6 +26,9 @@ public sealed class EnchantAscension : ModCardTemplate
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
+
+	// 消耗：升级前后都消耗（关键字作用于基础卡，升级不会移除）。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	public EnchantAscension()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)

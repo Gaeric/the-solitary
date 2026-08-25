@@ -115,7 +115,7 @@
   "THE_SOLITARY_CARD_ENCHANT_BOOST.description": "获得{Block:diff()}点格挡。\n选择手牌中一张[gold]附魔[/gold]牌，本场战斗其[gold]附魔[/gold]数值+1。",
   "THE_SOLITARY_CARD_ENCHANT_BOOST.smartDescription": "获得{Block:diff()}点格挡。\n选择手牌中一张[gold]附魔[/gold]牌，本场战斗其[gold]附魔[/gold]数值+1。",
   "THE_SOLITARY_CARD_ENCHANT_BOOST.selectionScreenPrompt": "选择一张手牌中的[gold]附魔[/gold]牌，使其[gold]附魔[/gold]数值+1。",
-  "THE_SOLITARY_CARD_ENCHANT_ASCENSION.title": "附魔升华",
+  "THE_SOLITARY_CARD_ENCHANT_ASCENSION.title": "凝华",
   "THE_SOLITARY_CARD_ENCHANT_ASCENSION.description": "你所有牌的[gold]附魔[/gold]数值+1。",
   "THE_SOLITARY_CARD_ENCHANT_ASCENSION.smartDescription": "你所有牌的[gold]附魔[/gold]数值+1。",
   "THE_SOLITARY_CARD_RING_OF_SOUL_RETURN.title": "魂回之环",
