@@ -12,7 +12,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 恶化（character.org 蓝卡 #6）：1 费攻击。
+// 衍射（character.org 蓝卡 #6）：1 费攻击。
 // 造成 8 点伤害；目标身上每有一种减益，所有减益数值 +1（升级后 +2）——
 // 即目标身上的减益种类越多，本次增幅越大（可叠加放大）。
 // 参考熔岩之拳 MoltenFist（减益层数操控）与腐蚀之拳 CorrosiveFist（枚举 Debuff 型 Power 逐个 +1）。

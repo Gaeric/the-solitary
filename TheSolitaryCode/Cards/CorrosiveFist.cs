@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 腐蚀之拳（character.org 白卡 #9）：1 费攻击，消耗。
-// 造成 6 点伤害，目标身上所有减益数值 +1（参考原版 熔岩之拳 MoltenFist 的减益层数操控方式）。
+// 造成 8 点伤害；若目标有减益，则额外造成一次伤害（参考原版 怨恨 Spite 的条件命中次数模式）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class CorrosiveFist : ModCardTemplate
 {
@@ -43,31 +43,25 @@ public sealed class CorrosiveFist : ModCardTemplate
 	// 基础数值：伤害（绑定 {Damage:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(6m, ValueProp.Move)
+		new DamageVar(8m, ValueProp.Move)
 	];
 
-	// 打出时：先造成 6 点伤害，再让目标身上的每种减益数值 +1。
+	// 打出时：先判定目标是否带减益（造成伤害前快照，避免敌人被击杀后无法判断），
+	// 若有减益则攻击 2 次（每次伤害 = Damage），否则攻击 1 次（参考原版 怨恨 Spite 的条件命中次数模式）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
 
+		bool hasDebuff = cardPlay.Target.Powers.Any(p => p.Type == PowerType.Debuff);
+
 		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+			.WithHitCount(hasDebuff ? 2 : 1)
 			.FromCard(this, cardPlay)
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
-
-		// 枚举目标身上所有 Debuff 类型的 Power，各 +1。
-		// 用 ModelDb.DebugPower + ToMutable 生成可变原型传给 PowerCmd.Apply：
-		// 已存在的减益会走叠加路径加层数；理论上可能存在的 Instanced 型减益也会安全地新增一层。
-		foreach (PowerModel debuff in cardPlay.Target.Powers.Where(p => p.Type == PowerType.Debuff))
-		{
-			await PowerCmd.Apply(choiceContext,
-				ModelDb.DebugPower(debuff.GetType()).ToMutable(),
-				cardPlay.Target, 1m, Owner.Creature, this);
-		}
 	}
 
-	// 升级：伤害 6 -> 9。
+	// 升级：伤害 8 -> 11。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Damage.UpgradeValueBy(3m);

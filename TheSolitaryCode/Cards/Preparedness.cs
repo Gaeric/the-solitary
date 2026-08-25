@@ -10,10 +10,10 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔抽牌（character.org 蓝卡 #14）：1 费技能。
+// 有备无患（原名附魔抽牌，character.org 蓝卡 #14）：1 费技能，打出后消耗。
 // 抽两张牌，为抽到的每张牌附魔伶俐（Adroit：打出时获得 3 点格挡；数值参考遗物 Kifuda）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class EnchantedDraw : ModCardTemplate
+public sealed class Preparedness : ModCardTemplate
 {
 	// 伶俐（Adroit）附魔层数的 DynamicVar 键名与数值（参考 Kifuda 的 Adroit 3）。
 	private const string AdroitAmountKey = "AdroitAmount";
@@ -30,14 +30,17 @@ public sealed class EnchantedDraw : ModCardTemplate
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
-	public EnchantedDraw()
+	public Preparedness()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantedDraw.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Preparedness.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
+
+	// 打出后消耗（基础与升级版一致，关键词自动显示在卡面，不必写进描述）。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 基础数值：抽牌数 + 附魔层数（绑定 {Cards:diff()} 与 {AdroitAmount:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -61,7 +64,7 @@ public sealed class EnchantedDraw : ModCardTemplate
 		}
 	}
 
-	// 升级：抽 2 -> 3 张牌。
+	// 升级：抽 2 -> 3 张牌（消耗与伶俐数值不变）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Cards.UpgradeValueBy(1);

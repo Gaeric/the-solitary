@@ -10,11 +10,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔守护（character.org 蓝卡 #33）：1 费能力牌。
-// 每当你生成附魔时，获得 6 点格挡（升级后 9 点）。
-// 触发实现见 AfterEnchantPatch（CardCmd.Enchant 补丁）＋ EnchantWardPower。
+// 余音（character.org 蓝卡 #33，原名附魔守护）：1 费能力牌。
+// 每当你生成附魔时，获得 4 点格挡（升级后 6 点）。
+// 触发实现见 AfterEnchantPatch（CardCmd.Enchant 补丁）＋ ReverbPower。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class EnchantWard : ModCardTemplate
+public sealed class Reverb : ModCardTemplate
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 1;
@@ -26,41 +26,41 @@ public sealed class EnchantWard : ModCardTemplate
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
-	// PowerVar 键名（与 typeof(EnchantWardPower).Name 一致，绑定 {EnchantWardPower:diff()} 占位符）。
-	private const string WardKey = nameof(EnchantWardPower);
-	// 每次生成附魔获得的格挡（升级后 9）。
-	private const int BlockAmount = 6;
+	// PowerVar 键名（与 typeof(ReverbPower).Name 一致，绑定 {ReverbPower:diff()} 占位符）。
+	private const string ReverbKey = nameof(ReverbPower);
+	// 每次生成附魔获得的格挡（升级后 6）。
+	private const int BlockAmount = 4;
 
-	public EnchantWard()
+	public Reverb()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantWard.png）。
+	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Reverb.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：每次生成附魔获得 6 点格挡（升级后 9），绑定 {EnchantWardPower:diff()} 占位符。
+	// 基础数值：每次生成附魔获得 4 点格挡（升级后 6），绑定 {ReverbPower:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new PowerVar<EnchantWardPower>(BlockAmount)
+		new PowerVar<ReverbPower>(BlockAmount)
 	];
 
-	// 悬停提示：附魔守护 Power（数量由 Amount 显示）。
+	// 悬停提示：余音 Power（数量由 Amount 显示）。
 	// 注意：HoverTipFactory.FromPower<T>() 返回单个 IHoverTip（不是 IEnumerable），用集合表达式包一层。
 	protected override IEnumerable<IHoverTip> AdditionalHoverTips =>
-		[HoverTipFactory.FromPower<EnchantWardPower>()];
+		[HoverTipFactory.FromPower<ReverbPower>()];
 
-	// 打出时：给自己施加附魔守护（层数 = 每次生成附魔应获得的格挡）。
+	// 打出时：给自己施加余音（层数 = 每次生成附魔应获得的格挡）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "PowerUp", Owner.Character.PowerUpAnimDelay);
-		await PowerCmd.Apply<EnchantWardPower>(choiceContext, Owner.Creature, DynamicVars[WardKey].BaseValue, Owner.Creature, this);
+		await PowerCmd.Apply<ReverbPower>(choiceContext, Owner.Creature, DynamicVars[ReverbKey].BaseValue, Owner.Creature, this);
 	}
 
-	// 升级：格挡 6 -> 9。
+	// 升级：格挡 4 -> 6。
 	protected override void OnUpgrade()
 	{
-		DynamicVars[WardKey].UpgradeValueBy(3m);
+		DynamicVars[ReverbKey].UpgradeValueBy(2m);
 	}
 }

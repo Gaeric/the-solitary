@@ -14,7 +14,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 奇点爆破（自定义卡）：2 费攻击（升级后 1 费）。
-// 敌人身上每有一种负面效果，就造成一次“本场战斗中生成的术式数量”点伤害。
+// 本次战斗每生成过一张术式，造成 1 点伤害（单次伤害 = 术式生成数）；
+// 敌人每有一种负面效果，额外造成一次伤害（命中次数 = 1 + 负面效果种类数）。
 // 生成数由 ArtTrackerPower 在 Arts.CreateRandomInHand 中累计。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class SingularityBurst : ModCardTemplate
@@ -44,7 +45,7 @@ public sealed class SingularityBurst : ModCardTemplate
 
 	// 基础数值：
 	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗生成的术式数量（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
-	// 命中次数 = 基础(0) + CalculationExtra(1) × 目标身上的减益类型数（绑定 {CalculatedHits:diff()}）。
+	// 命中次数 = 基础 1 次 + 目标身上的减益类型数（绑定 {CalculatedHits:diff()}）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new CalculationBaseVar(0m),
@@ -53,10 +54,11 @@ public sealed class SingularityBurst : ModCardTemplate
 		new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) =>
 			card.Owner.Creature.GetPowerAmount<ArtTrackerPower>()),
 		new CalculatedVar(CalculatedHitsKey).WithMultiplier(static (_, target) =>
-			CountDistinctDebuffTypes(target))
+			1 + CountDistinctDebuffTypes(target))
 	];
 
-	// 打出时：按“单次伤害 × 命中次数”进行多段攻击（参考原版 FlakCannon 的 WithHitCount 用法）。
+	// 打出时：按“单次伤害 × 命中次数”进行多段攻击
+	//（至少 1 次 + 目标每种负面效果额外 1 次，参考原版 FlakCannon 的 WithHitCount 用法）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);

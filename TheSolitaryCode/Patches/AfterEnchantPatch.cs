@@ -15,7 +15,7 @@ namespace TheSolitary.Patches;
 // 游戏没有任何"获得附魔后"的事件钩子（CardCmd.Enchant 不触发任何 Hook），
 // 因此在 CardCmd.Enchant（所有附魔动作的唯一入口）成功后统一派发：
 //   - EnchantResonancePower（附魔共鸣）：获得附魔时获得等量活力（VigorPower）；
-//   - EnchantWardPower（附魔守护）：生成附魔时获得等量格挡。
+//   - ReverbPower（余音）：生成附魔时获得等量格挡。
 // 以后新增"附魔后触发"的 Power 时，只需在此 Postfix 追加一个分支。
 public sealed class AfterEnchantPatch : IPatchMethod
 {
@@ -23,7 +23,7 @@ public sealed class AfterEnchantPatch : IPatchMethod
 	public static string PatchId => "thesolitary_after_enchant";
 
 	public static string Description =>
-		"Grant Vigor / Block whenever a card gains an Enchantment while Enchant Resonance / Enchant Ward is active";
+		"Grant Vigor / Block whenever a card gains an Enchantment while Enchant Resonance / Reverb is active";
 
 	// 非关键补丁：若游戏更新导致 CardCmd.Enchant 签名变化，仅本功能失效，不影响整个 Mod。
 	public static bool IsCritical => false;
@@ -65,8 +65,8 @@ public sealed class AfterEnchantPatch : IPatchMethod
 					new ThrowingPlayerChoiceContext(), creature, resonance.Amount, creature, null);
 			}
 
-			// 附魔守护：生成附魔时获得格挡（ValueProp.Unpowered：来自 Power 的格挡，不享受力量/敏捷）。
-			var ward = creature.GetPower<EnchantWardPower>();
+			// 余音：生成附魔时获得格挡（ValueProp.Unpowered：来自 Power 的格挡，不享受力量/敏捷）。
+			var ward = creature.GetPower<ReverbPower>();
 			if (ward != null)
 			{
 				await CreatureCmd.GainBlock(creature, ward.Amount, ValueProp.Unpowered, null);

@@ -12,7 +12,7 @@ namespace TheSolitary.Cards;
 
 // 见往如来（character.org 蓝卡 #31）：1 费技能。
 // 抽 3 张牌；每抽到一张附魔牌，获得 5 点格挡（升级后 8 点）。
-// 实现参考附魔抽牌 EnchantedDraw（CardPileCmd.Draw 抽牌）＋ 共轭 Conjugate（格挡施加）。
+// 实现参考有备无患 Preparedness（CardPileCmd.Draw 抽牌）＋ 共轭 Conjugate（格挡施加）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantedInsight : ModCardTemplate
 {
