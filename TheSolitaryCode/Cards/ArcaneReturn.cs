@@ -8,8 +8,8 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 术法归元（character.org 金卡 #14）：3 费能力牌。
-// 每当你打出一张附魔牌时，生成一张随机术式并自动打出（目标为随机敌方）。
+// 全知形态（原术法归元，character.org 金卡 #14）：3 费能力牌。
+// 每当你打出一张附魔牌时，对一名随机敌人打出一张随机术式。
 // 升级后不改变耗能，改由 Power 在触发时生成升级版术式（术式+）：
 // ArcaneReturnPower.AfterApplied 捕获来源卡，按 IsUpgraded 决定生成术式还是术式+。
 // 实现参考原版模仿学习 ImitationLearning（Power 覆写 AfterCardPlayed 钩子 + CardCmd.AutoPlay 随机目标自动打出），

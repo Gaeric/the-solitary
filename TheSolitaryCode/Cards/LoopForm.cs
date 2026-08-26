@@ -9,7 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 环回形态（character.org 金卡 #5）：3 费能力牌。
+// 斗转星移（原环回形态，character.org 金卡 #5）：3 费能力牌。
 // 每洗牌 2 次获得 1 点能量（升级后每次结算获得 2 点能量，费用保持 3）。
 // 实现参考计策（Stratagem）：能力牌打出后给自己施加 Power，
 // 通过 Power 的 AfterShuffle 钩子响应“抽牌堆被打乱洗牌”事件（CardPileCmd 洗牌后触发），
