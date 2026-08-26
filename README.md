@@ -179,22 +179,22 @@ TheSolitary/
 |---|---|
 | 类型 | `TheSolitaryCharacter` |
 | 预期 id | `THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER` |
-| starter 牌组 | 4 × `TheSolitaryStrike`、4 × `TheSolitaryDefend`、1 × `TheSolitaryRelic` |
+| starter 牌组 | 4 × `Strike`、4 × `Defend`、1 × `TheSolitaryRelic` |
 | 资源配置 | `CharacterAssetProfile`；模板只指定静态占位资源，未指定的音频/拖尾/转场等字段从 `PlaceholderCharacterId` 回退 |
 
 ### 示例卡牌与遗物
 
 | 类型 | 池 | 预期 id |
 |---|---|---|
-| `TheSolitaryStrike`（攻击） | 角色卡池 | `THE_SOLITARY_CARD_THE_SOLITARY_STRIKE` |
-| `TheSolitaryDefend`（技能） | 角色卡池 | `THE_SOLITARY_CARD_THE_SOLITARY_DEFEND` |
+| `Strike`（攻击） | 角色卡池 | `THE_SOLITARY_CARD_STRIKE` |
+| `Defend`（技能） | 角色卡池 | `THE_SOLITARY_CARD_DEFEND` |
 | `TheSolitaryRelic` | `TheSolitaryRelicPool` | `THE_SOLITARY_RELIC_THE_SOLITARY_RELIC` |
 
 ### 静态占位资源
 
 **图片**（`res://TheSolitary/images/...`）：
 
-- `cards/TheSolitaryStrike.png`、`cards/TheSolitaryDefend.png`：示例卡图。
+- `cards/Strike.png`、`cards/Defend.png`：示例卡图。
 - `relics/TheSolitaryRelic.png`：示例遗物图标。
 - `characters/TheSolitary_character_*.png`：角色头像、角色选择图、地图标记和能量图标。
 

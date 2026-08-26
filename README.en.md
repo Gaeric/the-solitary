@@ -179,22 +179,22 @@ TheSolitary/
 |---|---|
 | Type | `TheSolitaryCharacter` |
 | Expected ID | `THE_SOLITARY_CHARACTER_THE_SOLITARY_CHARACTER` |
-| Starter deck | 4 × `TheSolitaryStrike`, 4 × `TheSolitaryDefend`, 1 × `TheSolitaryRelic` |
+| Starter deck | 4 × `Strike`, 4 × `Defend`, 1 × `TheSolitaryRelic` |
 | Assets | Configured via `CharacterAssetProfile`. The template only specifies static placeholder assets; unspecified audio, trail, transition, etc. fall back through `PlaceholderCharacterId` |
 
 ### Sample cards and relic
 
 | Type | Pool | Expected ID |
 |---|---|---|
-| `TheSolitaryStrike` (attack) | character card pool | `THE_SOLITARY_CARD_THE_SOLITARY_STRIKE` |
-| `TheSolitaryDefend` (skill) | character card pool | `THE_SOLITARY_CARD_THE_SOLITARY_DEFEND` |
+| `Strike` (attack) | character card pool | `THE_SOLITARY_CARD_STRIKE` |
+| `Defend` (skill) | character card pool | `THE_SOLITARY_CARD_DEFEND` |
 | `TheSolitaryRelic` | `TheSolitaryRelicPool` | `THE_SOLITARY_RELIC_THE_SOLITARY_RELIC` |
 
 ### Static placeholder assets
 
 **Images** (`res://TheSolitary/images/...`):
 
-- `cards/TheSolitaryStrike.png`, `cards/TheSolitaryDefend.png`: sample card art.
+- `cards/Strike.png`, `cards/Defend.png`: sample card art.
 - `relics/TheSolitaryRelic.png`: sample relic icon.
 - `characters/TheSolitary_character_*.png`: character icons, select art, map marker, and energy icons.
 

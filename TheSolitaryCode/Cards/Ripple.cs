@@ -88,10 +88,11 @@ public sealed class Ripple : ModCardTemplate
 			return;
 		}
 
-		// 随机附魔候选：手牌中未附魔的牌（参考唤醒 Sacrifice 的候选筛选）。
+		// 随机附魔候选：手牌中未附魔且能被随机附魔池作用的牌
+		// （跳过已附魔的牌与无法附魔的牌，参考唤醒 Sacrifice 的候选筛选）。
 		// OnPlay 必然处于战斗中，PlayerCombatState 一定存在。
 		List<CardModel> candidates = Owner.PlayerCombatState!.Hand.Cards
-			.Where(card => card.Enchantment == null)
+			.Where(card => card.Enchantment == null && RandomEnchantPool.CanEnchantRandomly(card))
 			.ToList();
 		if (candidates.Count == 0)
 		{

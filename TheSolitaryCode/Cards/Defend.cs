@@ -9,10 +9,10 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 防御牌和打击一样注册到角色卡池，并作为 4 张初始卡加入角色卡组。
+// 初始防御牌，和打击一样注册到角色卡池，并作为 4 张初始卡加入角色卡组。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 4)]
-public sealed class TheSolitaryDefend : ModCardTemplate
+public sealed class Defend : ModCardTemplate
 {
     // 基础耗能。
     private const int BaseEnergyCost = 1;
@@ -27,8 +27,7 @@ public sealed class TheSolitaryDefend : ModCardTemplate
 
     public override bool GainsBlock => true;
 
-    // 卡图资源。
-    // 如果你按这行代码写，文件名就对应 TheSolitary/images/cards/TheSolitaryDefend.png。
+    // 卡图资源；文件名与类名一致（TheSolitary/images/cards/Defend.png）。
     public override CardAssetProfile AssetProfile => new(
         PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
@@ -41,7 +40,7 @@ public sealed class TheSolitaryDefend : ModCardTemplate
         new BlockVar(5m, ValueProp.Move)
     ];
 
-    public TheSolitaryDefend() : base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
+    public Defend() : base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
     {
     }
 

@@ -77,10 +77,10 @@ public sealed class Resurgence : ModCardTemplate
 			await CardCmd.Exhaust(choiceContext, card);
 		}
 
-		// 3. 随机为手牌中另外 2 张牌附魔（排除被消耗的牌与已附魔的牌）。
+		// 3. 随机为手牌中另外 2 张牌附魔（排除被消耗的牌、已附魔的牌与无法附魔的牌）。
 		// OnPlay 必然处于战斗中，PlayerCombatState 一定存在。
 		List<CardModel> candidates = Owner.PlayerCombatState!.Hand.Cards
-			.Where(card => !exhausted.Contains(card) && card.Enchantment == null)
+			.Where(card => !exhausted.Contains(card) && card.Enchantment == null && RandomEnchantPool.CanEnchantRandomly(card))
 			.ToList();
 
 		for (int i = 0; i < EnchantCount && candidates.Count > 0; i++)

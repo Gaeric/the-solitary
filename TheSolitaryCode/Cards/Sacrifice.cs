@@ -12,7 +12,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 唤醒（character.org 基础卡 #2）：1 费技能。
-// 获得 8 点格挡；选择一张手牌消耗，随机为手牌中另一张牌附魔（随机附魔池见 RandomEnchantPool）。
+// 获得 5 点格挡；选择一张手牌消耗，随机为手牌中另一张牌附魔（随机附魔池见 RandomEnchantPool）。
 // 先古超脱（Transcendence）：持有远古之牙 ArchaicTooth 遗物时，会把牌组中的本牌
 // 替换为先古牌「复苏 Resurgence」（参考原版 中和 Neutralize -> 压制 Suppress）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -43,10 +43,10 @@ public sealed class Sacrifice : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：格挡 8（升级后 11），绑定 {Block:diff()} 占位符。
+	// 基础数值：格挡 5（升级后 8），绑定 {Block:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new BlockVar(8m, ValueProp.Move)
+		new BlockVar(5m, ValueProp.Move)
 	];
 
 	// 打出时：获得格挡，选择一张手牌消耗，再随机为手牌中另一张牌附魔。
@@ -72,10 +72,10 @@ public sealed class Sacrifice : ModCardTemplate
 
 		await CardCmd.Exhaust(choiceContext, exhausted);
 
-		// 3. 随机为手牌中另一张牌附魔（排除被消耗的牌与已附魔的牌）。
+		// 3. 随机为手牌中另一张牌附魔（排除被消耗的牌、已附魔的牌与无法附魔的牌）。
 		// OnPlay 必然处于战斗中，PlayerCombatState 一定存在。
 		List<CardModel> candidates = Owner.PlayerCombatState!.Hand.Cards
-			.Where(card => card != exhausted && card.Enchantment == null)
+			.Where(card => card != exhausted && card.Enchantment == null && RandomEnchantPool.CanEnchantRandomly(card))
 			.ToList();
 		if (candidates.Count == 0)
 		{
@@ -89,7 +89,7 @@ public sealed class Sacrifice : ModCardTemplate
 		}
 	}
 
-	// 升级：格挡 8 -> 11。
+	// 升级：格挡 5 -> 8。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(3m);

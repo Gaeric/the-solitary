@@ -9,11 +9,11 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// RegisterCard 会把这张牌交给 RitsuLib 自动注册。
-// RegisterCharacterStarterCard 会把它追加进 TheSolitaryCharacter 的初始卡组。
+// 初始打击牌。RegisterCard 会把这张牌交给 RitsuLib 自动注册；
+// RegisterCharacterStarterCard 会把它追加进 TheSolitaryCharacter 的初始卡组（4 张）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 4)]
-public sealed class TheSolitaryStrike : ModCardTemplate
+public sealed class Strike : ModCardTemplate
 {
     // 基础耗能。
     private const int BaseEnergyCost = 1;
@@ -26,8 +26,7 @@ public sealed class TheSolitaryStrike : ModCardTemplate
     // 是否在卡牌图鉴中显示。
     private const bool ShowInCardLibrary = true;
 
-    // 卡图资源。
-    // 如果你按这行代码写，文件名就对应 TheSolitary/images/cards/TheSolitaryStrike.png。
+    // 卡图资源；文件名与类名一致（TheSolitary/images/cards/Strike.png）。
     // 这里的 res://TheSolitary/... 是 Godot 资源路径，对应的是你的资源文件夹名字。
     public override CardAssetProfile AssetProfile => new(
         PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
@@ -41,7 +40,7 @@ public sealed class TheSolitaryStrike : ModCardTemplate
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
 
-    public TheSolitaryStrike() : base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
+    public Strike() : base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
     {
     }
 

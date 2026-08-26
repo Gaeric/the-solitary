@@ -46,6 +46,15 @@ public static class RandomEnchantPool
 	}
 
 	/// <summary>
+	/// 该牌能否被随机附魔池中至少一种附魔作用。
+	/// 供随机附魔候选筛选使用：除跳过已附魔的牌外，还要跳过状态/诅咒等无法附魔的牌。
+	/// </summary>
+	public static bool CanEnchantRandomly(CardModel card)
+	{
+		return Pool.Any(entry => entry.CanEnchant(card));
+	}
+
+	/// <summary>
 	/// 用与 CardCmd.Enchant 相同的方式检查该附魔能否作用于目标牌。
 	/// </summary>
 	private static bool CanEnchant<T>(CardModel card) where T : EnchantmentModel
