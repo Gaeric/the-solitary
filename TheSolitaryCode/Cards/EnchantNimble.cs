@@ -12,7 +12,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔灵巧（character.org 白卡 #3）：1 费攻击。
+// 游龙（原附魔灵巧，character.org 白卡 #3）：1 费攻击。
 // 造成 6 点伤害，为手牌中一张牌附魔灵巧（Nimble：此牌获得的格挡+X）3。
 // 只有能被灵巧附魔的牌（能获得格挡的牌）才能被选择；手牌中没有可用牌时跳过附魔。
 [RegisterCard(typeof(TheSolitaryCardPool))]

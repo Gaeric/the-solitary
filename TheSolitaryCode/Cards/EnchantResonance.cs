@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔共鸣（character.org 蓝卡 #27）：1 费能力牌。
+// 共鸣（原附魔共鸣，character.org 蓝卡 #27）：1 费能力牌。
 // 每当你获得附魔时，获得 3 点活力（升级后 4 点；活力=下次攻击伤害+X）。
 // 触发实现见 EnchantResonancePatch（CardCmd.Enchant 补丁）＋ EnchantResonancePower。
 [RegisterCard(typeof(TheSolitaryCardPool))]

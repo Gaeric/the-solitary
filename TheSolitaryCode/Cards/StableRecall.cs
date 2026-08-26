@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 稳定召回（character.org 蓝卡 #7）：1 费技能。
+// 召回（原稳定召回，character.org 蓝卡 #7）：1 费技能。
 // 获得 5 点格挡；从弃牌堆选择一张牌加入手牌，并附魔稳定（Steady：该牌获得保留）。消耗。
 // 实现参考原版全息影像 Hologram（从弃牌堆回收一张牌）＋ 稳定附魔 Steady
 // （附魔机制，施加方式参考沉没抄本 WaterloggedScriptorium 的 CardCmd.Enchant<Steady>）。

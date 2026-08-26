@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔华彩（character.org 金卡 #2）：0 费技能，保留。
+// 光谱 Spectrum（原附魔华彩，character.org 金卡 #2）：0 费技能，保留、消耗。
 // 获得 10 点格挡；选择抽牌堆中两张牌附魔华彩（Glam：每场战斗第一次打出时额外打出一次）。升级后固有。
 // 选牌附魔套路参考魂回之环 RingOfSoulReturn（FromCombatPile 从抽牌堆选牌）＋ 余烬庇护 EmberShelter（悬停提示）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -48,8 +48,8 @@ public sealed class EnchantGlam : ModCardTemplate
 		new BlockVar(10m, ValueProp.Move)
 	];
 
-	// 保留关键字（本回合未打出的情况下保留在手牌）。
-	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Retain];
+	// 保留关键字（本回合未打出的情况下保留在手牌）；打出后消耗（升级前后均消耗）。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Retain, CardKeyword.Exhaust];
 
 	// 悬停提示：华彩附魔（Glam：每场战斗第一次打出时额外打出一次）。
 	// 注意：HoverTipFactory.FromEnchantment<T>() 本身返回 IEnumerable<IHoverTip>，不能再用集合表达式包一层。
