@@ -12,8 +12,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 乘虚而入（character.org 蓝卡 #32，英文名 Dropkick）：1 费攻击。
-// 造成 5 点伤害；若目标有减益，获得 1 点能量并抽 1 张牌（升级后伤害 +3）。
-// 机制参考原版 MoltenFist / 本模组腐蚀之拳：枚举目标 Powers 判断减益类型。
+// 造成 5 点伤害；若目标有负面效果，获得 1 点能量并抽 1 张牌（升级后伤害 +3）。
+// 机制参考原版 MoltenFist / 本模组腐蚀之拳：枚举目标 Powers 判断负面效果类型。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Dropkick : ModCardTemplate
 {
@@ -45,12 +45,12 @@ public sealed class Dropkick : ModCardTemplate
 		new CardsVar(1)
 	];
 
-	// 打出时：先判定目标是否带减益（造成伤害前快照，避免敌人被击杀后无法判断），再造成伤害；带减益则获得能量并抽牌。
+	// 打出时：先判定目标是否带负面效果（造成伤害前快照，避免敌人被击杀后无法判断），再造成伤害；带负面效果则获得能量并抽牌。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
 
-		bool hasDebuff = cardPlay.Target.Powers.Any(p => p.Type == PowerType.Debuff);
+		bool hasDebuff = cardPlay.Target.Powers.Any(p => p.TypeForCurrentAmount == PowerType.Debuff);
 
 		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
 			.FromCard(this, cardPlay)

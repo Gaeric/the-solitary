@@ -13,7 +13,9 @@ namespace TheSolitary.Characters;
 [RegisterCharacter]
 public sealed class TheSolitaryCharacter : ModCharacterTemplate<TheSolitaryCardPool, TheSolitaryRelicPool, TheSolitaryPotionPool>
 {
-    public static readonly Color ThemeColor = new(0.42f, 0.65f, 0.72f);
+    // 主题色（紫色 #8B5CF6）：色相约 258°，与卡框的观者紫色（h=0.715→257°）同色系。
+    // 用于角色名/地图标记/牌组条目/药水与遗物实验室描边。
+    public static readonly Color ThemeColor = new(0.545f, 0.361f, 0.965f);
 
     private const string SceneRoot = $"{Entry.ResPath}/scenes/characters";
     private const string ImageRoot = $"{Entry.ResPath}/images/characters";

@@ -15,7 +15,7 @@ namespace TheSolitary.Cards;
 
 // 透射（character.org 金卡 #8）：1 费攻击。
 // 造成 12 点伤害（升级后 16）；斩杀时，给予其他敌人该敌人身上的所有负面效果。
-// 斩杀判定用 DamageResult.WasTargetKilled；减益转移用 PowerCmd.Apply（参考衍射 Aggravate 的枚举+施加方式）。
+// 斩杀判定用 DamageResult.WasTargetKilled；负面效果转移用 PowerCmd.Apply（参考衍射 Aggravate 的枚举+施加方式）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Contagion : ModCardTemplate
 {
@@ -45,8 +45,8 @@ public sealed class Contagion : ModCardTemplate
 		new DamageVar(12m, ValueProp.Move)
 	];
 
-	// 打出时：先快照目标身上的所有减益（类型+层数），再造成伤害；
-	// 若本次攻击斩杀目标，把快照的每种减益按原层数给予其他存活敌人。
+	// 打出时：先快照目标身上的所有负面效果（类型+层数），再造成伤害；
+	// 若本次攻击斩杀目标，把快照的每种负面效果按原层数给予其他存活敌人。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);

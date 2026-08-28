@@ -11,7 +11,7 @@ namespace TheSolitary.Powers;
 
 // 万物通元的 Power（参考原版 PillarOfCreationPower / SmokestackPower 的 AfterCardGeneratedForCombat 钩子）：
 // 每当拥有者生成一张牌时，为它随机附魔（随机附魔池与唤醒一致）。
-// 注：交换附魔/元能转置直接在原卡上交换附魔（不再通过 Transform 重建卡牌），
+// 注：轮回/元能转置直接在原卡上交换附魔（不再通过 Transform 重建卡牌），
 // 不会触发生成牌钩子，因此不会对交换中的牌误附魔。
 [RegisterPower]
 public sealed class EnchantedCreationPower : ModPowerTemplate

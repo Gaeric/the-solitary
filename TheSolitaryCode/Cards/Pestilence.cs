@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 瘟疫（character.org 蓝卡 #2）：1 费攻击。
-// 目标身上每有一种减益类型，便造成 6 点伤害（按“不同的减益类型”计数，参考原版 撕裂 Rend 的 CalculatedDamageVar）。
+// 目标身上每有一种负面效果类型，便造成 6 点伤害（按“不同的负面效果类型”计数，参考原版 撕裂 Rend 的 CalculatedDamageVar）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Pestilence : ModCardTemplate
 {
@@ -37,7 +37,7 @@ public sealed class Pestilence : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：计算伤害 = 基础(0) + 每种减益类型 × ExtraDamage(6)。
+	// 基础数值：计算伤害 = 基础(0) + 每种负面效果类型 × ExtraDamage(6)。
 	// 绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()} 占位符（参考原版 Rend）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
@@ -64,15 +64,15 @@ public sealed class Pestilence : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 升级：每种减益类型造成的伤害 6 -> 9。
+	// 升级：每种负面效果类型造成的伤害 6 -> 9。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.ExtraDamage.UpgradeValueBy(3m);
 	}
 
 	/// <summary>
-	/// 计数条件：当前数值为减益的 Power；排除临时性 Power（参考原版 Rend，
-	/// 避免临时减益与内层正式减益重复计数）。
+	/// 计数条件：当前数值为负面效果的 Power；排除临时性 Power（参考原版 Rend，
+	/// 避免临时负面效果与内层正式负面效果重复计数）。
 	/// </summary>
 	private static bool ShouldCountPower(PowerModel power)
 	{

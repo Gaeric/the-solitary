@@ -35,5 +35,8 @@
   "THE_SOLITARY_POWER_ARCANE_RETURN_POWER.smartDescription": "每当你打出一张[gold]附魔[/gold]牌时，生成一张随机[gold]术式[/gold]并打出，目标为随机敌方。",
   "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.title": "元能吸附",
   "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.description": "每打出5张附魔牌，获得 {Amount:energyIcons()}。",
-  "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.smartDescription": "每打出5张附魔牌，获得 {Amount:energyIcons()}。"
+  "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.smartDescription": "每打出5张附魔牌，获得 {Amount:energyIcons()}。",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.title": "动能回收",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.description": "你下一张打出的[gold]攻击[/gold]牌获得[gold]动量[/gold]。",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.smartDescription": "你下一张打出的[gold]攻击[/gold]牌获得[gold]动量[/gold]。"
 }

@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 腐蚀之拳（character.org 白卡 #9）：1 费攻击，消耗。
-// 造成 8 点伤害；若目标有减益，则额外造成一次伤害（参考原版 怨恨 Spite 的条件命中次数模式）。
+// 造成 8 点伤害；若目标有负面效果，则额外造成一次伤害（参考原版 怨恨 Spite 的条件命中次数模式）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class CorrosiveFist : ModCardTemplate
 {
@@ -46,8 +46,8 @@ public sealed class CorrosiveFist : ModCardTemplate
 		new DamageVar(8m, ValueProp.Move)
 	];
 
-	// 打出时：先判定目标是否带减益（造成伤害前快照，避免敌人被击杀后无法判断），
-	// 若有减益则攻击 2 次（每次伤害 = Damage），否则攻击 1 次（参考原版 怨恨 Spite 的条件命中次数模式）。
+	// 打出时：先判定目标是否带负面效果（造成伤害前快照，避免敌人被击杀后无法判断），
+	// 若有负面效果则攻击 2 次（每次伤害 = Damage），否则攻击 1 次（参考原版 怨恨 Spite 的条件命中次数模式）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);

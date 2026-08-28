@@ -104,7 +104,7 @@ the-solitary/
 ├── TheSolitaryCode/          # C# 源码（Mod 逻辑）
 │   ├── Entry.cs              # Mod 入口 [ModInitializer]
 │   ├── Characters/           # TheSolitaryCharacter + 卡池/遗物池/药水池
-│   ├── Cards/                # 卡牌类（Strike/Defend/交换附魔/减益符/无尽符/撒符等）
+│   ├── Cards/                # 卡牌类（Strike/Defend/轮回/负面效果符/无尽符/撒符等）
 │   ├── Powers/               # Power 类（EndlessCharmPower 等）
 │   └── Relics/               # 遗物类（SwiftCircuit 等）
 ├── TheSolitary/              # Godot 资源（images / localization / scenes），非 C#

@@ -45,7 +45,7 @@ public sealed class SingularityBurst : ModCardTemplate
 
 	// 基础数值：
 	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗生成的术式数量（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
-	// 命中次数 = 基础 1 次 + 目标身上的减益类型数（绑定 {CalculatedHits:diff()}）。
+	// 命中次数 = 基础 1 次 + 目标身上的负面效果类型数（绑定 {CalculatedHits:diff()}）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new CalculationBaseVar(0m),
@@ -79,7 +79,7 @@ public sealed class SingularityBurst : ModCardTemplate
 	}
 
 	/// <summary>
-	/// 统计目标身上不同的减益类型数（与瘟疫 Pestilence 相同的计数方式，参考原版 Rend）。
+	/// 统计目标身上不同的负面效果类型数（与瘟疫 Pestilence 相同的计数方式，参考原版 Rend）。
 	/// </summary>
 	private static int CountDistinctDebuffTypes(Creature? target)
 	{

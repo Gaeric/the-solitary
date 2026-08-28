@@ -12,7 +12,7 @@ namespace TheSolitary.Powers;
 // 元能转置的 Power（AfterPlayerTurnStart 回合开始钩子）：
 // 每回合开始抽牌后（AfterPlayerTurnStart）交换手牌中两张牌的附魔。
 // 注意不能用 BeforeHandDraw（抽牌前手牌为空），否则“手牌不足两张”会永远成立、效果从不触发。
-// 交换逻辑复用 EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards（与交换附魔技能共用）。
+// 交换逻辑复用 EnchantHelpers.SwapEnchantmentsBetweenTwoHandCards（与轮回技能共用）。
 [RegisterPower]
 public sealed class TranspositionPower : ModPowerTemplate
 {

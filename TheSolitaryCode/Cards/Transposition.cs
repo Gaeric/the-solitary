@@ -9,7 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 元能转置（character.org 蓝卡 #26）：1 费能力牌，升级后 0 费。
-// 每回合开始时交换手牌中两张牌的附魔（技能效果参考交换附魔 SwapEnchantments）。
+// 每回合开始时交换手牌中两张牌的附魔（技能效果参考轮回 SwapEnchantments）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Transposition : ModCardTemplate
 {

@@ -35,5 +35,8 @@
   "THE_SOLITARY_POWER_ARCANE_RETURN_POWER.smartDescription": "Whenever you play an [gold]Enchanted[/gold] card, create a random [gold]Art[/gold] and play it at a random enemy.",
   "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.title": "Energy Absorption",
   "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.description": "Every 5 [gold]Enchanted[/gold] cards you play, gain {Amount:energyIcons()}.",
-  "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.smartDescription": "Every 5 [gold]Enchanted[/gold] cards you play, gain {Amount:energyIcons()}."
+  "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.smartDescription": "Every 5 [gold]Enchanted[/gold] cards you play, gain {Amount:energyIcons()}.",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.title": "Kinetic Recovery",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.description": "Your next [gold]Attack[/gold] card gains [gold]Momentum[/gold].",
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.smartDescription": "Your next [gold]Attack[/gold] card gains [gold]Momentum[/gold]."
 }
