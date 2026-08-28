@@ -187,5 +187,8 @@
   "THE_SOLITARY_CARD_MEDITATION.smartDescription": "将你的[gold]弃牌堆[/gold]洗牌后放入你的[gold]抽牌堆[/gold]。\n抽{Cards:diff()}张牌。",
   "THE_SOLITARY_CARD_SCATTER.title": "散射",
   "THE_SOLITARY_CARD_SCATTER.description": "获得{Block:diff()}点[gold]格挡[/gold]X次。",
-  "THE_SOLITARY_CARD_SCATTER.smartDescription": "获得{Block:diff()}点[gold]格挡[/gold]X次。"
+  "THE_SOLITARY_CARD_SCATTER.smartDescription": "获得{Block:diff()}点[gold]格挡[/gold]X次。",
+  "THE_SOLITARY_CARD_PATH_TRACING.title": "路径追踪",
+  "THE_SOLITARY_CARD_PATH_TRACING.description": "在这个回合内每打出过一张[gold]技能[/gold]牌，打出一张随机[gold]术式[/gold]{IfUpgraded:show:+|}。",
+  "THE_SOLITARY_CARD_PATH_TRACING.smartDescription": "在这个回合内每打出过一张[gold]技能[/gold]牌，打出一张随机[gold]术式[/gold]{IfUpgraded:show:+|}。"
 }

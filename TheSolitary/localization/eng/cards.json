@@ -187,5 +187,8 @@
   "THE_SOLITARY_CARD_MEDITATION.smartDescription": "Shuffle your [gold]Discard Pile[/gold] into your [gold]Draw Pile[/gold].\nDraw {Cards:diff()} {Cards:plural:card|cards}.",
   "THE_SOLITARY_CARD_SCATTER.title": "Scatter",
   "THE_SOLITARY_CARD_SCATTER.description": "Gain {Block:diff()} [gold]Block[/gold] X times.",
-  "THE_SOLITARY_CARD_SCATTER.smartDescription": "Gain {Block:diff()} [gold]Block[/gold] X times."
+  "THE_SOLITARY_CARD_SCATTER.smartDescription": "Gain {Block:diff()} [gold]Block[/gold] X times.",
+  "THE_SOLITARY_CARD_PATH_TRACING.title": "Path Tracing",
+  "THE_SOLITARY_CARD_PATH_TRACING.description": "Play a random [gold]Art[/gold]{IfUpgraded:show:+|} for each [gold]Skill[/gold] already played this turn.",
+  "THE_SOLITARY_CARD_PATH_TRACING.smartDescription": "Play a random [gold]Art[/gold]{IfUpgraded:show:+|} for each [gold]Skill[/gold] already played this turn."
 }
