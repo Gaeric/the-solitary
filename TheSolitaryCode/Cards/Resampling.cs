@@ -39,6 +39,9 @@ public sealed class Resampling : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
+	// 关键词：消耗（升级前后均保留；自动显示在卡面，无需写进描述）。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
+
 	// 基础数值：抽牌数 2（升级后 3），绑定 {Cards:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[

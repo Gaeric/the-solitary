@@ -298,3 +298,5 @@ dotnet ...\ilspycmd.dll -t 'STS2RitsuLib.Scaffolding.Content.ModCardTemplate' 'D
 - `local.props`、`.tools/`、`*.uid`、`*.import` 都在 `.gitignore` 中，不要提交。
 - 美术资源取材自 `../WatcherBeautified`（观者美化包，GDRE 导出的 Godot 工程），详见「美术资源目录」一节。
 - 查阅游戏 API 与原版描述措辞优先参考 `../sts2_20260821`（源码 + 本地化）；旧 `.tools/sts2_decomp/` 仅为残留反编译副本。
+- **余烬附魔的降费是不可逆的**：原版 `TezcatarasEmber.OnEnchant` 用 `EnergyCost.UpgradeBy` 把基础费用永久改写成 0，而 `ClearEnchantmentInternal` 不恢复费用、`EnchantmentModel` 也没有移除钩子。本 Mod 在施加时用 Harmony 补丁（`Patches/TezcatarasEmberCostRecordPatch.cs`）把「附魔前费用」写入附魔 `Props`，`EnchantHelpers.SwapEnchantmentsBetweenTwoCards` 清除余烬后调用 `RestoreCardAfterEmberRemoved` 恢复费用 + `RemoveKeyword(CardKeyword.Eternal)`。**以后任何「移除/交换附魔」的逻辑都必须走 `EnchantHelpers` 的交换路径或复用该恢复逻辑**，不要直接 `CardCmd.ClearEnchantment`，否则 0 费/永恒会残留在原卡上。
+- **RitsuLib Harmony 补丁必须显式注册**：新增 `IPatchMethod` 类后，必须在 `Entry.Initialize()` 里 `RitsuLibFramework.CreatePatcher(...)` + `patcher.RegisterPatch<T>()` + `patcher.PatchAll()`（参考 `AfterEnchantPatch` / `TezcatarasEmberCostRecordPatch` 的注册）。不会自动发现；漏注册表现为「编译通过但补丁不生效」（启动日志里看不到对应的 `Patch application complete` 行）。

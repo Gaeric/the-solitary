@@ -1,3 +1,4 @@
+using System;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -11,8 +12,10 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 逆转（character.org todo 白卡）：1 费攻击。
-// 对所有敌人造成 9 点伤害（升级后 13 点）；每当你洗牌 1 次，本场战斗此牌耗能 +1。
-// 洗牌加费与光子映射 PhotonMapping 的洗牌减费机制相反（EnergyCost.AddThisCombat(+1)）。
+// 对所有敌人造成 9 点伤害（升级后 13 点）；每当你洗牌 1 次，在本场战斗中其基础伤害 -2。
+// 洗牌减伤参考原版 Claw / Rampage 直接改写 DynamicVar.BaseValue 的模式；
+// 战斗中的卡牌是牌组卡的克隆（DynamicVarSet 各自独立，见 CardModel 克隆逻辑），
+// 修改只作用于本场战斗的克隆，战斗结束自动失效，天然符合"本场战斗"语义。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Inversion : ModCardTemplate
 {
@@ -26,6 +29,8 @@ public sealed class Inversion : ModCardTemplate
 	private const TargetType CardTarget = TargetType.AllEnemies;
 	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
+	// 每次洗牌减少的基础伤害。
+	private const int DamageReductionPerShuffle = 2;
 
 	public Inversion()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
@@ -42,12 +47,13 @@ public sealed class Inversion : ModCardTemplate
 		new DamageVar(9m, ValueProp.Move)
 	];
 
-	// 抽牌堆被洗牌时触发：本场战斗内这张牌耗能 +1（多次洗牌可叠加）。
+	// 抽牌堆被洗牌时触发：本场战斗内这张牌的基础伤害 -2（多次洗牌可叠加，战斗结束自动失效）。
 	public override Task AfterShuffle(PlayerChoiceContext choiceContext, Player shuffler)
 	{
 		if (shuffler == Owner)
 		{
-			EnergyCost.AddThisCombat(1);
+			DynamicVars.Damage.BaseValue =
+				Math.Max(0m, DynamicVars.Damage.BaseValue - DamageReductionPerShuffle);
 		}
 		return Task.CompletedTask;
 	}

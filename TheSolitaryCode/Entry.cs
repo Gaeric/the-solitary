@@ -41,6 +41,13 @@ public partial class Entry
         patcher.RegisterPatch<AfterEnchantPatch>();
         patcher.PatchAll();
 
+        // 余烬附魔降费记录：原版 TezcatarasEmber.OnEnchant 用 EnergyCost.UpgradeBy 把基础费用
+        // 永久改写成 0、清除附魔不会还原（无 OnUnenchant 钩子）。该补丁在施加时把"附魔前费用"
+        // 写入附魔 Props，供 EnchantHelpers 在清除/交换余烬时恢复（修复移除余烬后费用不回到原值）。
+        var emberCostPatcher = RitsuLibFramework.CreatePatcher(ModId, "tezcataras-ember-cost-record", "Tezcataras Ember Cost Record", LogType.Generic);
+        emberCostPatcher.RegisterPatch<TezcatarasEmberCostRecordPatch>();
+        emberCostPatcher.PatchAll();
+
         Logger.Info("TheSolitary initialized.");
     }
 }

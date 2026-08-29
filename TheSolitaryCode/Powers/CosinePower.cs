@@ -21,6 +21,11 @@ public sealed class CosinePower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 生成钩子：只处理拥有者自己生成的术式，为其发放格挡。
 	public override async Task AfterCardGeneratedForCombat(CardModel card, Player? creator)
 	{

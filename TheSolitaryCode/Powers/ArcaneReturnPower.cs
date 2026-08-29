@@ -34,6 +34,11 @@ public sealed class ArcaneReturnPower : ModPowerTemplate
 	// 计数的层数型：叠多层时，每次附魔牌打出会生成并打出多张术式（参考能元妙术按 Amount 循环）。
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 施加时捕获来源卡，用于判断生成普通术式还是术式+。
 	public override Task AfterApplied(Creature? applier, CardModel? cardSource)
 	{

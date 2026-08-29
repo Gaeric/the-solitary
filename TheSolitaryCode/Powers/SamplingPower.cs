@@ -20,6 +20,11 @@ public sealed class SamplingPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 战斗内计算打出次数时：拥有者打出的附魔牌打出次数 +1（参考复制 DuplicationPower.ModifyCardPlayCount）。
 	public override int ModifyCardPlayCount(CardModel card, Creature? target, int playCount)
 	{

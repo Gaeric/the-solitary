@@ -24,6 +24,11 @@ public sealed class KineticRecoveryPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 悬停提示：展示动量附魔的机制（每次打出该攻击牌，攻击伤害永久 +MomentumAmount）。
 	protected override IEnumerable<IHoverTip> AdditionalHoverTips =>
 		HoverTipFactory.FromEnchantment<Momentum>(MomentumAmount);

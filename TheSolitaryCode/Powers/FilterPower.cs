@@ -38,6 +38,11 @@ public sealed class FilterPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 每当拥有者打出一张附魔牌时触发（参考元能吸附 EnergyAbsorptionPower 的归属与附魔判定）。
 	public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{

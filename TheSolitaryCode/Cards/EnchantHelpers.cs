@@ -10,9 +10,12 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Enchantments;
+using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
+using TheSolitary.Patches;
 
 namespace TheSolitary.Cards;
 
@@ -192,9 +195,25 @@ public static class EnchantHelpers
 		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
 		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
 
+		// 余烬（特兹卡塔拉的余烬）的降费是永久改写基础费用（EnergyCost.UpgradeBy → SetCustomBaseCost(0)），
+		// 清除附魔不会自动还原；若被清除的是余烬，先记下其附魔前费用，清除后再恢复。
+		bool firstHadEmber = TryGetEmberOriginalCost(first.Enchantment, out int firstEmberCost);
+		bool secondHadEmber = TryGetEmberOriginalCost(second.Enchantment, out int secondEmberCost);
+
 		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）。
 		CardCmd.ClearEnchantment(first);
 		CardCmd.ClearEnchantment(second);
+
+		// 手动恢复被移除的余烬留下的费用/永恒（RemoveKeyword 只作用于 LocalKeywords，
+		// 恰好撤销余烬自身的 AddKeyword(Eternal)，不会误伤卡牌自带的永恒）。
+		if (firstHadEmber)
+		{
+			RestoreCardAfterEmberRemoved(first, firstEmberCost);
+		}
+		if (secondHadEmber)
+		{
+			RestoreCardAfterEmberRemoved(second, secondEmberCost);
+		}
 
 		// 无条件施加交换后的附魔（与游戏加载时重新施加附魔一致，绕过 CanEnchant）。
 		// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
@@ -208,6 +227,42 @@ public static class EnchantHelpers
 			ApplyEnchantment(second, firstEnchantment);
 			PlayEnchantVfx(second);
 		}
+	}
+
+	/// <summary>
+	/// 读取余烬附魔记录下的"附魔前费用"（由 TezcatarasEmberCostRecordPatch 在施加时写入 Props）。
+	/// 只有被清除的是余烬且记录存在时才返回 true，否则不恢复（保持旧行为）。
+	/// </summary>
+	private static bool TryGetEmberOriginalCost(EnchantmentModel? enchantment, out int originalCost)
+	{
+		originalCost = -1;
+		if (enchantment is not TezcatarasEmber || enchantment.Props?.ints == null)
+		{
+			return false;
+		}
+		foreach (SavedProperties.SavedProperty<int> prop in enchantment.Props.ints)
+		{
+			if (prop.name == TezcatarasEmberCostRecordPatch.OriginalCostPropName)
+			{
+				originalCost = prop.value;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// 余烬被移除后恢复卡牌：把基础费用还原为附魔前的值，并移除余烬加上的永恒关键词。
+	/// RemoveKeyword 只作用于 LocalKeywords，恰好撤销余烬自身的 AddKeyword(Eternal)，
+	/// 不会误伤卡牌自带的永恒（如诅咒牌的 CanonicalKeywords）。
+	/// </summary>
+	private static void RestoreCardAfterEmberRemoved(CardModel card, int originalCost)
+	{
+		if (originalCost >= 0)
+		{
+			card.EnergyCost.SetCustomBaseCost(originalCost);
+		}
+		card.RemoveKeyword(CardKeyword.Eternal);
 	}
 
 	/// <summary>

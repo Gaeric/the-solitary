@@ -14,6 +14,11 @@ public sealed class ArtTrackerPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 不显示在状态栏/战斗日志中。
 	protected override bool IsVisibleInternal => false;
 }

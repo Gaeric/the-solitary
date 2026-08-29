@@ -1,5 +1,4 @@
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -14,8 +13,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 透射（character.org 金卡 #8）：1 费攻击。
-// 造成 12 点伤害（升级后 16）；斩杀时，给予其他敌人该敌人身上的所有负面效果。
-// 斩杀判定用 DamageResult.WasTargetKilled；负面效果转移用 PowerCmd.Apply（参考衍射 Aggravate 的枚举+施加方式）。
+// 造成 12 点伤害（升级后 16）；给予其他敌人该敌人身上的所有负面效果（不要求斩杀）。
+// 负面效果快照+转移用 PowerCmd.Apply（参考衍射 Aggravate 的枚举+施加方式）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Contagion : ModCardTemplate
 {
@@ -46,7 +45,7 @@ public sealed class Contagion : ModCardTemplate
 	];
 
 	// 打出时：先快照目标身上的所有负面效果（类型+层数），再造成伤害；
-	// 若本次攻击斩杀目标，把快照的每种负面效果按原层数给予其他存活敌人。
+	// 随后把快照的每种负面效果按原层数给予其他存活敌人（不要求斩杀目标）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -57,14 +56,13 @@ public sealed class Contagion : ModCardTemplate
 			.Select(p => (p.GetType(), p.Amount))
 			.ToList();
 
-		AttackCommand attack = await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
 			.FromCard(this, cardPlay)
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
 
-		// 仅本次攻击击杀目标时转移（WasTargetKilled 精确标记本次伤害是否致死）。
-		bool wasKilled = attack.Results.SelectMany(hit => hit).Any(r => r.WasTargetKilled);
-		if (!wasKilled || debuffs.Count == 0)
+		// 目标没有负面效果时无需转移。
+		if (debuffs.Count == 0)
 		{
 			return;
 		}

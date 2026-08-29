@@ -18,6 +18,11 @@ public sealed class DetourPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 战斗内计算耗能时：拥有者手牌/打出区的附魔牌耗能改为 0。
 	// 与原版 FreeSkillPower 完全同款，仅把“Skill 类型”判定换成“有附魔”判定。
 	public override bool TryModifyEnergyCostInCombatLate(CardModel card, decimal originalCost, out decimal modifiedCost)

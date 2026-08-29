@@ -38,6 +38,11 @@ public sealed class EnchantedCreationPower : ModPowerTemplate
 	// 因此不显示层数（原版 Barricade / Corruption 同款 PowerStackType.Single）。
 	public override PowerStackType StackType => PowerStackType.Single;
 
+	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
+	public override PowerAssetProfile AssetProfile => new(
+		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
+		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
+
 	// 只处理自己生成的牌；已附魔的牌与递归中的生成跳过。
 	public override Task AfterCardGeneratedForCombat(CardModel card, Player? creator)
 	{

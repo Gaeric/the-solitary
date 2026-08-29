@@ -39,7 +39,6 @@
   "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.title": "Kinetic Recovery",
   "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.description": "Your next [gold]Attack[/gold] card gains [gold]Momentum[/gold].",
   "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.smartDescription": "Your next [gold]Attack[/gold] card gains [gold]Momentum[/gold].",
-
   "THE_SOLITARY_POWER_RASTER_POWER.title": "Raster",
   "THE_SOLITARY_POWER_RASTER_POWER.description": "Whenever you play an [gold]Enchanted[/gold] card, gain [blue]{Amount}[/blue] [gold]Block[/gold].",
   "THE_SOLITARY_POWER_RASTER_POWER.smartDescription": "Whenever you play an [gold]Enchanted[/gold] card, gain [blue]{Amount}[/blue] [gold]Block[/gold].",
@@ -51,6 +50,14 @@
   "THE_SOLITARY_POWER_COSINE_POWER.smartDescription": "Whenever you create an [gold]Art[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold].",
   "THE_SOLITARY_POWER_SAMPLING_POWER.title": "Sampling",
   "THE_SOLITARY_POWER_SAMPLING_POWER.description": "The next [gold]Enchanted[/gold] card you play is played twice.",
-  "THE_SOLITARY_POWER_SAMPLING_POWER.smartDescription": "The next {Amount:plural:[gold]Enchanted[/gold] card|[blue]{}[/blue] [gold]Enchanted[/gold] cards} you play {Amount:plural:is|are} played twice."
-
+  "THE_SOLITARY_POWER_SAMPLING_POWER.smartDescription": "The next {Amount:plural:[gold]Enchanted[/gold] card|[blue]{}[/blue] [gold]Enchanted[/gold] cards} you play {Amount:plural:is|are} played twice.",
+  "THE_SOLITARY_POWER_IRRADIATION_POWER.title": "Irradiation",
+  "THE_SOLITARY_POWER_IRRADIATION_POWER.description": "Whenever you play an [gold]Enchanted[/gold] card, deal [blue]{Amount}[/blue] damage to ALL characters.",
+  "THE_SOLITARY_POWER_IRRADIATION_POWER.smartDescription": "Whenever you play an [gold]Enchanted[/gold] card, deal [blue]{Amount}[/blue] damage to ALL characters.",
+  "THE_SOLITARY_POWER_FOCUS_POWER.title": "Focus",
+  "THE_SOLITARY_POWER_FOCUS_POWER.description": "Enemies take [blue]{Amount}%[/blue] more damage from all sources for each [gold]negative effect[/gold] they have.",
+  "THE_SOLITARY_POWER_FOCUS_POWER.smartDescription": "Enemies take [blue]{Amount}%[/blue] more damage from all sources for each [gold]negative effect[/gold] they have.",
+  "THE_SOLITARY_POWER_OSCILLATION_POWER.title": "Oscillation",
+  "THE_SOLITARY_POWER_OSCILLATION_POWER.description": "This turn, for each [gold]negative effect[/gold] enemies have, reduce damage you take by [blue]10%[/blue].",
+  "THE_SOLITARY_POWER_OSCILLATION_POWER.smartDescription": "This turn, for each [gold]negative effect[/gold] enemies have, reduce damage you take by [blue]10%[/blue]."
 }

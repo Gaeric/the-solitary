@@ -9,8 +9,8 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 斗转星移（原环回形态，character.org 金卡 #5）：3 费能力牌。
-// 每洗牌 2 次获得 1 点能量（升级后每次结算获得 2 点能量，费用保持 3）。
+// 斗转星移（原环回形态，character.org 金卡 #5）：2 费能力牌。
+// 每洗牌 2 次获得 1 点能量（升级后每次结算获得 2 点能量，费用保持 2）。
 // 实现参考计策（Stratagem）：能力牌打出后给自己施加 Power，
 // 通过 Power 的 AfterShuffle 钩子响应“抽牌堆被打乱洗牌”事件（CardPileCmd 洗牌后触发），
 // Power 内部累计洗牌次数，每累计 2 次结算一次能量。
@@ -18,7 +18,7 @@ namespace TheSolitary.Cards;
 public sealed class LoopForm : ModCardTemplate
 {
 	// 基础耗能。
-	private const int BaseEnergyCost = 3;
+	private const int BaseEnergyCost = 2;
 	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
 	// 卡牌稀有度（金卡 = Rare）。
@@ -49,7 +49,7 @@ public sealed class LoopForm : ModCardTemplate
 		await PowerCmd.Apply<LoopFormPower>(choiceContext, Owner.Creature, DynamicVars.Energy.BaseValue, Owner.Creature, this);
 	}
 
-	// 升级：每次结算获得的能量 1 -> 2（费用保持 3，洗牌阈值固定 2）。
+	// 升级：每次结算获得的能量 1 -> 2（费用保持 2，洗牌阈值固定 2）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Energy.UpgradeValueBy(1);
