@@ -10,12 +10,9 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 重采样（character.org 金卡 #5）：0 费技能。
-// 抽 2 张牌（升级后抽 3 张）；将当前手牌中所有附魔牌的耗能降为 0（本场战斗）。
-// “当前手牌”在施放时快照：只有此刻在手牌中的附魔牌享受 0 费，
-// 之后才抽到/进入手牌的附魔牌不受影响。
-// 实现参考原版 开悟 Enlightenment 的手牌降费机制：升级版 Enlightenment+
-// 用 card.EnergyCost.SetThisCombat(1, reduceOnly: true) 对当前手牌统一降费，
-// 本卡改为对所有附魔牌 SetThisCombat(0, reduceOnly: true)。
+// 抽 2 张牌（升级后抽 3 张）；你手牌中的所有附魔牌在本回合免费打出。
+// 实现参考原版 子弹时间 BulletTime：用卡牌级 SetToFreeThisTurn()
+// 同时归零能量费与星费，并跳过 X 费用牌。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Resampling : ModCardTemplate
 {
@@ -48,19 +45,23 @@ public sealed class Resampling : ModCardTemplate
 		new CardsVar(2)
 	];
 
-	// 打出时：先抽牌，再对当前手牌中所有附魔牌本场战斗降费为 0。
+	// 打出时：先抽牌，再让当前手牌中所有附魔牌在本回合免费打出。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 
-		// 1. 抽牌（新抽到的附魔牌此时也在手牌中，一并计入“当前手牌”快照）。
+		// 1. 抽牌（新抽到的附魔牌此时也在手牌中，一并享受本回合免费打出）。
 		await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
 
-		// 2. 对当前手牌中所有附魔牌降费为 0（本场战斗永久；reduceOnly 保证只降不升，
-		//    参考原版 开悟 Enlightenment+ 的 SetThisCombat）。
+		// 2. 让当前手牌中所有附魔牌在本回合免费打出。
+		//    参考原版 子弹时间 BulletTime：用卡牌级 SetToFreeThisTurn()
+		//    （能量费与星费都归零），并跳过 X 费用牌避免破坏其 X 机制。
 		foreach (CardModel card in PileType.Hand.GetPile(Owner).Cards.Where(c => c.Enchantment != null))
 		{
-			card.EnergyCost.SetThisCombat(0, reduceOnly: true);
+			if (!card.EnergyCost.CostsX)
+			{
+				card.SetToFreeThisTurn();
+			}
 		}
 	}
 
