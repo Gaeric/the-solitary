@@ -127,9 +127,60 @@ public static class EnchantHelpers
 			return;
 		}
 
-		CardModel first = selection[0];
-		CardModel second = selection[1];
+		// 直接在两牌原实例上交换附魔（先快照为全新实例，再清除并无条件施加），
+		// 使交换后的附魔「重新充能」。
+		SwapEnchantmentsBetweenTwoCards(selection[0], selection[1]);
+	}
 
+	/// <summary>
+	/// 将一张指定牌（例如正在打出的卡牌本身）与手牌中一张牌交换附魔（白卡 拟合 的交换逻辑）。
+	/// 指定牌与手牌都没有附魔时跳过选择过程；取消选择则无事发生。
+	/// 交换逻辑与两牌交换完全一致：先快照为全新实例（Status 复位、一次性标记清除），
+	/// 清除原附魔后无条件施加另一张的附魔，使交换后的附魔「重新充能」。
+	/// </summary>
+	/// <param name="choiceContext">选择上下文。</param>
+	/// <param name="player">玩家。</param>
+	/// <param name="thisCard">参与交换的指定牌（一般为当前打出的卡牌实例）。</param>
+	/// <param name="prefs">选择偏好（数量固定 1）。</param>
+	/// <param name="source">效果来源（用于选择界面）。</param>
+	public static async Task SwapEnchantmentWithHandCard(
+		PlayerChoiceContext choiceContext,
+		Player player,
+		CardModel thisCard,
+		CardSelectorPrefs prefs,
+		AbstractModel source)
+	{
+		// 本卡与手牌都没有附魔时，交换没有意义，直接跳过选择过程。
+		if (thisCard.Enchantment == null && player.PlayerCombatState!.Hand.Cards.All(card => card.Enchantment == null))
+		{
+			return;
+		}
+
+		CardModel? picked = (await CardSelectCmd.FromHand(
+			prefs: prefs,
+			context: choiceContext,
+			player: player,
+			filter: null,
+			source: source)).FirstOrDefault();
+
+		// 取消选择则无事发生。
+		if (picked == null)
+		{
+			return;
+		}
+
+		SwapEnchantmentsBetweenTwoCards(thisCard, picked);
+	}
+
+	/// <summary>
+	/// 直接在两牌原实例上交换附魔（先快照为全新实例，再清除并无条件施加，不重建卡牌）：
+	/// 附魔对卡牌数值的贡献是钩子式的（EnchantXAdditive / 自带 DynamicVars），清除后自动失效，
+	/// 无需 CardCmd.Transform 重建——重建会丢失卡牌自身的本场战斗状态（如掌中奇术的减费），
+	/// 也不会再触发生成牌钩子，因此附魔造物不会误触发。
+	/// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
+	/// </summary>
+	private static void SwapEnchantmentsBetweenTwoCards(CardModel first, CardModel second)
+	{
 		// 两张被选牌都没有附魔时，交换没有意义，跳过后续所有过程。
 		if (first.Enchantment == null && second.Enchantment == null)
 		{
@@ -141,10 +192,7 @@ public static class EnchantHelpers
 		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
 		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
 
-		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）：
-		// 附魔对卡牌数值的贡献是钩子式的（EnchantXAdditive / 自带 DynamicVars），清除后自动失效，
-		// 无需 CardCmd.Transform 重建——重建会丢失卡牌自身的本场战斗状态（如掌中奇术的减费），
-		// 也不会再触发生成牌钩子，因此附魔造物不会误触发。
+		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）。
 		CardCmd.ClearEnchantment(first);
 		CardCmd.ClearEnchantment(second);
 

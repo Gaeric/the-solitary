@@ -38,5 +38,19 @@
   "THE_SOLITARY_POWER_ENERGY_ABSORPTION_POWER.smartDescription": "每打出5张附魔牌，获得 {Amount:energyIcons()}。",
   "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.title": "动能回收",
   "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.description": "你下一张打出的[gold]攻击[/gold]牌获得[gold]动量[/gold]。",
-  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.smartDescription": "你下一张打出的[gold]攻击[/gold]牌获得[gold]动量[/gold]。"
+  "THE_SOLITARY_POWER_KINETIC_RECOVERY_POWER.smartDescription": "你下一张打出的[gold]攻击[/gold]牌获得[gold]动量[/gold]。",
+
+  "THE_SOLITARY_POWER_RASTER_POWER.title": "光栅",
+  "THE_SOLITARY_POWER_RASTER_POWER.description": "每当你打出一张[gold]附魔[/gold]牌，获得 [blue]{Amount}[/blue] 点[gold]格挡[/gold]。",
+  "THE_SOLITARY_POWER_RASTER_POWER.smartDescription": "每当你打出一张[gold]附魔[/gold]牌，获得 [blue]{Amount}[/blue] 点[gold]格挡[/gold]。",
+  "THE_SOLITARY_POWER_FILTER_POWER.title": "滤波",
+  "THE_SOLITARY_POWER_FILTER_POWER.description": "每当你打出3张[gold]附魔[/gold]牌，额外抽[blue]1[/blue]张牌。",
+  "THE_SOLITARY_POWER_FILTER_POWER.smartDescription": "每当你打出3张[gold]附魔[/gold]牌，额外抽[blue]1[/blue]张牌。",
+  "THE_SOLITARY_POWER_COSINE_POWER.title": "余弦",
+  "THE_SOLITARY_POWER_COSINE_POWER.description": "每当你生成一张[gold]术式[/gold]时，获得 [blue]{Amount}[/blue] 点[gold]格挡[/gold]。",
+  "THE_SOLITARY_POWER_COSINE_POWER.smartDescription": "每当你生成一张[gold]术式[/gold]时，获得 [blue]{Amount}[/blue] 点[gold]格挡[/gold]。",
+  "THE_SOLITARY_POWER_SAMPLING_POWER.title": "抽样",
+  "THE_SOLITARY_POWER_SAMPLING_POWER.description": "你打出的下一张[gold]附魔[/gold]牌被打出两次。",
+  "THE_SOLITARY_POWER_SAMPLING_POWER.smartDescription": "你打出的下{Amount:plural:一张|{}张}[gold]附魔[/gold]牌被打出两次。"
+
 }

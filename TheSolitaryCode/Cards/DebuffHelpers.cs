@@ -53,6 +53,31 @@ public static class DebuffHelpers
 	}
 
 	/// <summary>
+	/// 统计一个角色身上的负面效果类型数量（按 Power 的运行时类型去重）。
+	/// 判定与原版 Rend / 瘟疫 Pestilence 一致：<see cref="PowerModel.TypeForCurrentAmount"/> 为
+	/// <see cref="PowerType.Debuff"/> 的 Power，并排除临时性 Power（<see cref="ITemporaryPower"/>，
+	/// 避免临时负面效果与内层正式负面效果重复计数）。
+	/// </summary>
+	/// <param name="creature">要统计的角色。</param>
+	/// <returns>负面效果类型的数量。</returns>
+	public static int CountDebuffTypes(Creature creature)
+	{
+		return creature.Powers
+			.Where(IsCountableDebuff)
+			.Select(p => p.Id)
+			.Distinct()
+			.Count();
+	}
+
+	/// <summary>
+	/// 判定一个 Power 是否计入负面效果类型统计（参考瘟疫 Pestilence.ShouldCountPower）。
+	/// </summary>
+	private static bool IsCountableDebuff(PowerModel power)
+	{
+		return power.TypeForCurrentAmount == PowerType.Debuff && power is not ITemporaryPower;
+	}
+
+	/// <summary>
 	/// 判定一个 Power 当前是否为负面效果。
 	/// </summary>
 	private static bool IsDebuff(PowerModel power)
