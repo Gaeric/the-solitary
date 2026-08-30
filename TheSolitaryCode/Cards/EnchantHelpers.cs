@@ -20,7 +20,7 @@ using TheSolitary.Patches;
 namespace TheSolitary.Cards;
 
 // 共享工具：按附魔牌数量缩放效果的卡牌公用逻辑。
-// 供附魔风暴 EnchantStorm、共轭 Conjugate 等卡牌复用，避免两处统计逻辑漂移。
+// 供风暴 EnchantStorm、共轭 Conjugate 等卡牌复用，避免两处统计逻辑漂移。
 public static class EnchantHelpers
 {
 	/// <summary>
@@ -30,13 +30,23 @@ public static class EnchantHelpers
 	/// </summary>
 	public static IEnumerable<CardModel> GetAllCombatPileCards(Player player)
 	{
+		// 战斗牌堆（手牌/抽牌堆/弃牌堆/消耗堆/打出堆）只存在于战斗期间：
+		// 非战斗时 CardPile.Get 返回 null，而 PileType.GetPile 会直接抛
+		// "Tried to get X pile while out of combat."。
+		// 牌库界面等非战斗预览（共轭 Conjugate / 风暴 EnchantStorm 的预览动态变量）
+		// 也会调用本方法，因此必须跳过 null 牌堆——战斗外安全返回空集合（张数计为 0）。
 		foreach (PileType pileType in Enum.GetValues<PileType>())
 		{
 			if (!pileType.IsCombatPile())
 			{
 				continue;
 			}
-			foreach (CardModel card in pileType.GetPile(player).Cards)
+			CardPile? pile = CardPile.Get(pileType, player);
+			if (pile == null)
+			{
+				continue;
+			}
+			foreach (CardModel card in pile.Cards)
 			{
 				yield return card;
 			}
@@ -47,6 +57,7 @@ public static class EnchantHelpers
 	/// 统计当前所有牌堆中的附魔牌数量（参考灰烬打击 AshenStrike 用 PileType.GetPile 访问牌堆的方式）。
 	/// 当前所有牌堆 = 手牌 / 抽牌堆 / 弃牌堆 / 消耗堆 / 打出堆。
 	/// 战斗中运行牌组 Deck 的牌会以克隆形式存在于上述牌堆中，因此不额外统计 Deck，避免重复计数。
+	/// 战斗外（牌库界面等）不存在战斗牌堆，返回 0。
 	/// </summary>
 	public static int CountEnchantedCardsInAllPiles(Player player)
 	{

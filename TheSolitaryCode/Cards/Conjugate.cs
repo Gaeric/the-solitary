@@ -13,7 +13,7 @@ namespace TheSolitary.Cards;
 // 你每有一张附魔牌，获得 2 点格挡（升级后每张 3 点）。
 // 注意：每张附魔牌逐次获得格挡，敏捷/灵巧作用于每张的 2/3 上（而非最终总数），
 // 战斗内预览由 PerCardCalculatedBlockVar 保证与实际行为一致。
-// 附魔牌数量统计与附魔风暴 EnchantStorm 共用 EnchantHelpers，避免两处逻辑漂移。
+// 附魔牌数量统计与风暴 EnchantStorm 共用 EnchantHelpers，避免两处逻辑漂移。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Conjugate : ModCardTemplate
 {

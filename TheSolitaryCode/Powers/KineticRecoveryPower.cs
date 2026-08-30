@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
@@ -11,9 +12,11 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Powers;
 
 // 动能回收（Kinetic Recovery，character.org 蓝卡 #15）效果的 Power：
-// 拥有者打出的下一张攻击牌获得动量（Momentum）附魔。
+// 拥有者打出的下一张（可附魔的）攻击牌获得动量（Momentum）附魔。
 // 参考迂回 DetourPower 的「下一张牌」触发模式：BeforeCardPlayed 命中后施加效果，
 // 再 PowerCmd.Decrement 扣 1，扣完自动移除。
+// 注意：若该攻击牌本身已带有其他附魔而无法再附魔动量，则跳过本次、不消耗层数，
+// 等待下一张可附魔的攻击牌再施加（CardCmd.Enchant 会因 CanEnchant 失败抛异常）。
 [RegisterPower]
 public sealed class KineticRecoveryPower : ModPowerTemplate
 {
@@ -38,6 +41,14 @@ public sealed class KineticRecoveryPower : ModPowerTemplate
 	public override async Task BeforeCardPlayed(CardPlay cardPlay)
 	{
 		if (cardPlay.Card.Owner.Creature != base.Owner || cardPlay.Card.Type != CardType.Attack)
+		{
+			return;
+		}
+
+		// 该攻击牌已带有其他附魔（或 Momentum 无法作用于它）时，跳过本次且不消耗层数，
+		// 等待下一张可附魔的攻击牌再施加。CardCmd.Enchant 内部会因 CanEnchant 失败抛异常，
+		// 必须先检查（与 Aliasing / EmberShelter / Mastery 等 CardCmd.Enchant 前的守卫一致）。
+		if (!ModelDb.Enchantment<Momentum>().ToMutable().CanEnchant(cardPlay.Card))
 		{
 			return;
 		}

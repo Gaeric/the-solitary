@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔挖掘（character.org 蓝卡 #11）：1 费攻击。
+// 挖掘（character.org 蓝卡 #11）：1 费攻击，打出后消耗。
 // 造成 6 点伤害（升级后 9 点）；抽牌直到抽到一张附魔牌。
 // 抽牌直到逻辑参考原版 劫掠 Pillage（do-while 逐张抽，附带手牌上限保护）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -35,6 +35,9 @@ public sealed class EnchantDig : ModCardTemplate
 	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantDig.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
+
+	// 打出后消耗。
+	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 基础数值：伤害 6（升级后 9），绑定 {Damage:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>

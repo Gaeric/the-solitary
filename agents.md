@@ -270,6 +270,69 @@ $g.DrawImage($src,(New-Object System.Drawing.Rectangle 0,0,500,380),(New-Object 
 $g.Dispose(); $bmp.Save('...\XxxCard.png',[System.Drawing.Imaging.ImageFormat]::Png); $bmp.Dispose(); $src.Dispose()
 ```
 - 复制/替换 png 后**删除旧的 `XxxCard.png.import`**，Godot 导出时会重新生成。
+#### 6.1 卡图占用检测与区分度校验（2026-08 实战总结）
+
+> 场景：给某张卡换卡图时，必须保证**不与任何现有卡图撞图**、且与目标区分对象（常一起出现/一起比较的卡）视觉差异足够大。
+> **教训：绝不要只按文件大小判断占用**——重编码后的图大小会变。实战案例：`EnchantedCreation.png`（401533B）与源图 `omniscience.png`（317282B）大小不同，但像素差仅 8.3，实为同一张图。占用以**缩略特征比对**为准。
+> 观者卡图同属紫/金色系：即使平均像素差 300+ 的两张图（如 `mental_fortress` 与 `hymn`），构图相近时玩家仍会觉得"一样"。判断"像不像"要**像素差 + 主色调色系**双看。
+
+**① 两图像素差异**（0=同一张图，765=完全不同；<15 视为同图，15~200 易看混，>250 差异明显）：
+
+```powershell
+Add-Type -AssemblyName System.Drawing
+$a=[System.Drawing.Bitmap]::FromFile('A.png'); $b=[System.Drawing.Bitmap]::FromFile('B.png')
+$diff=0.0; $n=0
+for($x=0;$x -lt 500;$x+=6){ for($y=0;$y -lt 380;$y+=6){
+    $pa=$a.GetPixel($x,$y); $pb=$b.GetPixel($x,$y)
+    $diff += [Math]::Abs($pa.R-$pb.R)+[Math]::Abs($pa.G-$pb.G)+[Math]::Abs($pa.B-$pb.B); $n++ } }
+$a.Dispose(); $b.Dispose()
+"Avg pixel diff (0=identical, 765=max): {0:N1}" -f ($diff/$n)
+```
+
+**② 主色调（平均 RGB）**——与目标卡同色系（如都是蓝紫）即使像素差大也易看混，优先选色系反差大的：
+
+```powershell
+Add-Type -AssemblyName System.Drawing
+function AvgColor($p){
+    $i=[System.Drawing.Bitmap]::FromFile($p); $r=0L;$g=0L;$b=0L;$n=0
+    for($x=0;$x -lt $i.Width;$x+=5){ for($y=0;$y -lt $i.Height;$y+=5){
+        $c=$i.GetPixel($x,$y); $r+=$c.R;$g+=$c.G;$b+=$c.B;$n++ } }
+    $i.Dispose(); [PSCustomObject]@{R=[int]($r/$n);G=[int]($g/$n);B=[int]($b/$n)} }
+AvgColor 'xxx.png'   # 参考：共轭 mental_fortress=(57,135,213)蓝紫；万物通元 omniscience=(134,93,69)金棕
+```
+
+**③ 全量占用检测 + 区分度排名**（把观者源图池 185 张与现有卡图 82 张全部比对，挑"与每张现有卡差异都大"的可用图）：
+
+```powershell
+Add-Type -AssemblyName System.Drawing
+# 500x380 缩略为 20x15 特征向量（900 int），可靠且快
+function Get-Feat($path){
+    $src=[System.Drawing.Bitmap]::FromFile($path)
+    $bmp=New-Object System.Drawing.Bitmap 20,15
+    $g=[System.Drawing.Graphics]::FromImage($bmp)
+    $g.InterpolationMode=[System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.DrawImage($src,0,0,20,15); $g.Dispose(); $src.Dispose()
+    $feat=New-Object int[] (900); $idx=0
+    for($y=0;$y -lt 15;$y++){ for($x=0;$x -lt 20;$x++){
+        $c=$bmp.GetPixel($x,$y); $feat[$idx]=$c.R; $feat[$idx+1]=$c.G; $feat[$idx+2]=$c.B; $idx+=3 } }
+    $bmp.Dispose(); return ,$feat }
+function FeatDiff($f1,$f2){ $s=0.0; for($i=0;$i -lt 900;$i++){ $s += [Math]::Abs($f1[$i]-$f2[$i]) }; $s/900.0 }
+
+$existing=@{}; $skip='Reverb'   # ← 改成要替换的目标卡类名
+foreach($png in Get-ChildItem 'TheSolitary\images\cards\*.png'){ if($png.BaseName -ne $skip){ $existing[$png.BaseName]=Get-Feat $png.FullName } }
+
+$out=New-Object System.Collections.Generic.List[object]
+foreach($src in Get-ChildItem '..\WatcherBeautified\images\packed\card_portraits\watcher\*.png'){
+    $feat=Get-Feat $src.FullName; $minName=''; $minD=[double]1e9
+    foreach($k in $existing.Keys){
+        $d=FeatDiff $feat $existing[$k]; if($d -lt $minD){ $minD=$d; $minName=$k } }
+    $out.Add([PSCustomObject]@{Source=$src.BaseName;Nearest=$minName;MinDiff=[int]$minD}) }
+$out | Sort-Object MinDiff -Descending | Select-Object -First 30 | Format-Table -AutoSize
+```
+
+- `MinDiff` = 该源图与「最接近的一张现有卡图」的缩略差异，**越大越独特**，>50 基本可安全使用。
+- 选图后用脚本 ① ② 再与目标区分对象核对一次；确认 500×380（或按上文裁剪脚本处理）。
+- 换图流程：`Copy-Item` 覆盖 → **删除 `XxxCard.png.import`**（Godot 重新导入）→ 完整构建导出 pck（仅 `dotnet build /p:RunPckExport=false` 不更新游戏内卡图）。
 
 ### 7. 反编译工具（ilspycmd）
 

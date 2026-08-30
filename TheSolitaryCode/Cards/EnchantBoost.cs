@@ -11,7 +11,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔增幅（character.org 白卡 #15）：1 费技能。
+// 位运算（character.org 白卡 #15）：1 费技能。
 // 获得 9 点格挡（升级后 12 点）。选择手牌中一张带数值型附魔的牌，本场战斗其附魔数值 +1。
 // 实现参考余烬庇护 EmberShelter（获得格挡 + 从手牌选牌）＋ EnchantHelpers.IncreaseEnchantmentValue
 // （数值型附魔判断与递增逻辑的共享抽象）。

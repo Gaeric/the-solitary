@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Combat;
-using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -74,12 +73,15 @@ public sealed class ArcaneReturnPower : ModPowerTemplate
 		ICombatState combatState = cardPlay.Card.CombatState ?? base.Owner.CombatState!;
 		for (int i = 0; i < base.Amount; i++)
 		{
-			// 生成一张随机术式（或术式+）到手牌中（内部会叠加 ArtTrackerPower 记录生成数）。
-			CardModel art = await Arts.CreateRandomInHand(player, combatState, player.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: upgraded);
-			// 自动打出：target 传 null 时 CardCmd.AutoPlay 会从可命中敌人中随机选一个目标。
-			_autoPlayingArts.Add(art);
-			await CardCmd.AutoPlay(choiceContext, art, null);
-			_autoPlayingArts.Remove(art);
+			// 生成一张随机术式（或术式+）到手牌并立即快速自动打出（内部会叠加 ArtTrackerPower 记录生成数）。
+			// 防递归（参考原版地狱使徒 HellraiserPower）：通过 beforeAutoPlay/afterAutoPlay 在自动打出前后
+			// 登记/解除本 Power 正在打出的术式；若该术式在生成瞬间被附魔造物（万物通元）随机附魔，
+			// 其 AfterCardPlayed 事件不会再次触发本 Power，避免无限连锁。
+			await Arts.CreateRandomInHandAndFastPlay(
+				player, combatState, player.RunState.Rng.CombatCardGeneration, choiceContext,
+				upgraded: upgraded,
+				beforeAutoPlay: card => { _autoPlayingArts.Add(card); },
+				afterAutoPlay: card => { _autoPlayingArts.Remove(card); });
 		}
 	}
 }

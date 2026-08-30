@@ -42,7 +42,11 @@ public sealed class PerCardCalculatedBlockVar : CalculatedBlockVar
 			base.EnchantedValue = baseValue;
 		}
 
-		int count = (int)_countCards(card, target);
+		// 只在战斗内计算张数：与基类 CalculatedVar.Calculate 的倍率保护一致
+		// （CombatManager.Instance.IsInProgress && cardModel.CombatState != null），
+		// 非战斗（牌库界面等）时按 0 处理并回退到基础计算，避免在预览阶段
+		// 访问战斗牌堆抛 "Tried to get X pile while out of combat."。
+		int count = card.CombatState != null ? (int)_countCards(card, target) : 0;
 		if (count > 0 && runGlobalHooks)
 		{
 			// 每张牌单独应用修改（敏捷/灵巧/牌自身的附魔），再乘以张数。

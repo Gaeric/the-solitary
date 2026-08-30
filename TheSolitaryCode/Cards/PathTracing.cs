@@ -13,18 +13,18 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 路径追踪（character.org 蓝卡，英文名 Path Tracing）：1 费攻击。
+// 路径追踪（英文名 Path Tracing）：0 费技能。
 // 在这个回合内每打出过一张技能牌，就对一名随机敌人打出一张随机术式（统计的是本牌打出前已结算的技能牌）。
 // 技能计数参考原版 连击 Finisher：CombatManager.Instance.History.CardPlaysFinished + HappenedThisTurn；
-// 随机术式生成与自动打出参考全知形态 ArcaneReturnPower：Arts.CreateRandomInHand + CardCmd.AutoPlay(随机目标)。
-// 升级后效果不变（与基础版一致）。
+// 随机术式生成与快速自动打出复用 Arts.CreateRandomInHandAndFastPlay（生成到手牌 + 快节奏自动打出）。
+// 升级后打出的术式变为术式+（升级版）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class PathTracing : ModCardTemplate
 {
 	// 基础耗能。
-	private const int BaseEnergyCost = 1;
-	// 卡牌类型（攻击）。
-	private const CardType CardKind = CardType.Attack;
+	private const int BaseEnergyCost = 0;
+	// 卡牌类型（技能）。
+	private const CardType CardKind = CardType.Skill;
 	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
 	// 目标类型（自身；术式会自动随机选择敌方目标）。
@@ -55,11 +55,10 @@ public sealed class PathTracing : ModCardTemplate
 		ICombatState combatState = CombatState!;
 		for (int i = 0; i < skillCount; i++)
 		{
-			// 生成一张随机术式到手牌，并以随机敌方目标自动打出（参考全知形态 ArcaneReturnPower）。
-			// 升级后生成术式+（升级版），与全知形态/掌中奇术的升级一致。
-			CardModel art = await Arts.CreateRandomInHand(
+			// 生成一张随机术式到手牌并立即快速自动打出（保留进手牌动画，跳过冗长的牌堆移动/等待动画）。
+			// 内部负责打出区节点清理，不会在 UI 中残留卡牌。
+			await Arts.CreateRandomInHandAndFastPlay(
 				Owner, combatState, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
-			await CardCmd.AutoPlay(choiceContext, art, null);
 		}
 	}
 

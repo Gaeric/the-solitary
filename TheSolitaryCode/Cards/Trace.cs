@@ -12,9 +12,9 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 循迹（参考原版精密瞄准 Pinpoint）：3 费攻击。
-// 造成 16 点伤害（升级后 20 点）。你在本回合中每打出过一张附魔牌，此牌耗能减少 1。
-// 费用按“本回合”递减（每回合重置），与 Pinpoint 的 EnergyCost.AddThisTurn 一致。
+// 循迹（参考原版火箭飞拳 RocketPunch）：3 费攻击。
+// 造成 16 点伤害（升级后 20 点）。每当你打出一张附魔牌，此牌耗能减少 1，直到下一次打出为止。
+// 费用跨回合累积、打出时重置，与 RocketPunch 的 EnergyCost.AddUntilPlayed 一致。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Trace : ModCardTemplate
 {
@@ -55,8 +55,8 @@ public sealed class Trace : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 本卡进入战斗时，按本回合已打出的附魔牌数量立即减费（参考 Pinpoint.AfterCardEnteredCombat，
-	// 处理本卡较晚才抽到/进入战斗的情况）。
+	// 本卡进入战斗时，按本场战斗已打出的附魔牌数量补扣（处理本卡较晚才生成/进入战斗的情况）。
+	// “直到下一次打出”不再按回合重置，因此统计整场战斗而非本回合（参考 Pinpoint.AfterCardEnteredCombat 的补扣思路）。
 	public override Task AfterCardEnteredCombat(CardModel card)
 	{
 		if (card != this || base.IsClone)
@@ -65,12 +65,12 @@ public sealed class Trace : ModCardTemplate
 		}
 		int amount = CombatManager.Instance.History.CardPlaysFinished
 			.Count((CardPlayFinishedEntry e) =>
-				e.CardPlay.Card.Enchantment != null && e.CardPlay.Player == base.Owner && e.HappenedThisTurn(base.CombatState));
+				e.CardPlay.Card.Enchantment != null && e.CardPlay.Player == base.Owner);
 		ReduceCostBy(amount);
 		return Task.CompletedTask;
 	}
 
-	// 每打出一张附魔牌，本回合内此牌耗能 -1（参考 Pinpoint.AfterCardPlayed）。
+	// 每打出一张附魔牌，此牌耗能 -1（直到下一次打出前有效，参考 RocketPunch.AfterCardGeneratedForCombat）。
 	public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		if (cardPlay.Card.Owner != base.Owner || cardPlay.Card.Enchantment == null)
@@ -81,10 +81,10 @@ public sealed class Trace : ModCardTemplate
 		return Task.CompletedTask;
 	}
 
-	// 本回合内降低耗能（每回合自动重置，参考 Pinpoint 的费用递减方式）。
+	// 降低耗能，直到此牌下一次被打出（打出时自动清空，参考 RocketPunch 的 EnergyCost.AddUntilPlayed）。
 	private void ReduceCostBy(int amount)
 	{
-		base.EnergyCost.AddThisTurn(-amount);
+		base.EnergyCost.AddUntilPlayed(-amount);
 	}
 
 	// 升级：伤害 16 -> 20。

@@ -9,7 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 附魔冲击（character.org 白卡 #1）：1 费攻击。
+// 移位（character.org 白卡 #1）：1 费攻击。
 // 造成 6 点伤害，抽取手牌中附魔数量张牌（参考原版 编译冲击 CompileDriver 的计算抽牌机制）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantImpact : ModCardTemplate
