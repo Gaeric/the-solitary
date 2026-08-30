@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -7,6 +8,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Powers;
+using TheSolitary.Relics;
 using STS2RitsuLib.Patching.Models;
 
 namespace TheSolitary.Patches;
@@ -15,15 +17,16 @@ namespace TheSolitary.Patches;
 // 游戏没有任何"获得附魔后"的事件钩子（CardCmd.Enchant 不触发任何 Hook），
 // 因此在 CardCmd.Enchant（所有附魔动作的唯一入口）成功后统一派发：
 //   - EnchantResonancePower（附魔共鸣）：获得附魔时获得等量活力（VigorPower）；
-//   - ReverbPower（余音）：生成附魔时获得等量格挡。
-// 以后新增"附魔后触发"的 Power 时，只需在此 Postfix 追加一个分支。
+//   - ReverbPower（余音）：生成附魔时获得等量格挡；
+//   - ArcaneSettling（元能沉淀遗物）：每回合首次生成附魔时获得格挡。
+// 以后新增"附魔后触发"的 Power / 遗物时，只需在此 Postfix 追加一个分支。
 public sealed class AfterEnchantPatch : IPatchMethod
 {
 	// 补丁 ID（RitsuLib 要求全局唯一）。
 	public static string PatchId => "thesolitary_after_enchant";
 
 	public static string Description =>
-		"Grant Vigor / Block whenever a card gains an Enchantment while Enchant Resonance / Reverb is active";
+		"Grant Vigor / Block whenever a card gains an Enchantment while Enchant Resonance / Reverb / Arcane Settling is active";
 
 	// 非关键补丁：若游戏更新导致 CardCmd.Enchant 签名变化，仅本功能失效，不影响整个 Mod。
 	public static bool IsCritical => false;
@@ -70,6 +73,13 @@ public sealed class AfterEnchantPatch : IPatchMethod
 			if (ward != null)
 			{
 				await CreatureCmd.GainBlock(creature, ward.Amount, ValueProp.Unpowered, null);
+			}
+
+			// 元能沉淀：每回合首次生成附魔时获得格挡（内部自带"每回合只触发一次"的标志）。
+			var settling = creature.Player?.Relics.OfType<ArcaneSettling>().FirstOrDefault();
+			if (settling != null)
+			{
+				await settling.OnEnchantTriggered(new ThrowingPlayerChoiceContext(), creature);
 			}
 		}
 		catch (Exception ex)

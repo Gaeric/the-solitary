@@ -4,7 +4,10 @@ using MegaCrit.Sts2.Core.Modding;
 using STS2RitsuLib;
 using STS2RitsuLib.Interop;
 using STS2RitsuLib.Patching.Core;
+using TheSolitary.Cards;
+using TheSolitary.Characters;
 using TheSolitary.Patches;
+using TheSolitary.Relics;
 using Logger = MegaCrit.Sts2.Core.Logging.Logger;
 
 namespace TheSolitary;
@@ -34,6 +37,17 @@ public partial class Entry
         // 自动注册扫描会读取当前程序集里的 RegisterCard/RegisterRelic 等 attribute。
         // 新增内容类后，只要 attribute 写对，通常不需要在入口里手动逐个注册。
         ModTypeDiscoveryHub.RegisterModAssembly(ModId, assembly);
+
+        // 事件关联：古老牙齿 ArchaicTooth 把初始卡 唤醒 Sacrifice 升级成先古卡 复苏 Resurgence。
+        // 映射 ID 延迟解析，放在内容注册之后即可。
+        RitsuLibFramework.RegisterArchaicToothTranscendenceMapping<Sacrifice, Resurgence>(ModId);
+
+        // 事件关联：尘封魔典 DustyTome 优先选择角色先古卡池中的 黏糊魔典 StickyGrimoire
+        // （复苏 Resurgence 是古老牙齿的先古升级牌，会被 DustyTome 自动排除）。
+        RitsuLibFramework.RegisterDustyTomeCard<TheSolitaryCharacter, StickyGrimoire>(ModId);
+
+        // 事件关联：欧洛巴斯之触 TouchOfOrobas 把初始遗物 迅捷回路 SwiftCircuit 精炼成 极速回路 RapidCircuit。
+        RitsuLibFramework.RegisterTouchOfOrobasRefinementMapping<SwiftCircuit, RapidCircuit>(ModId);
 
         // 附魔共鸣 / 附魔守护：游戏没有"获得附魔后"的钩子，需通过 Harmony 补丁拦截 CardCmd.Enchant。
         // 用 RitsuLib 的补丁 API 注册（非关键补丁，游戏更新签名变化时仅该功能失效）。

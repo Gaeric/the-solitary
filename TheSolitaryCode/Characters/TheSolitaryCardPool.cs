@@ -1,10 +1,13 @@
 using Godot;
+using STS2RitsuLib.Scaffolding.Characters;
 using STS2RitsuLib.Scaffolding.Content;
 using STS2RitsuLib.Utils;
 
 namespace TheSolitary.Characters;
 
-public sealed class TheSolitaryCardPool : TypeListCardPoolModel
+// 实现 IModColorfulPhilosophersCardPool：让"色彩哲学家"事件的卡池轮换可以出现本角色卡池。
+// RitsuLib 会通过补丁自动把实现该接口的角色卡池追加进事件的颜色顺序（选项 ID = EnergyColorName 大写）。
+public sealed class TheSolitaryCardPool : TypeListCardPoolModel, IModColorfulPhilosophersCardPool
 {
     // 卡框材质：使用游戏自带 hsv.gdshader，参数与原版观者紫色卡框 card_frame_purple_mat.tres 完全一致
     // （h=0.715 → 257° 紫色）。不要用 CreateReplaceHueShaderMaterial——它的参数是目标 RGB（0.42,0.65,0.72

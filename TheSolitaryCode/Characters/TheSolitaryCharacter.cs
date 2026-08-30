@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Characters;
+using STS2RitsuLib.Scaffolding.Content;
 using STS2RitsuLib.Scaffolding.Godot;
 
 namespace TheSolitary.Characters;
@@ -65,7 +66,17 @@ public sealed class TheSolitaryCharacter : ModCharacterTemplate<TheSolitaryCardP
             // 人物选择图标-锁定状态。
             CharacterSelectLockedIconPath: $"{ImageRoot}/TheSolitary_character_select_locked.png",
             // 地图上的角色标记图标、表情轮盘上的角色头像。
-            MapMarkerPath: $"{ImageRoot}/TheSolitary_map_marker.png"));
+            MapMarkerPath: $"{ImageRoot}/TheSolitary_map_marker.png"),
+        // 事件关联：美味饼干 YummyCookie 为本角色使用专属图标（RelicModelIdEntry 匹配不区分大小写）。
+        VanillaRelicVisualOverrides:
+        [
+            new CharacterVanillaRelicVisualOverride(
+                "YummyCookie",
+                new RelicAssetProfile(
+                    IconPath: $"{Entry.ResPath}/images/relics/YummyCookie.png",
+                    IconOutlinePath: $"{Entry.ResPath}/images/relics/YummyCookie.png",
+                    BigIconPath: $"{Entry.ResPath}/images/relics/YummyCookie.png"))
+        ]);
 
     // 某个字段没写时，RitsuLib 会从占位角色配置里补齐。
     public override string? PlaceholderCharacterId => "ironclad";
