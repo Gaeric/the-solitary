@@ -8,18 +8,18 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 掌中奇术（参考袖里乾坤 UpMySleeve）：2 费 Skill。
-// 将 4 张随机术式加入手牌；本场战斗每打出一次，本卡费用 -1。
-// 升级后生成的术式变为升级版（术式+），数量保持 4 张。
+// 掌中奇术（参考袖里乾坤 UpMySleeve）：1 费 Skill。
+// 将 3 张随机术式加入手牌；本场战斗每打出一次，本卡费用 -1。
+// 升级后生成的术式变为升级版（术式+），数量保持 3 张。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class ArtOfThePalm : ModCardTemplate
 {
 	// 基础耗能。
-	private const int BaseEnergyCost = 2;
+	private const int BaseEnergyCost = 1;
 	// 卡牌类型（Skill）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
-	private const CardRarity CardRarityValue = CardRarity.Uncommon;
+	// 卡牌稀有度（白卡 = Common）。
+	private const CardRarity CardRarityValue = CardRarity.Common;
 	// 目标类型（Self）。
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。
@@ -53,7 +53,7 @@ public sealed class ArtOfThePalm : ModCardTemplate
 	// 基础数值：生成的术式数量（绑定 {Cards:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new CardsVar(4)
+		new CardsVar(3)
 	];
 
 	// 打出时：循环生成随机术式加入手牌（本卡升级后生成升级版术式）；随后本场战斗费用 -1（参考 UpMySleeve）。
@@ -70,7 +70,7 @@ public sealed class ArtOfThePalm : ModCardTemplate
 		EnergyCost.AddThisCombat(-1);
 	}
 
-	// 升级后：数量不变（仍为 4 张），升级效果由 OnPlay 中的 IsUpgraded 决定（生成术式+）。
+	// 升级后：数量不变（仍为 3 张），升级效果由 OnPlay 中的 IsUpgraded 决定（生成术式+）。
 	protected override void OnUpgrade()
 	{
 	}

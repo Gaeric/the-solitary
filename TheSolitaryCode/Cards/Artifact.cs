@@ -12,7 +12,9 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 伪影（character.org todo 蓝卡）：1 费技能，打出后消耗。
-// 抽 2 张牌（升级后抽 3 张）；选择 2 张手牌附魔墨影（Inky：打出时施加 1 层虚弱）。
+// 抽 2 张牌（升级后抽 3 张）；选择 2 张手牌中的攻击牌附魔墨影（Inky：打出时施加 1 层虚弱）。
+// 墨影只限定攻击牌：参考原版 Instinct/Sharp/Momentum 用 CanEnchantCardType 限定 CardType.Attack 的做法，
+// 避免把墨影附到自目标/技能牌上时 Inky.OnPlay 对 cardPlay.Target（即自己）施加虚弱。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Artifact : ModCardTemplate
 {
@@ -53,13 +55,13 @@ public sealed class Artifact : ModCardTemplate
 		// 1. 抽牌。
 		await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
 
-		// 2. 手牌中没有能被墨影附魔的牌时，跳过附魔（不弹选择界面）。
+		// 2. 手牌中没有能被墨影附魔的攻击牌时，跳过附魔（不弹选择界面）。
 		if (!Owner.PlayerCombatState!.Hand.Cards.Any(CanEnchantInky))
 		{
 			return;
 		}
 
-		// 3. 选择 2 张手牌附魔墨影（filter 只放行能附魔的牌）。
+		// 3. 选择 2 张手牌中的攻击牌附魔墨影（filter 只放行攻击牌且能附魔的牌）。
 		List<CardModel> selected = (await CardSelectCmd.FromHand(
 			context: choiceContext,
 			player: Owner,
@@ -81,10 +83,11 @@ public sealed class Artifact : ModCardTemplate
 	}
 
 	/// <summary>
-	/// 检查目标牌能否附魔墨影（Inky），与 CardCmd.Enchant 内部的 CanEnchant 检查一致。
+	/// 检查目标牌能否附魔墨影（Inky）：墨影只允许附魔攻击牌，
+	/// 并在攻击牌基础上再走一遍 CardCmd.Enchant 内部的 CanEnchant 通用检查。
 	/// </summary>
 	private static bool CanEnchantInky(CardModel card)
 	{
-		return ModelDb.Enchantment<Inky>().ToMutable().CanEnchant(card);
+		return card.Type == CardType.Attack && ModelDb.Enchantment<Inky>().ToMutable().CanEnchant(card);
 	}
 }

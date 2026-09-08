@@ -9,9 +9,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 全知形态（原术法归元，character.org 金卡 #14）：3 费能力牌。
-// 每当你打出一张附魔牌时，对一名随机敌人打出一张随机术式。
-// 升级后不改变耗能，改由 Power 在触发时生成升级版术式（术式+）：
-// ArcaneReturnPower.AfterApplied 捕获来源卡，按 IsUpgraded 决定生成术式还是术式+。
+// 每当你打出一张附魔牌时，对一名随机敌人打出一张随机术式+（升级版术式）。
+// 升级后不改变耗能、不改动生成的术式（始终为术式+），而是本卡获得保留（Retain）。
 // 实现参考原版模仿学习 ImitationLearning（Power 覆写 AfterCardPlayed 钩子 + CardCmd.AutoPlay 随机目标自动打出），
 // 结构与术式回想 SpellRecall（能力牌 + Power 钩子）保持一致。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -42,5 +41,12 @@ public sealed class ArcaneReturn : ModCardTemplate
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "PowerUp", Owner.Character.PowerUpAnimDelay);
 		await PowerCmd.Apply<ArcaneReturnPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
+	}
+
+	// 升级：本卡获得保留（Retain，回合结束不丢弃、留在手牌）。
+	// 生成的术式不受升级影响（始终为术式+），故升级逻辑仅添加关键字。
+	protected override void OnUpgrade()
+	{
+		AddKeyword(CardKeyword.Retain);
 	}
 }

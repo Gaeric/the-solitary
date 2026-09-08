@@ -10,9 +10,9 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 辐照（新卡）：2 费能力牌（蓝卡）。
-// 每当你打出一张附魔牌，对所有角色造成 2 点伤害（升级后 3 点）。
-// "所有角色" = 战斗中所有可命中角色（我方 + 敌方，含多人模式全部玩家角色），
-// 用 CombatState.Creatures 枚举全部角色、IsHittable 过滤存活可命中者。
+// 每当你打出一张附魔牌，对所有敌人造成 2 点伤害（升级后 3 点）。
+// "所有敌人" = 战斗中所有可命中敌人，Power 端用 CombatState.HittableEnemies 选取。
+// 全体敌人伤害参考原版速行者 SpeedsterPower（SpeedsterPower.AfterCardDrawn 里 CreatureCmd.Damage 打全体敌人）。
 // 能力牌 + 持续 Power 的模式参考光栅 Raster（RasterPower 做实际触发）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Irradiation : ModCardTemplate
@@ -37,7 +37,7 @@ public sealed class Irradiation : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：每次打出一张附魔牌对所有角色造成的伤害（绑定 {IrradiationPower:diff()} 占位符）。
+	// 基础数值：每次打出一张附魔牌对所有敌人造成的伤害（绑定 {IrradiationPower:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new PowerVar<IrradiationPower>(2m)

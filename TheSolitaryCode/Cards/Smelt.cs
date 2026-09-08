@@ -42,10 +42,10 @@ public sealed class Smelt : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：基础格挡 8（绑定 {Block:diff()} 占位符）。额外格挡与基础格挡同值，见 OnPlay。
+	// 基础数值：基础格挡 5（绑定 {Block:diff()} 占位符）。额外格挡与基础格挡同值，见 OnPlay。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new BlockVar(8m, ValueProp.Move)
+		new BlockVar(5m, ValueProp.Move)
 	];
 
 	// 打出时：选择一张手牌消耗；获得格挡；若该牌带附魔则额外获得格挡。
@@ -80,7 +80,7 @@ public sealed class Smelt : ModCardTemplate
 		}
 	}
 
-	// 升级：基础格挡 8 -> 11（额外格挡随基础格挡一同提升）。
+	// 升级：基础格挡 5 -> 8（额外格挡随基础格挡一同提升）。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(3m);

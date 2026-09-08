@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 奇点爆破（自定义卡）：2 费攻击（升级后 1 费）。
+// 奇点爆破（自定义卡）：3 费攻击（升级后 2 费）。
 // 本次战斗每生成过一张术式，造成 1 点伤害（单次伤害 = 术式生成数）；
 // 敌人每有一种负面效果，额外造成一次伤害（命中次数 = 1 + 负面效果种类数）。
 // 生成数由 ArtTrackerPower 在 Arts.CreateRandomInHand 中累计。
@@ -24,11 +24,11 @@ public sealed class SingularityBurst : ModCardTemplate
 	private const string CalculatedHitsKey = "CalculatedHits";
 
 	// 基础耗能。
-	private const int BaseEnergyCost = 2;
+	private const int BaseEnergyCost = 3;
 	// 卡牌类型（攻击）。
 	private const CardType CardKind = CardType.Attack;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
-	private const CardRarity CardRarityValue = CardRarity.Uncommon;
+	// 卡牌稀有度（金卡 = Rare）。
+	private const CardRarity CardRarityValue = CardRarity.Rare;
 	// 目标类型（任意敌人）。
 	private const TargetType CardTarget = TargetType.AnyEnemy;
 	// 是否在卡牌图鉴中显示。
@@ -72,7 +72,7 @@ public sealed class SingularityBurst : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 升级：费用 2 -> 1（伤害机制不变）。
+	// 升级：费用 3 -> 2（伤害机制不变）。
 	protected override void OnUpgrade()
 	{
 		base.EnergyCost.UpgradeBy(-1);
