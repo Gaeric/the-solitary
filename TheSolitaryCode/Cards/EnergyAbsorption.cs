@@ -9,7 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 元能吸附（character.org 金卡 #3）：2 费能力牌，升级后 1 费。
+// 元能吸附（character.org 蓝卡 #3）：2 费能力牌，升级后 1 费。
 // 每打出 5 张附魔牌，获得 1 点能量。
 // 实现参考环回形态 LoopForm（能力牌 + Power 内部计数阈值结算能量的模式）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -19,8 +19,8 @@ public sealed class EnergyAbsorption : ModCardTemplate
 	private const int BaseEnergyCost = 2;
 	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
-	// 卡牌稀有度（金卡 = Rare）。
-	private const CardRarity CardRarityValue = CardRarity.Rare;
+	// 卡牌稀有度（蓝卡 = Uncommon）。
+	private const CardRarity CardRarityValue = CardRarity.Uncommon;
 	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
 	// 是否在卡牌图鉴中显示。

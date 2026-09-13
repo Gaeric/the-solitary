@@ -16,7 +16,7 @@ namespace TheSolitary.Cards;
 // 路径追踪（英文名 Path Tracing）：0 费技能。
 // 在这个回合内每打出过一张技能牌，就对一名随机敌人打出一张随机术式（统计的是本牌打出前已结算的技能牌）。
 // 技能计数参考原版 连击 Finisher：CombatManager.Instance.History.CardPlaysFinished + HappenedThisTurn；
-// 随机术式生成与快速自动打出复用 Arts.CreateRandomInHandAndFastPlay（生成到手牌 + 快节奏自动打出）。
+// 随机术式生成与直接快速自动打出复用 Arts.CreateRandomArtAndAutoPlay（不进手牌，效果当场施放）。
 // 升级后打出的术式变为术式+（升级版）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class PathTracing : ModCardTemplate
@@ -55,9 +55,9 @@ public sealed class PathTracing : ModCardTemplate
 		ICombatState combatState = CombatState!;
 		for (int i = 0; i < skillCount; i++)
 		{
-			// 生成一张随机术式到手牌并立即快速自动打出（保留进手牌动画，跳过冗长的牌堆移动/等待动画）。
+			// 生成一张随机术式并直接快速自动打出（不进手牌、无进手牌动画，直接播放打出效果）。
 			// 内部负责打出区节点清理，不会在 UI 中残留卡牌。
-			await Arts.CreateRandomInHandAndFastPlay(
+			await Arts.CreateRandomArtAndAutoPlay(
 				Owner, combatState, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 		}
 	}

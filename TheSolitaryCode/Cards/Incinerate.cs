@@ -11,7 +11,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 焚尽（character.org 蓝卡 #23 变体——由"擦除手牌全部附魔"改为"消耗未附魔牌"）：2 费攻击。
-// 消耗手牌中所有未附魔的卡牌，对所有敌人造成 21 点伤害（升级后 26 点）。
+// 消耗手牌中所有未附魔的卡牌，对所有敌人造成 12 点伤害（升级后 15 点）。
 // 全体伤害参考原版硬着陆 CrashLanding（DamageVar 21 + TargetingAllOpponents）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Incinerate : ModCardTemplate
@@ -36,10 +36,10 @@ public sealed class Incinerate : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：全体伤害 21（绑定 {Damage:diff()} 占位符）。
+	// 基础数值：全体伤害 12（绑定 {Damage:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DamageVar(21m, ValueProp.Move)
+		new DamageVar(12m, ValueProp.Move)
 	];
 
 	// 打出时：先消耗手牌中所有未附魔的卡牌，再对所有敌人造成伤害。
@@ -63,9 +63,9 @@ public sealed class Incinerate : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 升级：伤害 21 -> 26。
+	// 升级：伤害 12 -> 15。
 	protected override void OnUpgrade()
 	{
-		DynamicVars.Damage.UpgradeValueBy(5m);
+		DynamicVars.Damage.UpgradeValueBy(3m);
 	}
 }

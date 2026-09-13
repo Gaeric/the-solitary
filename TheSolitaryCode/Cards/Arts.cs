@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Nodes.Cards;
@@ -45,6 +46,20 @@ public static class Arts
 	/// <param name="upgraded">是否生成升级版术式（术式+），参考 Largesse / ManifestAuthority 的升级判定模式。</param>
 	public static async Task<CardModel> CreateRandomInHand(Player owner, ICombatState combatState, Rng rng, PlayerChoiceContext choiceContext, Player? creator = null, bool upgraded = false)
 	{
+		CardModel card = CreateRandomArtCard(owner, combatState, rng, upgraded);
+		await CardPileCmd.AddGeneratedCardsToCombat([card], PileType.Hand, creator ?? owner);
+
+		// 记录本场战斗为该玩家生成的术式数量 +1（供“造成生成数伤害”的卡牌使用）。
+		await PowerCmd.Apply<ArtTrackerPower>(choiceContext, owner.Creature, 1m, owner.Creature, null);
+
+		return card;
+	}
+
+	// 随机挑选并创建一张术式实例（含可选升级），不放入任何牌堆。
+	// 候选过滤逻辑（术式-凋零在全员已缓慢时排除）与 CreateRandomInHand 的 doc 注释保持一致，
+	// 直接打出流程与加手牌流程共用此处，避免两处随机池漂移。
+	private static CardModel CreateRandomArtCard(Player owner, ICombatState combatState, Rng rng, bool upgraded)
+	{
 		// 只要存在一个可命中敌人没有缓慢，就保留术式-凋零作为候选；否则排除它。
 		bool anyHittableEnemyWithoutSlow = combatState.HittableEnemies.Any(e => !e.HasPower<SlowPower>());
 		IEnumerable<CardModel> candidates = anyHittableEnemyWithoutSlow
@@ -58,24 +73,20 @@ public static class Arts
 		{
 			CardCmd.Upgrade(card);
 		}
-		await CardPileCmd.AddGeneratedCardsToCombat([card], PileType.Hand, creator ?? owner);
-
-		// 记录本场战斗为该玩家生成的术式数量 +1（供“造成生成数伤害”的卡牌使用）。
-		await PowerCmd.Apply<ArtTrackerPower>(choiceContext, owner.Creature, 1m, owner.Creature, null);
-
 		return card;
 	}
 
 	/// <summary>
-	/// 生成一张随机术式到手牌并立即快速自动打出（路径追踪 / 全知形态术法归元共用的快节奏流程）。
-	/// 保留「进手牌」动画让玩家看清随机生成了什么术式，随后把卡牌节点快速移到打出区（0.1s 短 tween），
-	/// 自动打出时跳过牌堆移动/等待动画（skipCardPileVisuals），只保留术式自身的攻击/命中动画，
-	/// 结束后清理打出区残留的卡牌节点（skipCardPileVisuals 不会清理节点，否则会卡在 UI 中）。
-	/// 内部先调用 <see cref="CreateRandomInHand"/>，因此随机/升级/生成钩子/ArtTrackerPower 计数逻辑完全一致。
+	/// 生成一张随机术式并直接快速自动打出（路径追踪 / 附魔挖掘 / 术法归元共用的快节奏流程）。
+	/// 不再保留「进手牌」动画：术式模型静默进手牌（skipVisuals，不播放飞入/展牌动画），
+	/// 卡牌节点直接出现在打出区，自动打出时跳过牌堆移动/等待动画（skipCardPileVisuals），
+	/// 只保留术式自身的攻击/命中动画，看起来是效果“当场施放术式”。
+	/// 与 <see cref="CreateRandomInHand"/> 共用随机/升级/生成钩子/ArtTrackerPower 计数逻辑：
+	/// 随机选择、术式+、万物通元随机附魔与术式召回等 AfterCardGeneratedForCombat 钩子不受影响。
 	/// </summary>
 	/// <param name="beforeAutoPlay">自动打出开始前回调（可用于防递归登记正在打出的术式）。</param>
 	/// <param name="afterAutoPlay">自动打出结束后回调（可用于解除防递归登记）。</param>
-	public static async Task<CardModel> CreateRandomInHandAndFastPlay(
+	public static async Task<CardModel> CreateRandomArtAndAutoPlay(
 		Player owner,
 		ICombatState combatState,
 		Rng rng,
@@ -85,24 +96,35 @@ public static class Arts
 		Action<CardModel>? beforeAutoPlay = null,
 		Action<CardModel>? afterAutoPlay = null)
 	{
-		// 先生成到手牌（保留进手牌动画，玩家能看到随机生成了什么术式）。
-		CardModel card = await CreateRandomInHand(owner, combatState, rng, choiceContext, creator, upgraded);
+		// 生成术式实例（不放入任何牌堆；候选过滤/升级与加手牌路径完全一致）。
+		CardModel card = CreateRandomArtCard(owner, combatState, rng, upgraded);
 
-		// 把卡牌节点从手牌快速移到打出区（0.1s 短 tween，替代原版 0.25s 的长 tween），
-		// 结算时术式在打出区可见。若节点不在手牌（极端情况），返回 false 并退回完整动画路径，
-		// 保证 UI 不会被卡牌残留。
-		bool moved = await TryMoveArtNodeToPlayArea(card);
+		Player actualCreator = creator ?? owner;
+
+		// 静默加入手牌（不播放进手牌动画）。核心 AddGeneratedCardsToCombat 不暴露 skipVisuals，
+		// 这里按与其相同的顺序复刻：战斗历史 CardGenerated → Add(skipVisuals:true) → AfterCardGeneratedForCombat 钩子，
+		// 以保证生成记录与“生成术式”监听（万物通元随机附魔、术式召回加回响等）仍然生效。
+		CombatManager.Instance.History.CardGenerated(combatState, card, actualCreator);
+		await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Bottom, clonedBy: null, skipVisuals: true);
+		await Hook.AfterCardGeneratedForCombat(combatState, card, actualCreator);
+
+		// 记录本场战斗为该玩家生成的术式数量 +1（供“造成生成数伤害”的卡牌使用）。
+		await PowerCmd.Apply<ArtTrackerPower>(choiceContext, owner.Creature, 1m, owner.Creature, null);
+
+		// 卡牌节点直接出现在打出区（不经过手牌），让玩家看到“正在打出的术式”。
+		// 节点创建失败（如 TestMode）时退回纯模型流程，不残留 UI。
+		bool shownInPlayArea = ShowArtInPlayArea(card);
 
 		beforeAutoPlay?.Invoke(card);
 
 		// 自动打出：跳过牌堆移动/等待动画（省去手牌→打出区 tween、0.25~0.35s 固定等待与打出区→弃牌 tween），
 		// 只保留术式自身的攻击/命中动画，避免连续多张术式时动画逐张拖沓。
-		await CardCmd.AutoPlay(choiceContext, card, null, skipCardPileVisuals: moved);
+		await CardCmd.AutoPlay(choiceContext, card, null, skipCardPileVisuals: true);
 
 		afterAutoPlay?.Invoke(card);
 
 		// skipCardPileVisuals 不会清理卡牌节点：手动移除打出区残留的节点，否则会卡在 UI 中。
-		if (moved)
+		if (shownInPlayArea)
 		{
 			RemovePlayAreaNode(card);
 		}
@@ -110,40 +132,25 @@ public static class Arts
 		return card;
 	}
 
-	// 把术式的卡牌节点从手牌快速移到打出区。
-	// 返回 false 表示未找到手牌节点（此时调用方应退回完整动画路径）。
-	private static async Task<bool> TryMoveArtNodeToPlayArea(CardModel card)
+	// 把术式的卡牌节点直接放到打出区目标位置（不做进手牌动画，卡牌原地出现在打出区）。
+	private static bool ShowArtInPlayArea(CardModel card)
 	{
 		NCombatRoom? combatRoom = NCombatRoom.Instance;
 		if (combatRoom == null)
 		{
 			return false;
 		}
-		NPlayerHand? hand = combatRoom.Ui.Hand;
-		if (hand == null)
-		{
-			return false;
-		}
-		NCardHolder? holder = hand.GetCardHolder(card);
-		NCard? node = holder?.CardNode;
-		if (holder == null || node == null)
+		NCard? node = NCard.Create(card);
+		if (node == null)
 		{
 			return false;
 		}
 
-		// 用标准手牌移除流程摘除 holder（会取消事件订阅并解除节点绑定），再把节点放进打出区展示。
-		// 顺序不能反：先 RemoveCardHolder 会让 holder.Clear() 把节点从树上摘下来（但不会释放节点），
-		// 随后 AddToPlayContainer 才会把该节点重新挂到打出区。
-		hand.RemoveCardHolder(holder);
+		// 直接挂到打出区并按其布局定位；卡牌在自动打出期间保持在打出区展示。
 		combatRoom.Ui.AddToPlayContainer(node);
 		node.UpdateVisuals(PileType.Play, CardPreviewMode.Normal);
 		node.Scale = Vector2.One * 0.8f;
-
-		// 0.1s 快速飞到打出区目标位置（替代原版 0.25s 的 AppendPlayPileLerpTween）。
-		Vector2 targetPosition = PileType.Play.GetTargetPosition(node);
-		Tween tween = node.CreateTween();
-		tween.TweenProperty(node, "position", targetPosition, 0.1f).SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Cubic);
-		await tween.AwaitFinished(combatRoom);
+		node.Position = PileType.Play.GetTargetPosition(node);
 		return true;
 	}
 

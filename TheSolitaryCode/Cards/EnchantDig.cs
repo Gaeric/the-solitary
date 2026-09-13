@@ -14,7 +14,7 @@ namespace TheSolitary.Cards;
 
 // 挖掘（character.org 白卡）：1 费攻击。
 // 造成 6 点伤害（升级后 8 点），抽 1 张牌（升级后 2 张）；每抽到一张附魔牌，随机打出一张术式。
-// 随机术式生成与快速自动打出复用 Arts.CreateRandomInHandAndFastPlay（参考路径追踪 PathTracing）。
+// 随机术式生成与直接快速自动打出复用 Arts.CreateRandomArtAndAutoPlay（参考路径追踪 PathTracing，不进手牌）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantDig : ModCardTemplate
 {
@@ -60,10 +60,10 @@ public sealed class EnchantDig : ModCardTemplate
 		List<CardModel> drawn = (await CardPileCmd.Draw(
 			choiceContext, DynamicVars.Cards.BaseValue, Owner)).ToList();
 
-		// 3. 每抽到一张附魔牌，生成一张随机术式（未升级版）并自动打出（随机敌方目标，参考路径追踪）。
+		// 3. 每抽到一张附魔牌，生成一张随机术式（未升级版）并直接自动打出（随机敌方目标，不进手牌，参考路径追踪）。
 		foreach (CardModel card in drawn.Where(c => c.Enchantment != null))
 		{
-			await Arts.CreateRandomInHandAndFastPlay(
+			await Arts.CreateRandomArtAndAutoPlay(
 				Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext);
 		}
 	}

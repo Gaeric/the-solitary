@@ -17,7 +17,7 @@ namespace TheSolitary.Relics;
 
 // 四象之阵（商店遗物）：在每场战斗中，你打出四种不同的术式后，所有敌人失去 2 点力量与 2 点敏捷。
 // 五种术式各占一个 bit 位，用位掩码记录本场战斗已打出过哪些术式（可序列化，避免保存 HashSet）。
-// 每场战斗开始时清零，同一场战斗只触发一次。
+// 每场战斗开始时清零，同一场战斗只触发一次；触发后遗物状态置为 Disabled，遗物图标变暗置灰标记已触发。
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
 public sealed class FourSymbolsFormation : ModRelicTemplate
 {
@@ -76,15 +76,18 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
 
     private void UpdateDisplay()
     {
-        base.Status = (CountBits(DistinctArtsMask) >= DistinctArtsRequired) ? RelicStatus.Active : RelicStatus.Normal;
+        // 触发后遗物置为 Disabled：图标由游戏本体渲染为 #808080 置灰暗色，标记本场已触发过。
+        // 四象集齐瞬间即当场触发，无需 Active 高亮常驻。
+        base.Status = DebuffTriggered ? RelicStatus.Disabled : RelicStatus.Normal;
         InvokeDisplayAmountChanged();
     }
 
-    // 每场战斗开始时清零计数（同一场战斗只触发一次）。
+    // 每场战斗开始时清零计数（同一场战斗只触发一次），并恢复图标为普通状态。
+    // 注意先复位 DebuffTriggered 再清零掩码：掩码 setter 会触发 UpdateDisplay，顺序颠倒会把图标卡在置灰态。
     public override Task BeforeCombatStart()
     {
-        DistinctArtsMask = 0;
         DebuffTriggered = false;
+        DistinctArtsMask = 0;
         return Task.CompletedTask;
     }
 
@@ -109,6 +112,7 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
         }
 
         DebuffTriggered = true;
+        UpdateDisplay();
         Flash();
         foreach (Creature enemy in base.Owner.Creature.CombatState!.HittableEnemies)
         {

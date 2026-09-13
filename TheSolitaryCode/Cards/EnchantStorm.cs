@@ -10,7 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 风暴（character.org 蓝卡 #8）：1 费攻击。
-// 造成 8 点伤害，你每有一张附魔牌，造成额外 4 点伤害。
+// 造成 8 点伤害，你每有一张附魔牌，造成额外 2 点伤害（升级后 3 点）。
 // 计算结构参考灰烬打击 AshenStrike；附魔牌数量统计与共轭 Conjugate 共用 EnchantHelpers。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantStorm : ModCardTemplate
@@ -35,12 +35,12 @@ public sealed class EnchantStorm : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：计算伤害 = 基础(8) + 附魔牌数量 × ExtraDamage(4)。
+	// 基础数值：计算伤害 = 基础(8) + 附魔牌数量 × ExtraDamage(2)。
 	// 绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()} 占位符（参考原版 AshenStrike 的结构）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new CalculationBaseVar(8m),
-		new ExtraDamageVar(3m),
+		new ExtraDamageVar(2m),
 		new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) =>
 			EnchantHelpers.CountEnchantedCardsInAllPiles(card.Owner))
 	];
@@ -56,7 +56,7 @@ public sealed class EnchantStorm : ModCardTemplate
 			.Execute(choiceContext);
 	}
 
-	// 升级：每张附魔牌造成的额外伤害 4 -> 6。
+	// 升级：每张附魔牌造成的额外伤害 2 -> 3。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.ExtraDamage.UpgradeValueBy(1m);
