@@ -239,6 +239,26 @@ public sealed class XxxPower : ModPowerTemplate
 - `ModPowerTemplate` 悬停提示：能量类设 `protected override bool IncludeEnergyHoverTip => true`（自动显示 Amount）；其余用 `AdditionalHoverTips`。
 - 可空警告按需加 `!`：`Owner.Player!` / `CombatState!` / `Owner.PlayerCombatState!`。
 
+#### 3.1 每个副本单独计数（`PowerInstanceType.Instanced`）
+
+默认 `PowerInstanceType.None` 时，重复施加同一 Power 只会**叠加 Amount**（图标只有一个、进度计数共享）。
+若要求「每一个打出的副本单独计数、单独显示」（例：元能吸附 EnergyAbsorptionPower），覆写：
+
+```csharp
+public override PowerStackType StackType => PowerStackType.Counter;
+// 每次施加都新建独立实例而非叠加层数（原版神气制胜 PanachePower / 定时炸弹 TheBombPower 同款）。
+public override PowerInstanceType InstanceType => PowerInstanceType.Instanced;
+```
+
+- `PowerCmd.Apply<T>` 走 `FindExistingInstanceForStacking`：`Instanced => null` → 每次都 `ToMutable()`，
+  因此每个实例拥有**自己的 `DynamicVars`**（`{EnchantedCardsLeft}` 之类的进度占位符互不影响）与自己的私有数据。
+- 私有数据用 `protected override object? InitInternalData() => new Data();` + `GetInternalData<Data>()`；
+  克隆/施加时重新初始化，**不会**出现在本地化里（要显示的数值放 `DynamicVars`）。
+- 施加本能力的卡牌刚打出时 `AfterCardPlayed` 会立刻触发（`CardModel.Play` 里 OnPlay 之后才 `Hook.AfterCardPlayed`），
+  新建的实例会把这张牌本身算进进度 → 参考 PanachePower 的 `Data.alreadyApplied` 首次跳过。
+- UI（`NPowerContainer`）按 `Creature.Powers` 逐个实例建图标，不做同 Id 去重，所以多个副本会各显示一个带各自数字的图标。
+- 结算总量不变：N 个副本 × 每副本 5 张附魔牌 = 每 5 张附魔牌共获得 N 点能量。
+
 ### 4. 生成牌随机附魔（附魔造物 EnchantedCreation）
 
 - 随机附魔池抽成共享静态类 `TheSolitaryCode/Cards/RandomEnchantPool.cs`（`EnchantRandomly(Rng, CardModel)`），供献祭 Sacrifice / 附魔造物复用，避免两处池子漂移。
@@ -351,6 +371,27 @@ dotnet ...\ilspycmd.dll -t 'STS2RitsuLib.Scaffolding.Content.ModCardTemplate' 'D
 - 事件钩子全部定义在 `AbstractModel`（Power/遗物/卡牌都能覆写）；触发点在 `../sts2_20260821/src/Core/Commands/CardPileCmd.cs` 等。
 - 本地化键：卡牌 `THE_SOLITARY_CARD_<CLASS_NAME>.title/.description/.smartDescription`；Power `THE_SOLITARY_POWER_<CLASS_NAME>_POWER.*`。
 
+### 9. Harmony 补丁技法（RitsuLib `IPatchMethod`，已实测验证）
+
+> 验证环境：游戏自带 `data_sts2_windows_x86_64/0Harmony.dll` + 游戏运行时 .NET 9（见 `sts2.runtimeconfig.json`）。
+> ⚠️ 这套 0Harmony **不支持 CoreCLR 10**（`PlatformNotSupportedException: CoreCLR version 10.x is not supported`），
+> 用 `dotnet run` 做对照实验时测试工程必须 `<TargetFramework>net9.0</TargetFramework>`。
+
+- **目标解析**：`new ModPatchTarget(type, methodName, parameterTypes, ignoreIfMissing)`；
+  `parameterTypes` 建议显式给全（如 `[typeof(PlayerChoiceContext), typeof(CardPlay)]`），传 `null` 时 `GetMethod` 可能歧义。
+  `public/protected/private` 方法都能命中（内部用 `instance|static|public|nonpublic`）。
+- **改写原方法参数（prefix）**：形参声明为 `ref`（**名字必须与原方法形参一致**），写入在进入原方法前生效，**对 `async` 方法同样有效**（状态机拿到的是改写后的对象）：
+  ```csharp
+  public static bool Prefix(ref CardPlay? cardPlay) { cardPlay = CopyWithTarget(cardPlay!, target); return true; }
+  ```
+- **跳过原方法**：prefix `return false`。若原方法返回 `Task`，**必须**同时给 `ref Task __result` 赋一个已完成 Task，
+  否则调用方 `await` 会拿到 null 抛 NRE：
+  ```csharp
+  public static bool Prefix(ref Task __result) { __result = Task.CompletedTask; return false; }  // 不执行原方法
+  ```
+- **只做后置效果**：用 `async void Postfix(...)` + `try/catch`（异常必须自己吞掉，否则崩游戏；见 `AfterEnchantPatch`）。
+- 新增 `IPatchMethod` 类后**必须在 `Entry.Initialize()` 里 `CreatePatcher` + `RegisterPatch<T>` + `PatchAll()`**，并保持 `PatchId` 唯一。
+
 ## 关键注意事项（Gotchas）
 
 - **`Entry.cs` 的 `ModId` 必须与 `TheSolitary.json` 的 `id` 一致**（当前都是 `TheSolitary`）。
@@ -362,4 +403,8 @@ dotnet ...\ilspycmd.dll -t 'STS2RitsuLib.Scaffolding.Content.ModCardTemplate' 'D
 - 美术资源取材自 `../WatcherBeautified`（观者美化包，GDRE 导出的 Godot 工程），详见「美术资源目录」一节。
 - 查阅游戏 API 与原版描述措辞优先参考 `../sts2_20260821`（源码 + 本地化）；旧 `.tools/sts2_decomp/` 仅为残留反编译副本。
 - **余烬附魔的降费是不可逆的**：原版 `TezcatarasEmber.OnEnchant` 用 `EnergyCost.UpgradeBy` 把基础费用永久改写成 0，而 `ClearEnchantmentInternal` 不恢复费用、`EnchantmentModel` 也没有移除钩子。本 Mod 在施加时用 Harmony 补丁（`Patches/TezcatarasEmberCostRecordPatch.cs`）把「附魔前费用」写入附魔 `Props`，`EnchantHelpers.SwapEnchantmentsBetweenTwoCards` 清除余烬后调用 `RestoreCardAfterEmberRemoved` 恢复费用 + `RemoveKeyword(CardKeyword.Eternal)`。**以后任何「移除/交换附魔」的逻辑都必须走 `EnchantHelpers` 的交换路径或复用该恢复逻辑**，不要直接 `CardCmd.ClearEnchantment`，否则 0 费/永恒会残留在原卡上。
-- **RitsuLib Harmony 补丁必须显式注册**：新增 `IPatchMethod` 类后，必须在 `Entry.Initialize()` 里 `RitsuLibFramework.CreatePatcher(...)` + `patcher.RegisterPatch<T>()` + `patcher.PatchAll()`（参考 `AfterEnchantPatch` / `TezcatarasEmberCostRecordPatch` 的注册）。不会自动发现；漏注册表现为「编译通过但补丁不生效」（启动日志里看不到对应的 `Patch application complete` 行）。
+- **RitsuLib Harmony 补丁必须显式注册**：新增 `IPatchMethod` 类后，必须在 `Entry.Initialize()` 里 `RitsuLibFramework.CreatePatcher(...)` + `patcher.RegisterPatch<T>()` + `patcher.PatchAll()`（参考 `AfterEnchantPatch` / `TezcatarasEmberCostRecordPatch` / `InkyNullTargetPatch` 的注册）。不会自动发现；漏注册表现为「编译通过但补丁不生效」（启动日志里看不到对应的 `Patch application complete` 行）。
+- **墨影（Inky）的虚弱在原版有两个毛病**：① `Inky.OnPlay` 只对 `TargetType.AllEnemies` 用 `HittableEnemies`，其余一律取 `cardPlay.Target`；而 `RandomEnemy`（随机多段攻击牌的目标类型，如 光子映射 / 飞剑回旋镖 / 星尘）与 `Self`/`None`/`AnyPlayer` 等牌**不选目标**，`cardPlay.Target == null` → `[null]` 进 `PowerCmd.Apply` → `target.CanReceivePowers` 抛 `NullReferenceException`（原版墨影只由 BladeOfInk 发给 AnyEnemy/AllEnemies 的小刀，所以这条路径在原版没被踩到）。② 原版每次打牌最多只施加 1 层（每个目标一次），表达不了"每命中一次加一层虚弱"。本 Mod 用两个补丁解决（都在 `Entry.Initialize()` 里注册到 `inky-target` patcher）：
+  - `Patches/InkyHitRecordPatch.cs`：前缀挂 `Hook.AfterDamageGiven`（**每次命中/每个目标都会触发一次**，含被完全格挡的命中），把"这张墨影牌本次打牌命中过的敌人"按 `(卡牌实例, CurrentPlayIndex)` 登记进 `InkyHitRegistry`（`ConditionalWeakTable` 弱引用，战斗结束自动回收）。**列表不去重**（命中几次记几次）。
+  - `Patches/InkyTargetPatch.cs`：前缀挂 `Inky.OnPlay`。**有命中登记（任意目标类型）→ 命中几次就对命中的敌人施加几次 1 层虚弱**（同一敌人多段命中叠多层；指定敌人的多段牌同样按段数叠），施加封装成原方法要返回的 `Task`，仍被打牌流程 `await`（时机与原版一致：本次伤害结算完之后，不会反过来增强本次多段伤害）；本次没造成伤害时退回原版（有目标 → 给该目标 1 层；`AllEnemies` → 所有可命中敌人各 1 层；`RandomEnemy` → 兜底随机一个可命中敌人）；其余无目标牌 → 安全跳过。
+  - **以后新增「给牌附墨影」的来源或改这两个补丁时，务必保留兜底**。若想改回"同一敌人每次打牌只加 1 层"，在 `InkyHitRegistry.Record` 里加回 `if (!hits.Contains(target))` 去重即可。

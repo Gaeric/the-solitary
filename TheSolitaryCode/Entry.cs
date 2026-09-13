@@ -62,6 +62,15 @@ public partial class Entry
         emberCostPatcher.RegisterPatch<TezcatarasEmberCostRecordPatch>();
         emberCostPatcher.PatchAll();
 
+        // 墨影（Inky）目标补丁：原版 Inky.OnPlay 只认 cardPlay.Target，随机多段攻击牌（RandomEnemy，
+        // 如光子映射）不选目标 → target 为 null → PowerCmd.Apply 抛 NRE；且原版每次打牌最多只施加 1 层，
+        // 无法表达"每命中一次加一层虚弱"。两个补丁类配合：InkyHitRecordPatch 登记每次命中，
+        // InkyTargetPatch 结算时按命中次数逐层施加（同一敌人多段命中会叠多层）。
+        var inkyPatcher = RitsuLibFramework.CreatePatcher(ModId, "inky-target", "Inky Target Guard", LogType.Generic);
+        inkyPatcher.RegisterPatch<InkyHitRecordPatch>();
+        inkyPatcher.RegisterPatch<InkyTargetPatch>();
+        inkyPatcher.PatchAll();
+
         Logger.Info("TheSolitary initialized.");
     }
 }
