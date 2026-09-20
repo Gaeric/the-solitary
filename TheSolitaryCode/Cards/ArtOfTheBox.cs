@@ -58,10 +58,4 @@ public sealed class ArtOfTheBox : ModCardTemplate
 			await Cmd.Wait(0.1f);
 		}
 	}
-
-	// 升级后：伤害 3 -> 5（生成的术式数量不变，但变为升级版，由 IsUpgraded 控制）。
-	protected override void OnUpgrade()
-	{
-		DynamicVars.Damage.UpgradeValueBy(2);
-	}
 }

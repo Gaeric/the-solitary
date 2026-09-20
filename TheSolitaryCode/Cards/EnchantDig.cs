@@ -13,7 +13,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 挖掘（character.org 白卡）：1 费攻击。
-// 造成 6 点伤害（升级后 8 点），抽 1 张牌（升级后 2 张）；每抽到一张附魔牌，随机打出一张术式。
+// 造成 6 点伤害，抽 1 张牌（升级后 2 张）；每抽到一张附魔牌，随机打出一张术式（升级后为术式+）。
 // 随机术式生成与直接快速自动打出复用 Arts.CreateRandomArtAndAutoPlay（参考路径追踪 PathTracing，不进手牌）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantDig : ModCardTemplate
@@ -45,7 +45,7 @@ public sealed class EnchantDig : ModCardTemplate
 		new CardsVar(1)
 	];
 
-	// 打出时：造成伤害；抽 N 张牌；每抽到一张附魔牌，随机打出一张术式。
+	// 打出时：造成伤害；抽 N 张牌；每抽到一张附魔牌，随机打出一张术式（升级后为术式+）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -60,18 +60,18 @@ public sealed class EnchantDig : ModCardTemplate
 		List<CardModel> drawn = (await CardPileCmd.Draw(
 			choiceContext, DynamicVars.Cards.BaseValue, Owner)).ToList();
 
-		// 3. 每抽到一张附魔牌，生成一张随机术式（未升级版）并直接自动打出（随机敌方目标，不进手牌，参考路径追踪）。
+		// 3. 每抽到一张附魔牌，生成一张随机术式并直接自动打出（随机敌方目标，不进手牌，参考路径追踪）。
+		//    本卡升级后生成的术式为术式+（升级版），由 IsUpgraded 控制（与路径追踪 PathTracing 同款）。
 		foreach (CardModel card in drawn.Where(c => c.Enchantment != null))
 		{
 			await Arts.CreateRandomArtAndAutoPlay(
-				Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext);
+				Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 		}
 	}
 
-	// 升级：伤害 6 -> 8，抽牌数 1 -> 2。
+	// 升级：抽牌数 1 -> 2；打出的随机术式变为术式+（升级版，由 OnPlay 中的 IsUpgraded 控制）。
 	protected override void OnUpgrade()
 	{
-		DynamicVars.Damage.UpgradeValueBy(5m);
 		DynamicVars.Cards.UpgradeValueBy(1m);
 	}
 }
