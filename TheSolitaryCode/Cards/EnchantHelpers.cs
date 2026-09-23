@@ -206,36 +206,29 @@ public static class EnchantHelpers
 		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
 		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
 
-		// 余烬（特兹卡塔拉的余烬）的降费是永久改写基础费用（EnergyCost.UpgradeBy → SetCustomBaseCost(0)），
-		// 清除附魔不会自动还原；若被清除的是余烬，先记下其附魔前费用，清除后再恢复。
-		bool firstHadEmber = TryGetEmberOriginalCost(first.Enchantment, out int firstEmberCost);
-		bool secondHadEmber = TryGetEmberOriginalCost(second.Enchantment, out int secondEmberCost);
+		// 附魔对卡牌的改写（费用/关键词）不会随附魔被清除而撤销（游戏没有"移除附魔"回调），
+		// 因此在清除前快照两张牌各自需要还原的副作用，清除后再逐项还原。
+		RemovedEnchantmentSideEffects firstEffects = RemovedEnchantmentSideEffects.Capture(first.Enchantment);
+		RemovedEnchantmentSideEffects secondEffects = RemovedEnchantmentSideEffects.Capture(second.Enchantment);
 
 		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）。
 		CardCmd.ClearEnchantment(first);
 		CardCmd.ClearEnchantment(second);
 
-		// 手动恢复被移除的余烬留下的费用/永恒（RemoveKeyword 只作用于 LocalKeywords，
-		// 恰好撤销余烬自身的 AddKeyword(Eternal)，不会误伤卡牌自带的永恒）。
-		if (firstHadEmber)
-		{
-			RestoreCardAfterEmberRemoved(first, firstEmberCost);
-		}
-		if (secondHadEmber)
-		{
-			RestoreCardAfterEmberRemoved(second, secondEmberCost);
-		}
+		// 还原被移除附魔留下的改写：余烬的降费、灵魂之力移除的消耗、其它附魔添加的关键词等。
+		firstEffects.Restore(first);
+		secondEffects.Restore(second);
 
 		// 无条件施加交换后的附魔（与游戏加载时重新施加附魔一致，绕过 CanEnchant）。
 		// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
 		if (secondEnchantment != null)
 		{
-			ApplyEnchantment(first, secondEnchantment);
+			ApplyEnchantment(first, secondEnchantment, secondEnchantment.Amount);
 			PlayEnchantVfx(first);
 		}
 		if (firstEnchantment != null)
 		{
-			ApplyEnchantment(second, firstEnchantment);
+			ApplyEnchantment(second, firstEnchantment, firstEnchantment.Amount);
 			PlayEnchantVfx(second);
 		}
 	}
@@ -263,9 +256,113 @@ public static class EnchantHelpers
 	}
 
 	/// <summary>
-	/// 余烬被移除后恢复卡牌：把基础费用还原为附魔前的值，并移除余烬加上的永恒关键词。
-	/// RemoveKeyword 只作用于 LocalKeywords，恰好撤销余烬自身的 AddKeyword(Eternal)，
-	/// 不会误伤卡牌自带的永恒（如诅咒牌的 CanonicalKeywords）。
+	/// 读取附魔记录下的"附魔前的本地关键词集合"（由 EnchantKeywordRecordPatch 在 ModifyCard → OnEnchant 之前写入 Props）。
+	/// 附魔的 OnEnchant 会永久改写卡牌关键词——灵魂之力 SoulsPower 移除消耗 Exhaust，
+	/// 黏糊 Goopy / 稳定 Steady / 御准 RoyallyApproved / 余烬 TezcatarasEmber 添加关键词——
+	/// 而清除附魔不会撤销改写，因此需要这份快照来还原。
+	/// 没有记录时返回 false（保持旧行为：不还原关键词）。
+	/// </summary>
+	private static bool TryGetKeywordsBeforeEnchant(EnchantmentModel? enchantment, out HashSet<CardKeyword> keywordsBefore)
+	{
+		keywordsBefore = [];
+		if (enchantment?.Props?.intArrays == null)
+		{
+			return false;
+		}
+		foreach (SavedProperties.SavedProperty<int[]> prop in enchantment.Props.intArrays)
+		{
+			if (prop.name != EnchantKeywordRecordPatch.KeywordsBeforeEnchantPropName || prop.value == null)
+			{
+				continue;
+			}
+			foreach (int value in prop.value)
+			{
+				keywordsBefore.Add((CardKeyword)value);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// 附魔被移除后还原它改写过的卡牌关键词：把"附魔前快照"与"当前关键词"双向求差。
+	/// - 快照里有、现在没有 → 是附魔移除掉的（灵魂之力 → 消耗 Exhaust）→ 加回来；
+	/// - 现在有、快照里没有 → 是附魔添加的（黏糊 → 消耗；稳定/御准 → 保留、固有；余烬 → 永恒）→ 去掉。
+	/// CardModel.AddKeyword / RemoveKeyword 只作用于 LocalKeywords（canonical + 本地增删），
+	/// 不涉及全局关键词，因此不会影响其它牌或战斗中由 Power 提供的关键词。
+	/// </summary>
+	private static void RestoreCardKeywordsAfterEnchantmentRemoved(CardModel card, HashSet<CardKeyword> keywordsBefore)
+	{
+		// GetKeywordsWithSources(Local) 在本地请求时返回卡牌内部的实时集合，必须复制后再迭代。
+		HashSet<CardKeyword> keywordsNow = card.GetKeywordsWithSources(KeywordSources.Local).ToHashSet();
+
+		foreach (CardKeyword keyword in keywordsBefore.Except(keywordsNow))
+		{
+			card.AddKeyword(keyword);
+		}
+		foreach (CardKeyword keyword in keywordsNow.Except(keywordsBefore))
+		{
+			card.RemoveKeyword(keyword);
+		}
+	}
+
+	/// <summary>
+	/// 一张牌被移除附魔后需要手动撤销的"卡牌永久改写"。
+	/// 游戏清除附魔（CardCmd.ClearEnchantment → CardModel.ClearEnchantmentInternal → EnchantmentModel.ClearInternal）
+	/// 只摘除附魔引用，EnchantmentModel 也没有任何"移除附魔"回调，因此 OnEnchant 的改写会残留在原卡上：
+	/// - 灵魂之力 SoulsPower 移除消耗 Exhaust（快照见 EnchantKeywordRecordPatch）；
+	/// - 黏糊 / 稳定 / 御准 / 余烬添加关键词，余烬还会把基础费用永久改写成 0
+	///   （费用记录见 TezcatarasEmberCostRecordPatch）。
+	/// 交换附魔前用 <see cref="Capture"/> 快照，清除后调用 <see cref="Restore"/> 还原。
+	/// </summary>
+	private readonly struct RemovedEnchantmentSideEffects
+	{
+		// 需要还原的余烬费用（-1 = 无需还原）。
+		private readonly int _emberOriginalCost;
+
+		// 附魔前的本地关键词快照（null = 没有记录，不还原关键词）。
+		private readonly HashSet<CardKeyword>? _keywordsBefore;
+
+		private RemovedEnchantmentSideEffects(int emberOriginalCost, HashSet<CardKeyword>? keywordsBefore)
+		{
+			_emberOriginalCost = emberOriginalCost;
+			_keywordsBefore = keywordsBefore;
+		}
+
+		/// <summary>快照一张牌当前附魔在移除后会留下的副作用（必须在 ClearEnchantment 之前调用）。</summary>
+		public static RemovedEnchantmentSideEffects Capture(EnchantmentModel? enchantment)
+		{
+			// TryGetEmberOriginalCost 为 false 时 out 值固定为 -1，表示"无需还原费用"。
+			bool hasEmberCost = TryGetEmberOriginalCost(enchantment, out int emberOriginalCost);
+			HashSet<CardKeyword>? keywordsBefore = null;
+			if (enchantment != null && TryGetKeywordsBeforeEnchant(enchantment, out HashSet<CardKeyword> snapshot))
+			{
+				keywordsBefore = snapshot;
+			}
+			return new RemovedEnchantmentSideEffects(hasEmberCost ? emberOriginalCost : -1, keywordsBefore);
+		}
+
+		/// <summary>撤销这些副作用（必须在附魔已被移除后调用）。</summary>
+		public void Restore(CardModel card)
+		{
+			if (_emberOriginalCost >= 0)
+			{
+				RestoreCardAfterEmberRemoved(card, _emberOriginalCost);
+			}
+			if (_keywordsBefore != null)
+			{
+				RestoreCardKeywordsAfterEnchantmentRemoved(card, _keywordsBefore);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 余烬被移除后恢复卡牌：把基础费用还原为附魔前的值。
+	/// 余烬加上的永恒（Eternal）关键词改由 <see cref="RestoreCardKeywordsAfterEnchantmentRemoved"/>
+	/// 按"附魔前关键词快照"还原——这里不再无条件 RemoveKeyword(Eternal)：
+	/// RemoveKeyword 直接作用于 LocalKeywords（= CanonicalKeywords + AddKeyword - RemoveKeyword），
+	/// 因此对"自带永恒"的牌（如 黏糊魔典 StickyGrimoire 的 CanonicalKeywords）同样会移除，
+	/// 反而会误伤卡牌自身的永恒。
 	/// </summary>
 	private static void RestoreCardAfterEmberRemoved(CardModel card, int originalCost)
 	{
@@ -273,12 +370,14 @@ public static class EnchantHelpers
 		{
 			card.EnergyCost.SetCustomBaseCost(originalCost);
 		}
-		card.RemoveKeyword(CardKeyword.Eternal);
 	}
 
 	/// <summary>
 	/// 从序列化形式重建附魔，使交换后的副本拥有初始运行状态（Status 复位、一次性标记清除），
-	/// 同时保留 Id、Props 与 Amount。
+	/// 同时保留 Id、Amount 与各 [SavedProperty] 属性。
+	/// 注意：附魔自身挂在模型上的 <see cref="EnchantmentModel.Props"/> 记录不会随重建保留
+	/// （SavedProperties.From 只收集 [SavedProperty] 属性），因此重建后的实例会在
+	/// ApplyEnchantment → ModifyCard → OnEnchant 时由补丁重新写入"附魔前"记录。
 	/// </summary>
 	private static EnchantmentModel? RebuildEnchantment(EnchantmentModel? enchantment)
 	{
@@ -293,11 +392,24 @@ public static class EnchantHelpers
 	/// 施加附魔的内部路径（与 CardCmd.Enchant 在 EnchantInternal 之后的步骤一致，但绕过 CanEnchant，
 	/// 因为交换是无条件的）。
 	/// </summary>
-	private static void ApplyEnchantment(CardModel card, EnchantmentModel enchantment)
+	private static void ApplyEnchantment(CardModel card, EnchantmentModel enchantment, decimal amount)
 	{
-		card.EnchantInternal(enchantment, enchantment.Amount);
+		card.EnchantInternal(enchantment, amount);
 		enchantment.ModifyCard();
 		card.FinalizeUpgradeInternal();
+	}
+
+	/// <summary>
+	/// 绕过 <see cref="EnchantmentModel.CanEnchant"/> 直接给指定卡牌施加附魔，用于"把牌变换成某种牌后
+	/// 再附魔"这类目标由效果指定的情况（例：博采众长把牌变换成能力牌后附魔 注能 Imbued，
+	/// 而注能自身只允许附魔技能牌）。附魔实例需要是可变实例（<c>ModelDb.Enchantment&lt;T&gt;().ToMutable()</c>）。
+	/// </summary>
+	/// <param name="card">要附魔的牌（必须是可变实例）。</param>
+	/// <param name="enchantment">要施加的附魔（可变实例）。</param>
+	/// <param name="amount">附魔数值（默认 1，与 CardCmd.Enchant 的调用方式一致）。</param>
+	public static void ApplyEnchantmentBypassingCanEnchant(CardModel card, EnchantmentModel enchantment, decimal amount = 1m)
+	{
+		ApplyEnchantment(card, enchantment, amount);
 	}
 
 	/// <summary>

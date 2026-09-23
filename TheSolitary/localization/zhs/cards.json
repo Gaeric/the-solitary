@@ -37,8 +37,8 @@
   "THE_SOLITARY_CARD_SACRIFICE.description": "获得 {Block:diff()} 点格挡。选择一张手牌消耗。随机为手牌中另一张牌[gold]附魔[/gold]。",
   "THE_SOLITARY_CARD_SACRIFICE.smartDescription": "获得 {Block:diff()} 点格挡。选择一张手牌消耗。随机为手牌中另一张牌[gold]附魔[/gold]。",
   "THE_SOLITARY_CARD_ENCHANT_IMPACT.title": "移位",
-  "THE_SOLITARY_CARD_ENCHANT_IMPACT.description": "造成{Damage:diff()}点伤害。\n手牌中每有一张[gold]附魔[/gold]牌，就抽一张牌。{InCombat:\n（抽{CalculatedCards:diff()}张牌）}",
-  "THE_SOLITARY_CARD_ENCHANT_IMPACT.smartDescription": "造成{Damage:diff()}点伤害。\n手牌中每有一张[gold]附魔[/gold]牌，就抽一张牌。{InCombat:\n（抽{CalculatedCards:diff()}张牌）}",
+  "THE_SOLITARY_CARD_ENCHANT_IMPACT.description": "造成{Damage:diff()}点伤害。\n手牌中每有1张[gold]附魔[/gold]牌，本场战斗中所有[gold]移位[/gold]卡牌的伤害增加{Increase:diff()}点。",
+  "THE_SOLITARY_CARD_ENCHANT_IMPACT.smartDescription": "造成{Damage:diff()}点伤害。\n手牌中每有1张[gold]附魔[/gold]牌，本场战斗中所有[gold]移位[/gold]卡牌的伤害增加{Increase:diff()}点。",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.title": "腐蚀之拳",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.description": "造成{Damage:diff()}点伤害。\n如果敌人有负面效果，则额外造成一次伤害。",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.smartDescription": "造成{Damage:diff()}点伤害。\n如果敌人有负面效果，则额外造成一次伤害。",
@@ -260,5 +260,15 @@
   "THE_SOLITARY_CARD_SUPPRESSION.smartDescription": "造成 {Damage:diff()} 点伤害。\n如果敌人有3种以上负面效果，为手牌中所有[gold]技能[/gold]牌[gold]附魔[/gold][gold]伶俐[/gold] {AdroitAmount:diff()}。",
   "THE_SOLITARY_CARD_WELLSPRING.title": "涌泉",
   "THE_SOLITARY_CARD_WELLSPRING.description": "获得 {Energy:energyIcons()}。\n每洗牌2次，获得的能量减少1点。",
-  "THE_SOLITARY_CARD_WELLSPRING.smartDescription": "获得 {Energy:energyIcons()}。\n每洗牌2次，获得的能量减少1点。"
+  "THE_SOLITARY_CARD_WELLSPRING.smartDescription": "获得 {Energy:energyIcons()}。\n每洗牌2次，获得的能量减少1点。",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.title": "勤学",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.description": "在进入{Types:diff()}种不同类型的房间后，这张牌转换为[gold]博识[/gold]。",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.smartDescription": "在进入{Types:diff()}种不同类型的房间后，这张牌转换为[gold]博识[/gold]。",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.missingRoom.description": "还没有进入过这种类型的房间（勤学需要它）。",
+  "THE_SOLITARY_CARD_ERUDITION.title": "博识",
+  "THE_SOLITARY_CARD_ERUDITION.description": "从{Cards:diff()}张其它角色的{IfUpgraded:show:升级过的|}[gold]稀有[/gold][gold]能力[/gold]牌中选择1张打出。\n将这张牌永久转换为你选择的能力牌并[gold]附魔[/gold][gold]注能[/gold]。",
+  "THE_SOLITARY_CARD_ERUDITION.smartDescription": "从{Cards:diff()}张其它角色的{IfUpgraded:show:升级过的|}[gold]稀有[/gold][gold]能力[/gold]牌中选择1张打出。\n将这张牌永久转换为你选择的能力牌并[gold]附魔[/gold][gold]注能[/gold]。",
+  "THE_SOLITARY_CARD_REQUIEM.title": "超渡",
+  "THE_SOLITARY_CARD_REQUIEM.description": "在{Combats:diff()}场战斗后从你的[gold]牌组[/gold]中移除，并获得{Gold:diff()}[gold]金币[/gold]。",
+  "THE_SOLITARY_CARD_REQUIEM.smartDescription": "在{Combats:diff()}场战斗后从你的[gold]牌组[/gold]中移除，并获得{Gold:diff()}[gold]金币[/gold]。"
 }

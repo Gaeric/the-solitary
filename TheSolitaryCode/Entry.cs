@@ -62,6 +62,14 @@ public partial class Entry
         emberCostPatcher.RegisterPatch<TezcatarasEmberCostRecordPatch>();
         emberCostPatcher.PatchAll();
 
+        // 附魔改写关键词记录：附魔的 OnEnchant 会永久改写卡牌关键词（灵魂之力 SoulsPower 移除消耗，
+        // 黏糊/稳定/御准/余烬添加关键词），清除附魔同样不会还原。该补丁在 EnchantmentModel.ModifyCard
+        // （OnEnchant 唯一调用点）前把"附魔前的本地关键词集合"写入附魔 Props，
+        // 供 EnchantHelpers 在清除附魔时按快照还原（修复：灵魂之力的附魔被移走后消耗词条不恢复）。
+        var enchantKeywordPatcher = RitsuLibFramework.CreatePatcher(ModId, "enchant-keyword-record", "Enchant Keyword Record", LogType.Generic);
+        enchantKeywordPatcher.RegisterPatch<EnchantKeywordRecordPatch>();
+        enchantKeywordPatcher.PatchAll();
+
         // 墨影（Inky）目标补丁：原版 Inky.OnPlay 只认 cardPlay.Target，随机多段攻击牌（RandomEnemy，
         // 如光子映射）不选目标 → target 为 null → PowerCmd.Apply 抛 NRE；且原版每次打牌最多只施加 1 层，
         // 无法表达"每命中一次加一层虚弱"。两个补丁类配合：InkyHitRecordPatch 登记每次命中，

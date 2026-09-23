@@ -37,8 +37,8 @@
   "THE_SOLITARY_CARD_SACRIFICE.description": "Gain {Block:diff()} [gold]Block[/gold]. Exhaust a card from your hand. Randomly [gold]Enchant[/gold] another card in your hand.",
   "THE_SOLITARY_CARD_SACRIFICE.smartDescription": "Gain {Block:diff()} [gold]Block[/gold]. Exhaust a card from your hand. Randomly [gold]Enchant[/gold] another card in your hand.",
   "THE_SOLITARY_CARD_ENCHANT_IMPACT.title": "Enchant Impact",
-  "THE_SOLITARY_CARD_ENCHANT_IMPACT.description": "Deal {Damage:diff()} damage.\nDraw 1 card for each [gold]Enchanted[/gold] card in your hand.{InCombat:\n(Draw {CalculatedCards:diff()} {CalculatedCards:plural:card|cards})|}",
-  "THE_SOLITARY_CARD_ENCHANT_IMPACT.smartDescription": "Deal {Damage:diff()} damage.\nDraw 1 card for each [gold]Enchanted[/gold] card in your hand.{InCombat:\n(Draw {CalculatedCards:diff()} {CalculatedCards:plural:card|cards})|}",
+  "THE_SOLITARY_CARD_ENCHANT_IMPACT.description": "Deal {Damage:diff()} damage.\nFor each [gold]Enchanted[/gold] card in your hand, increase the damage of ALL [gold]Enchant Impact[/gold] cards by {Increase:diff()} this combat.",
+  "THE_SOLITARY_CARD_ENCHANT_IMPACT.smartDescription": "Deal {Damage:diff()} damage.\nFor each [gold]Enchanted[/gold] card in your hand, increase the damage of ALL [gold]Enchant Impact[/gold] cards by {Increase:diff()} this combat.",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.title": "Corrosive Fist",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.description": "Deal {Damage:diff()} damage.\nIf the enemy has a debuff, deal damage again.",
   "THE_SOLITARY_CARD_CORROSIVE_FIST.smartDescription": "Deal {Damage:diff()} damage.\nIf the enemy has a debuff, deal damage again.",
@@ -260,5 +260,15 @@
   "THE_SOLITARY_CARD_SUPPRESSION.smartDescription": "Deal {Damage:diff()} damage.\nIf the enemy has 3 or more types of [gold]negative effects[/gold], [gold]Enchant[/gold] ALL [gold]Skill[/gold] cards in your hand with [gold]Adroit[/gold] {AdroitAmount:diff()}.",
   "THE_SOLITARY_CARD_WELLSPRING.title": "Wellspring",
   "THE_SOLITARY_CARD_WELLSPRING.description": "Gain {Energy:energyIcons()}.\nFor every 2 times you shuffle, the energy gained is reduced by 1.",
-  "THE_SOLITARY_CARD_WELLSPRING.smartDescription": "Gain {Energy:energyIcons()}.\nFor every 2 times you shuffle, the energy gained is reduced by 1."
+  "THE_SOLITARY_CARD_WELLSPRING.smartDescription": "Gain {Energy:energyIcons()}.\nFor every 2 times you shuffle, the energy gained is reduced by 1.",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.title": "Diligent Study",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.description": "After entering {Types:diff()} more {Types:plural:type|types} of room, transforms into [gold]Erudition[/gold].",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.smartDescription": "After entering {Types:diff()} more {Types:plural:type|types} of room, transforms into [gold]Erudition[/gold].",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.missingRoom.description": "You haven't entered this type of room yet (Diligent Study needs it).",
+  "THE_SOLITARY_CARD_ERUDITION.title": "Erudition",
+  "THE_SOLITARY_CARD_ERUDITION.description": "Play 1 of {Cards:diff()} {IfUpgraded:show:[gold]Upgraded[/gold] |}[gold]Rare[/gold] [gold]Powers[/gold] from other characters.\nPermanently transform this card into the chosen Power and [gold]Enchant[/gold] it with [gold]Imbued[/gold].",
+  "THE_SOLITARY_CARD_ERUDITION.smartDescription": "Play 1 of {Cards:diff()} {IfUpgraded:show:[gold]Upgraded[/gold] |}[gold]Rare[/gold] [gold]Powers[/gold] from other characters.\nPermanently transform this card into the chosen Power and [gold]Enchant[/gold] it with [gold]Imbued[/gold].",
+  "THE_SOLITARY_CARD_REQUIEM.title": "Requiem",
+  "THE_SOLITARY_CARD_REQUIEM.description": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:combat|combats}, and gain {Gold:diff()} [gold]Gold[/gold].",
+  "THE_SOLITARY_CARD_REQUIEM.smartDescription": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:combat|combats}, and gain {Gold:diff()} [gold]Gold[/gold]."
 }
