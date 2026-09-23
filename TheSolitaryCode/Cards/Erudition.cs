@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Factories;
@@ -88,8 +89,17 @@ public sealed class Erudition : ModCardTemplate
 			}
 		}
 
-		// 2. 选择 1 张（与富足一致，使用"从几张牌中选一张"界面）。
-		CardModel? chosen = await CardSelectCmd.FromChooseACardScreen(choiceContext, candidates, Owner);
+		// 2. 选择 1 张。
+		//    注意：候选有 5 张，超过 CardSelectCmd.FromChooseACardScreen 的 3 张上限（内部 `cards.Count > 3` 即抛异常，
+		//    原版 飞溅 Splash 之所以能用是因为它只取 3 张），因此这里用网格选择界面 FromSimpleGrid
+		//    （与遗物 抉择悖论 ChoicesParadox 的"多选一"同款，战斗中可用，无张数限制）。
+		List<CardModel> selected = (await CardSelectCmd.FromSimpleGrid(
+			choiceContext,
+			candidates,
+			Owner,
+			new CardSelectorPrefs(base.SelectionScreenPrompt, 1))).ToList();
+
+		CardModel? chosen = selected.FirstOrDefault();
 		if (chosen == null)
 		{
 			return;

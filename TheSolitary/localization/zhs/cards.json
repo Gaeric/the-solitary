@@ -268,6 +268,7 @@
   "THE_SOLITARY_CARD_ERUDITION.title": "博识",
   "THE_SOLITARY_CARD_ERUDITION.description": "从{Cards:diff()}张其它角色的{IfUpgraded:show:升级过的|}[gold]稀有[/gold][gold]能力[/gold]牌中选择1张打出。\n将这张牌永久转换为你选择的能力牌并[gold]附魔[/gold][gold]注能[/gold]。",
   "THE_SOLITARY_CARD_ERUDITION.smartDescription": "从{Cards:diff()}张其它角色的{IfUpgraded:show:升级过的|}[gold]稀有[/gold][gold]能力[/gold]牌中选择1张打出。\n将这张牌永久转换为你选择的能力牌并[gold]附魔[/gold][gold]注能[/gold]。",
+  "THE_SOLITARY_CARD_ERUDITION.selectionScreenPrompt": "选择1张能力牌。",
   "THE_SOLITARY_CARD_REQUIEM.title": "超渡",
   "THE_SOLITARY_CARD_REQUIEM.description": "在{Combats:diff()}场战斗后从你的[gold]牌组[/gold]中移除，并获得{Gold:diff()}[gold]金币[/gold]。",
   "THE_SOLITARY_CARD_REQUIEM.smartDescription": "在{Combats:diff()}场战斗后从你的[gold]牌组[/gold]中移除，并获得{Gold:diff()}[gold]金币[/gold]。"
