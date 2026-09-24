@@ -11,6 +11,8 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Models.Enchantments;
+using MegaCrit.Sts2.Core.Rooms;
+using MegaCrit.Sts2.Core.Saves.Runs;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -37,6 +39,39 @@ public sealed class Erudition : ModCardTemplate
 	// 衍生牌不出现在卡牌图鉴中。
 	private const bool ShowInCardLibrary = false;
 
+	// 待变换成的能力牌（OnPlay 选中后写入）。
+	private ModelId? _pendingPowerId;
+	private bool _pendingPowerUpgraded;
+
+	/// <summary>
+	/// 本卡要变换成的能力牌 Id。OnPlay 选中后**同时**写在本场战斗的克隆与本卡对应的[gold]牌组原件[/gold]上，
+	/// 并用 <c>[SavedProperty]</c> 随存档保存：万一战斗中的变换没能走完（被打断 / 读档），
+	/// 牌组原件仍能在 <see cref="AfterCombatEnd"/> 里补做这次变换，保证"学会的能力"不会丢。
+	/// 值为 null（无待转换）时不写入存档（<see cref="SerializationCondition.SaveIfNotTypeDefault"/>）。
+	/// </summary>
+	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
+	public ModelId? PendingPowerId
+	{
+		get => _pendingPowerId;
+		set
+		{
+			AssertMutable();
+			_pendingPowerId = value;
+		}
+	}
+
+	/// <summary>与 <see cref="PendingPowerId"/> 配套：待变换的能力牌是否应为升级版。</summary>
+	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
+	public bool PendingPowerUpgraded
+	{
+		get => _pendingPowerUpgraded;
+		set
+		{
+			AssertMutable();
+			_pendingPowerUpgraded = value;
+		}
+	}
+
 	public Erudition()
 		: base(BaseEnergyCost, CardKind, CardRarityValue, CardTarget, ShowInCardLibrary)
 	{
@@ -61,8 +96,10 @@ public sealed class Erudition : ModCardTemplate
 	];
 
 	/// <summary>
-	/// 打出时：从其它角色的稀有能力牌里随机取 5 张（本卡升级后为升级过的版本）→ 选择 1 张直接打出 →
-	/// 把这张牌（牌组原件）永久转换为所选能力牌并附魔 注能。
+	/// 打出时：从其它角色的稀有能力牌里随机取 5 张（本卡升级后为升级过的版本）→ 选择 1 张。
+	/// 真正的"把这张牌变换成所选能力牌 → 附魔 注能 → 打出变换后的牌"要等本卡的**打出流程结束**
+	/// （离开打出区、进入结果牌堆）之后再做，见 <see cref="AfterCardChangedPiles"/>：
+	/// 在 OnPlay 里替换正在打出的牌会打断牌堆流程（原版把结果牌堆的搬运放在 OnPlay 之后）。
 	/// </summary>
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
@@ -105,56 +142,144 @@ public sealed class Erudition : ModCardTemplate
 			return;
 		}
 
-		// 3. 直接打出所选能力牌（自动打出即免费；生成牌不在任何牌堆，AutoPlay 会自行放进打出区）。
-		await CardCmd.AutoPlay(choiceContext, chosen, null);
-
-		// 4. 把这张牌永久转换为所选能力牌。
-		//    转换对象是牌组原件（战斗克隆的 DeckVersion）——本场战斗的克隆会在战斗结束时丢弃，
-		//    只有改牌组原件才能让"学会的能力"跨战斗保留。
-		CardModel? deckCard = cardPlay.Card.DeckVersion;
-		if (deckCard == null)
+		// 3. 记录选择结果：本场战斗的克隆与本卡对应的**牌组原件**都记一份（[SavedProperty]，随存档保存），
+		//    真正的"变换本卡 → 附魔注能 → 打出变换后的牌"等本卡打出流程结束后执行（见 AfterCardChangedPiles）。
+		PendingPowerId = chosen.Id;
+		PendingPowerUpgraded = chosen.IsUpgraded;
+		if (DeckVersion is Erudition deckVersion)
 		{
-			// 这张牌不是来自牌组（例如战斗中复制/生成的实例），无法永久转换，直接结束（不做战斗内临时变换，
-			// 以免打断"正在打出的牌"自身的牌堆流程）。
-			return;
+			deckVersion.PendingPowerId = chosen.Id;
+			deckVersion.PendingPowerUpgraded = chosen.IsUpgraded;
 		}
-
-		CardPileAddResult? transformResult = await TransformDeckCardToPower(deckCard, chosen);
-		if (transformResult?.cardAdded is not { } transformed)
-		{
-			return;
-		}
-
-		// 5. 为转换后的能力牌附魔 注能。
-		//    注能只允许附魔技能牌（Imbued.CanEnchantCardType），这里绕过 CanEnchant 直接施加。
-		EnchantHelpers.ApplyEnchantmentBypassingCanEnchant(
-			transformed, ModelDb.Enchantment<Imbued>().ToMutable());
 	}
 
 	/// <summary>
-	/// 把牌组原件变换为所选能力牌：按 canonical 版本新建一张可变替换牌，升级状态与所选牌保持一致，
-	/// 再走 <see cref="CardCmd.Transform"/>。参考 变化 Begone 的"创建替换牌 + CardCmd.Upgrade"写法。
+	/// 本卡**打出流程结束**（从打出区进入结果牌堆）后触发，按顺序执行：
+	/// ① 把这张牌本身变换为所选能力牌 → ② 附魔 注能 → ③ 把变换后的牌打出去；
+	/// ④ 再把[gold]牌组原件[/gold]变换为同一张能力牌并附魔 注能，使"学会的能力"跨战斗永久保留
+	/// （注能的效果是"每场战斗开始时自动打出"，只有牌组里的那份才能生效）。
+	/// </summary>
+	public override async Task AfterCardChangedPiles(CardModel card, PileType oldPileType, AbstractModel? clonedBy)
+	{
+		// 只处理"这张牌自己离开打出区"的那次牌堆变化（其余牌堆变化，如变换后新牌加入牌堆，直接忽略）。
+		if (card != this || oldPileType != PileType.Play || PendingPowerId is not { } powerId)
+		{
+			return;
+		}
+		bool upgraded = PendingPowerUpgraded;
+		PendingPowerId = null;
+		PendingPowerUpgraded = false;
+
+		try
+		{
+			CardModel? canonical = ModelDb.GetByIdOrNull<CardModel>(powerId);
+			if (canonical == null)
+			{
+				return;
+			}
+
+			// 变换前先记住牌组原件（变换这张牌后本实例会被移出状态，DeckVersion 就取不到了）。
+			CardModel? deckCard = DeckVersion;
+
+			// ① 这张牌本身：在战斗作用域建替换牌 → 变换 → ② 附魔注能 → ③ 打出变换后的牌。
+			//    自动打出用 ThrowingPlayerChoiceContext（与原版 PrepTimePower / 本 Mod AfterEnchantPatch 一致）：
+			//    能力牌不会要求玩家二次选择。
+			CardModel replacement = CreatePowerReplacement(
+				CombatState!.CreateCard(canonical, Owner), upgraded);
+			CardPileAddResult? selfResult = await CardCmd.Transform(this, replacement);
+			if (selfResult?.cardAdded is { } transformedSelf)
+			{
+				EnchantHelpers.ApplyEnchantmentBypassingCanEnchant(
+					transformedSelf, ModelDb.Enchantment<Imbued>().ToMutable());
+				await CardCmd.AutoPlay(new ThrowingPlayerChoiceContext(), transformedSelf, null);
+			}
+
+			// ④ 牌组原件：同样变换 + 附魔注能（这一步让能力牌永久留在牌组里，下一场战斗自动打出）。
+			if (deckCard != null)
+			{
+				CardPileAddResult? deckResult = await TransformDeckCardToPower(deckCard, canonical, upgraded);
+				if (deckResult?.cardAdded is { } transformedDeck)
+				{
+					EnchantHelpers.ApplyEnchantmentBypassingCanEnchant(
+						transformedDeck, ModelDb.Enchantment<Imbued>().ToMutable());
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			// 这段逻辑挂在"牌堆搬运"的钩子里，异常会打断打出流程，因此自行吞掉并记录。
+			Entry.Logger.Error(ex.ToString());
+		}
+	}
+
+	// 按所选能力牌建一张替换牌，升级状态与所选牌一致（参考 变化 Begone 的"创建替换牌 + CardCmd.Upgrade"写法）。
+	private static CardModel CreatePowerReplacement(CardModel replacement, bool upgraded)
+	{
+		if (upgraded)
+		{
+			CardCmd.Upgrade(replacement);
+		}
+		return replacement;
+	}
+
+	/// <summary>
+	/// 把牌组原件变换为所选能力牌：替换牌必须建在**运行作用域**（IRunState : ICardScope）里——
+	/// 战斗中 <see cref="CardModel.CardScope"/> 会优先返回战斗作用域，那样建出来的牌属于本场战斗、
+	/// 战斗结束会被清理，无法永久留在牌组里。
 	/// </summary>
 	/// <returns>变换结果（cardAdded 为真正进入牌组的那张牌，可能被"加入牌组"钩子替换）。</returns>
-	private static async Task<CardPileAddResult?> TransformDeckCardToPower(CardModel deckCard, CardModel chosen)
+	private static async Task<CardPileAddResult?> TransformDeckCardToPower(CardModel deckCard, CardModel canonical, bool upgraded)
 	{
-		// CreateCard 需要 canonical 实例（内部会 ToMutable），所选牌是战斗中的可变实例，故按 Id 取回原型。
-		CardModel? canonical = ModelDb.GetByIdOrNull<CardModel>(chosen.Id);
-		if (canonical == null)
+		// 牌组原件可能已经被本卡本次打出的前一次结算替换掉了（例如带"重放"效果时 OnPlay 会跑多次），
+		// 这时它已不在任何牌堆中（RemoveFromState），不能再变换，直接跳过。
+		if (deckCard.HasBeenRemovedFromState || deckCard.Pile == null)
 		{
 			return null;
 		}
 
-		// 替换牌必须建在**运行作用域**（IRunState : ICardScope）里：战斗中 CardModel.CardScope 会优先返回
-		// 战斗作用域（CardModel.CardScope => CombatState ?? ... ?? RunState），那样建出来的牌属于本场战斗、
-		// 战斗结束会被清理，无法永久留在牌组里。这里显式用 RunState 新建运行作用域的牌。
-		CardModel replacement = deckCard.Owner.RunState.CreateCard(canonical, deckCard.Owner);
-		if (chosen.IsUpgraded)
+		CardModel replacement = CreatePowerReplacement(
+			deckCard.Owner.RunState.CreateCard(canonical, deckCard.Owner), upgraded);
+		CardPileAddResult? result = await CardCmd.Transform(deckCard, replacement);
+		if (result?.cardAdded != null && deckCard is Erudition deckErudition)
 		{
-			CardCmd.Upgrade(replacement);
+			// 转换完成：清掉牌组原件上的待转换记录（失败时保留，交给 AfterCombatEnd 兜底重试）。
+			deckErudition.PendingPowerId = null;
+			deckErudition.PendingPowerUpgraded = false;
+		}
+		return result;
+	}
+
+	/// <summary>
+	/// 兜底：如果这张牌在战斗中的变换没能走完（被打断 / 读档恢复），只要它还在[gold]牌组[/gold]里，
+	/// 就在战斗结束时补做一次变换 + 附魔 注能（战斗结束时牌组里的牌都处于安全状态）。
+	/// 战斗中的克隆此时在战斗牌堆里，不满足条件，会被跳过。
+	/// </summary>
+	public override async Task AfterCombatEnd(CombatRoom room)
+	{
+		if (PendingPowerId is not { } powerId || Pile?.Type != PileType.Deck)
+		{
+			return;
 		}
 
-		return await CardCmd.Transform(deckCard, replacement);
+		try
+		{
+			CardModel? canonical = ModelDb.GetByIdOrNull<CardModel>(powerId);
+			if (canonical == null)
+			{
+				return;
+			}
+
+			CardPileAddResult? result = await TransformDeckCardToPower(this, canonical, PendingPowerUpgraded);
+			if (result?.cardAdded is { } transformed)
+			{
+				EnchantHelpers.ApplyEnchantmentBypassingCanEnchant(
+					transformed, ModelDb.Enchantment<Imbued>().ToMutable());
+			}
+		}
+		catch (Exception ex)
+		{
+			Entry.Logger.Error(ex.ToString());
+		}
 	}
 
 	/// <summary>
