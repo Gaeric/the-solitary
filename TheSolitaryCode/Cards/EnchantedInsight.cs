@@ -3,7 +3,6 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
@@ -26,8 +25,6 @@ public sealed class EnchantedInsight : ModCardTemplate
 	{
 	}
 
-	public override bool GainsBlock => true;
-
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
@@ -40,15 +37,14 @@ public sealed class EnchantedInsight : ModCardTemplate
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 		IEnumerable<CardModel> drawn = await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-		CardModel[] enchantedDrawn = drawn.Where(EnchantHelpers.HasValueEnchantment).ToArray();
-
-                foreach (CardModel target in enchantedDrawn) {
-                    EnchantHelpers.IncreaseEnchantmentValue(target, persistToDeckVersion: false);
-                }
+		foreach (CardModel target in drawn.Where(EnchantHelpers.HasValueEnchantment))
+		{
+			EnchantHelpers.IncreaseEnchantmentValue(target, persistToDeckVersion: false);
+		}
 	}
 
 	protected override void OnUpgrade()
 	{
-            DynamicVars.Cards.UpgradeValueBy(1);
+		DynamicVars.Cards.UpgradeValueBy(1);
 	}
 }
