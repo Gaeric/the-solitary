@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
+using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
@@ -192,6 +193,7 @@ public static class EnchantHelpers
 	/// 无需 CardCmd.Transform 重建——重建会丢失卡牌自身的本场战斗状态（如掌中奇术的减费），
 	/// 也不会再触发生成牌钩子，因此附魔造物不会误触发。
 	/// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
+	/// 两张牌各自按 <see cref="ReplaceEnchantment"/> 的固定顺序单独替换。
 	/// </summary>
 	private static void SwapEnchantmentsBetweenTwoCards(CardModel first, CardModel second)
 	{
@@ -202,35 +204,132 @@ public static class EnchantHelpers
 		}
 
 		// 先快照两张牌的附魔为全新实例（初始运行状态：Status 复位、一次性标记清除），
-		// 使交换后的附魔「重新充能」。
+		// 使交换后的附魔「重新充能」。必须在替换之前快照——清除后原实例已从卡牌上摘除。
 		EnchantmentModel? firstEnchantment = RebuildEnchantment(first.Enchantment);
 		EnchantmentModel? secondEnchantment = RebuildEnchantment(second.Enchantment);
 
-		// 附魔对卡牌的改写（费用/关键词）不会随附魔被清除而撤销（游戏没有"移除附魔"回调），
-		// 因此在清除前快照两张牌各自需要还原的副作用，清除后再逐项还原。
-		RemovedEnchantmentSideEffects firstEffects = RemovedEnchantmentSideEffects.Capture(first.Enchantment);
-		RemovedEnchantmentSideEffects secondEffects = RemovedEnchantmentSideEffects.Capture(second.Enchantment);
+		// 逐张替换：每张牌内部都是"先还原被移除附魔的改写，再施加新附魔"的固定顺序。
+		// 两张牌的附魔实例互不相同，因此先替换第一张不会影响第二张的快照记录。
+		ReplaceEnchantment(first, secondEnchantment);
+		ReplaceEnchantment(second, firstEnchantment);
+	}
 
-		// 直接在两牌原实例上清除并施加附魔（不重建卡牌）。
-		CardCmd.ClearEnchantment(first);
-		CardCmd.ClearEnchantment(second);
+	/// <summary>
+	/// 把一张牌的附魔整体替换为 <paramref name="newEnchantment"/>（传 null 表示只清除、不重新施加），
+	/// 并还原被清除附魔留在卡牌上的改写（余烬降费 / 灵魂之力移除的消耗 / 其它附魔添加的关键词等）。
+	/// 固定顺序：Capture(旧附魔) → CardCmd.ClearEnchantment → Restore(原卡) → ApplyEnchantment(新附魔) + 特效。
+	/// **还原必须排在施加新附魔之前**：否则新附魔添加的关键词会被当成"残留差异"删掉
+	/// （见 EnchantKeywordRecordPatch 的快照语义）。
+	/// 不重建卡牌（不使用 CardCmd.Transform），以保留卡牌自身的本场战斗状态（如掌中奇术的减费）。
+	/// </summary>
+	private static void ReplaceEnchantment(CardModel card, EnchantmentModel? newEnchantment)
+	{
+		// 附魔对卡牌的改写（费用/关键词）不会随附魔被清除而撤销（游戏没有"移除附魔"回调），
+		// 因此在清除前快照这张牌需要还原的副作用，清除后再还原。
+		RemovedEnchantmentSideEffects removedEffects = RemovedEnchantmentSideEffects.Capture(card.Enchantment);
+
+		// 直接在原实例上清除并施加附魔（不重建卡牌）。
+		CardCmd.ClearEnchantment(card);
 
 		// 还原被移除附魔留下的改写：余烬的降费、灵魂之力移除的消耗、其它附魔添加的关键词等。
-		firstEffects.Restore(first);
-		secondEffects.Restore(second);
+		removedEffects.Restore(card);
 
-		// 无条件施加交换后的附魔（与游戏加载时重新施加附魔一致，绕过 CanEnchant）。
+		// 无条件施加新的附魔（与游戏加载时重新施加附魔一致，绕过 CanEnchant）。
 		// 施加后播放原版附魔特效（NCardEnchantVfx）作为简单视觉反馈。
-		if (secondEnchantment != null)
+		if (newEnchantment != null)
 		{
-			ApplyEnchantment(first, secondEnchantment, secondEnchantment.Amount);
-			PlayEnchantVfx(first);
+			ApplyEnchantment(card, newEnchantment, newEnchantment.Amount);
+			PlayEnchantVfx(card);
 		}
-		if (firstEnchantment != null)
+	}
+
+	/// <summary>
+	/// 在给定的一组牌内部随机重新分配附魔（金卡 融会贯通 Mastery 的效果）。
+	/// 规则：两张及以上时每张牌都会换到"另一张牌原来的附魔"，绝不会保留自己的附魔（随机错排 derangement）；
+	/// 只有一张时不存在别人的附魔可换，改为把这张牌的附魔"重新充能"（快照为全新实例后替换回同一张牌，
+	/// Status 复位、一次性标记清除）；没有带附魔的牌时无事发生。
+	/// 实现方式：先随机生成错排的目标顺序，再用两两交换（<see cref="SwapEnchantmentsBetweenTwoCards"/>）
+	/// 逐步把排列实现出来——"移除附魔的副作用还原"（余烬降费 / 灵魂之力移除的消耗 / 关键词快照）
+	/// 与"附魔重建为初始运行状态"因此都沿用同一套已验证逻辑，不会漏还原或漏重建。
+	/// </summary>
+	/// <param name="cards">参与重排的牌（调用方传入的牌一般自带附魔，例如手牌中所有带附魔的非攻击牌；
+	/// 万一混入没有附魔的牌，该牌只会被当作"无附魔位置"参与排列，不会报错）。</param>
+	/// <param name="rng">随机源（建议 RunState.Rng.CombatCardSelection，与其它随机挑手牌的效果一致）。</param>
+	public static void ShuffleEnchantmentsInCards(IReadOnlyList<CardModel> cards, Rng rng)
+	{
+		// 没有带附魔的牌时无事发生。
+		if (cards.Count == 0)
 		{
-			ApplyEnchantment(second, firstEnchantment, firstEnchantment.Amount);
-			PlayEnchantVfx(second);
+			return;
 		}
+
+		// 只有一张附魔牌时不存在"别人的附魔"可换，改为把这唯一一张牌的附魔重新充能：
+		// 快照为全新实例（Status 复位、一次性标记清除）后替换回同一张牌。
+		// 与交换共用同一套还原/施加顺序（ReplaceEnchantment），副作用处理完全一致。
+		if (cards.Count == 1)
+		{
+			ReplaceEnchantment(cards[0], RebuildEnchantment(cards[0].Enchantment));
+			return;
+		}
+
+		// sources[i] = 第 i 张牌最终应该拿到哪张牌原来的附魔（随机错排：sources[i] != i）。
+		int[] sources = CreateRandomDerangement(cards.Count, rng);
+
+		// current[i] = 第 i 张牌当前持有的是哪张牌的附魔（初始时持有自己的）。
+		int[] current = Enumerable.Range(0, cards.Count).ToArray();
+
+		for (int i = 0; i < cards.Count; i++)
+		{
+			if (current[i] == sources[i])
+			{
+				continue;
+			}
+
+			// 找到目前持有 sources[i] 那张牌附魔的位置，与 i 交换后位置 i 就位。
+			// 已就位的位置（下标小于 i）不可能持有 sources[i]（sources 是排列、值不重复），
+			// 因此 j 必然大于 i，后续交换不会破坏已经就位的位置。
+			int j = Array.IndexOf(current, sources[i]);
+			if (j < 0)
+			{
+				continue;
+			}
+
+			SwapEnchantmentsBetweenTwoCards(cards[i], cards[j]);
+			(current[i], current[j]) = (current[j], current[i]);
+		}
+	}
+
+	/// <summary>
+	/// 生成 0..count-1 的随机错排：每个下标都不指向自己。
+	/// 做法：先用 Fisher-Yates 随机打乱（<see cref="Rng.Shuffle{T}"/>），再把恰好落在原位的下标与另一个位置交换修复。
+	/// 附魔实例互不相同（值不重复），因此 count >= 2 时总能找到修复位置，循环必然终止。
+	/// </summary>
+	private static int[] CreateRandomDerangement(int count, Rng rng)
+	{
+		int[] order = Enumerable.Range(0, count).ToArray();
+		rng.Shuffle(order);
+
+		for (int i = 0; i < count; i++)
+		{
+			if (order[i] != i)
+			{
+				continue;
+			}
+
+			// 候选位置：不等于 i，且当前持有的不是 i 的附魔（count >= 2 时必然存在）。
+			List<int> swapCandidates = Enumerable.Range(0, count)
+				.Where(index => index != i && order[index] != i)
+				.ToList();
+			if (swapCandidates.Count == 0)
+			{
+				continue;
+			}
+
+			// 交换后位置 i 拿到 order[j]（不等于 i），位置 j 拿到 i（j 不等于 i），两处都不再是原位。
+			int j = swapCandidates[rng.NextInt(swapCandidates.Count)];
+			(order[i], order[j]) = (order[j], order[i]);
+		}
+		return order;
 	}
 
 	/// <summary>
@@ -361,7 +460,7 @@ public static class EnchantHelpers
 	/// 余烬加上的永恒（Eternal）关键词改由 <see cref="RestoreCardKeywordsAfterEnchantmentRemoved"/>
 	/// 按"附魔前关键词快照"还原——这里不再无条件 RemoveKeyword(Eternal)：
 	/// RemoveKeyword 直接作用于 LocalKeywords（= CanonicalKeywords + AddKeyword - RemoveKeyword），
-	/// 因此对"自带永恒"的牌（如 黏糊魔典 StickyGrimoire 的 CanonicalKeywords）同样会移除，
+	/// 因此对"自带永恒"的牌（如原版 禁忌魔典 ForbiddenGrimoire 的 CanonicalKeywords）同样会移除，
 	/// 反而会误伤卡牌自身的永恒。
 	/// </summary>
 	private static void RestoreCardAfterEmberRemoved(CardModel card, int originalCost)

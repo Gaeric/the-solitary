@@ -47,7 +47,7 @@ public sealed class KineticRecoveryPower : ModPowerTemplate
 
 		// 该攻击牌已带有其他附魔（或 Momentum 无法作用于它）时，跳过本次且不消耗层数，
 		// 等待下一张可附魔的攻击牌再施加。CardCmd.Enchant 内部会因 CanEnchant 失败抛异常，
-		// 必须先检查（与 Aliasing / EmberShelter / Mastery 等 CardCmd.Enchant 前的守卫一致）。
+		// 必须先检查（与 Aliasing / EmberShelter / Suppression 等 CardCmd.Enchant 前的守卫一致）。
 		if (!ModelDb.Enchantment<Momentum>().ToMutable().CanEnchant(cardPlay.Card))
 		{
 			return;

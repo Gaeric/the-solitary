@@ -13,7 +13,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 涌动（character.org 蓝卡 #1）：1 费技能。
-// 获得 6 点格挡（升级后 8）；每当你洗牌一次，额外获得一次等量格挡（前后数值相同）。
+// 获得 6 点格挡（升级后 8）；每当你洗牌一次，额外获得一次 2 点格挡（升级后 3）。
+// 基础格挡与额外格挡是两份独立数值（两个 BlockVar），分别走各自的升级与 {…:diff()} 占位符。
 // 格挡数值先结算敏捷/附魔效果，再计算次数：每次 GainBlock 都走完整 ModifyBlock 管线后累加。
 // 洗牌次数由 AfterShuffle 累计、BeforeCombatStart 清零；hovertip 备注当前次数。
 [RegisterCard(typeof(TheSolitaryCardPool))]
@@ -50,11 +51,17 @@ public sealed class Surge : ModCardTemplate
 	private const string HoverTipDescriptionKey = "THE_SOLITARY_CARD_SURGE.hoverTipDescription";
 	// hovertip 中次数占位符的 DynamicVar 键名。
 	private const string CountKey = "Count";
+	// 额外格挡数值的 DynamicVar 键名。同一张牌上有两个 BlockVar 时必须显式命名
+	// （DynamicVarSet 对重复键名直接抛异常，见其 "2 BlockVars for Halt" 断言），
+	// 命名写法参考原版 闪光溪流 Glitterstream 的 "BlockNextTurn"。
+	private const string ExtraBlockKey = "ExtraBlock";
 
-	// 基础数值：每次格挡值（升级后 8），绑定 {Block:diff()} 占位符。
+	// 基础数值：基础格挡（升级后 8）与每次洗牌的额外格挡（升级后 3），
+	// 分别绑定 {Block:diff()} 与 {ExtraBlock:diff()} 占位符。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new BlockVar(6m, ValueProp.Move)
+		new BlockVar(6m, ValueProp.Move),
+		new BlockVar(ExtraBlockKey, 2m, ValueProp.Move)
 	];
 
 	// hovertip：每次悬停时重建，展示当前洗牌次数（次数 = 额外获得格挡的次数）。
@@ -89,22 +96,27 @@ public sealed class Surge : ModCardTemplate
 		return Task.CompletedTask;
 	}
 
-	// 打出时：基础获得一次格挡，外加每次洗牌额外一次（共 1 + 洗牌次数 次）。
+	// 打出时：先按基础数值获得一次格挡，再按已洗牌次数各额外获得一次额外格挡。
 	// 每次 GainBlock 都独立结算敏捷/附魔后再累加，即“先结算数值、再乘以次数”。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 
-		int totalGains = 1 + _shuffleCount;
-		for (int i = 0; i < totalGains; i++)
+		// 基础格挡：固定一次。
+		await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay, fast: true);
+
+		// 额外格挡：本场战斗每洗牌一次各一次（战斗开始前清零，见 BeforeCombatStart）。
+		BlockVar extraBlock = (BlockVar)DynamicVars[ExtraBlockKey];
+		for (int i = 0; i < _shuffleCount; i++)
 		{
-			await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay, fast: true);
+			await CreatureCmd.GainBlock(Owner.Creature, extraBlock, cardPlay, fast: true);
 		}
 	}
 
-	// 升级：格挡 6 -> 8（前后数值保持一致）。
+	// 升级：基础格挡 6 -> 8，额外格挡 2 -> 3。
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(2m);
+		DynamicVars[ExtraBlockKey].UpgradeValueBy(1m);
 	}
 }

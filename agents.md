@@ -274,8 +274,8 @@ public override PowerInstanceType InstanceType => PowerInstanceType.Instanced;
 
 ### 6. 卡图（WatcherBeautified）
 
-- **直接可用的 png**：`../WatcherBeautified/images/packed/card_portraits/watcher/*.png`（185 张观者全卡图，如 cataclysm / deva_form / omniscience）。`Watcher/_imported/*.ctex` 是压缩纹理，别直接用。
-- 游戏卡框尺寸 **500×380（横向）**；源图若已是 500×380（如 deva_form、omniscience）直接复制；竖版（1058×1487 等）需**居中裁剪到 500:380 再缩放**避免变形：
+- **直接可用的 png**：`../WatcherBeautified/images/packed/card_portraits/watcher/*.png`（观者全卡图，如 cataclysm / deva_form / omniscience）。`Watcher/_imported/*.ctex` 是压缩纹理，别直接用。其中 `draw_talisman` / `preach` / `serenity` 三张是**先古卡尺寸 606×852（竖向）**，见 6.2。
+- 游戏卡框尺寸 **500×380（横向）**，**先古卡为 606×852（竖向，见 6.2）**；源图若已是目标尺寸（如 deva_form、omniscience、draw_talisman）直接复制；竖版（1058×1487 等）需**居中裁剪到 500:380 再缩放**避免变形：
 
 ```powershell
 Add-Type -AssemblyName System.Drawing
@@ -351,8 +351,19 @@ $out | Sort-Object MinDiff -Descending | Select-Object -First 30 | Format-Table 
 ```
 
 - `MinDiff` = 该源图与「最接近的一张现有卡图」的缩略差异，**越大越独特**，>50 基本可安全使用。
-- 选图后用脚本 ① ② 再与目标区分对象核对一次；确认 500×380（或按上文裁剪脚本处理）。
+- 选图后用脚本 ① ② 再与目标区分对象核对一次；确认尺寸正确——**普通卡 500×380（横向）**、**先古卡 606×852（竖向，见 6.2）**（或按上文裁剪脚本处理）。
 - 换图流程：`Copy-Item` 覆盖 → **删除 `XxxCard.png.import`**（Godot 重新导入）→ 完整构建导出 pck（仅 `dotnet build /p:RunPckExport=false` 不更新游戏内卡图）。
+
+#### 6.2 先古（Ancient）卡图尺寸 = 606×852（竖向整幅画）
+
+> 教训（2026-09）：`CardRarity.Ancient` 的卡走**完全不同的卡面布局**，卡图尺寸与普通卡不同——普通卡 **500×380（横向，原版源图 1000×760）**，先古卡必须是 **606×852（竖向）**。曾把 `Revelation` / `Resurgence` 卡图做成 500×380，游戏里被硬拉伸变形（"图很怪"）。
+
+- **判定与布局**（`Reload`，`../sts2_20260821/src/Core/Nodes/Cards/NCard.cs:738`）：`Model.Rarity == CardRarity.Ancient` 时隐藏 `Portrait` / `PortraitBorder` / `Frame` / `Banner`，改显示 `AncientPortrait` + `AncientBorder` + `AncientBorderGlassOverlay` + `AncientTextBg` + `AncientBanner`（后四者贴图由游戏按 `CardType` 自动挑，本 Mod 不必提供）。
+- **为什么会变形**：`scenes/cards/card.tscn` 的 `AncientPortrait` 是 `expand_mode = 1`（IGNORE_SIZE）且**没有 `stretch_mode`（默认 `SCALE` = 直接拉满矩形）**，矩形约 598×842（`offset_left/top/right/bottom = -153/-215/445/627`，`scale = 0.5`）；普通 `Portrait` 才是 `stretch_mode = 5`（KEEP_ASPECT_CENTERED，等比）。**先古卡图宽高比不对就是硬拉伸，不会等比缩放。**
+- **正确尺寸**：原版全部先古卡图都是 **606×852**（606/852 = 0.711 ≈ 矩形 598/842 = 0.710，肉眼无变形），例 `corruption` / `apotheosis` / `wish` / `wraith_form` / `the_sealed_throne`，占位图 `ancient_beta.png` 同尺寸。原版卡图尺寸分布（PNG 头 offset 16..23 为宽高，比 System.Drawing 快、适合全量扫描）：`1000×760`（普通卡源图，684 张；图集精灵另存为 668×508）/ **`606×852`（先古卡）** / `500×380`（少数旧素材）/ `668×936`（先古卡 beta）。
+- **RitsuLib 没有「先古卡图」字段**：`CardAssetProfile` 只有 `AncientBorderPath` / `AncientTextBgPath` / `AncientBannerPath`（+ 各自 `*Material*`）与 `VisualStyle`（默认 `CardVisualStyle.Default` = 沿用游戏本体稀有度判定，**别改**），卡面肖像仍共用同一个 `PortraitPath` → **先古卡只能把 `PortraitPath` 直接指向 606×852 的图**。
+- **现成素材（606×852、观者主题、本 Mod 未占用）**：`../WatcherBeautified/images/packed/card_portraits/watcher/` 下的 `draw_talisman.png`（卡片从法杖/符中爆出）、`preach.png`（巨手赐福跪拜者）、`serenity.png`（606×851，观者角色立绘）。直接 `Copy-Item` 覆盖即可，**无需裁剪**（观者池其余 263 张都是 500×380 横向，不能用于先古卡）。当前用法：`Revelation` ← `draw_talisman`，`Resurgence` ← `preach`。
+- 替换后照例**删除旧 `XxxCard.png.import`** → 完整构建（含 pck 导出）才进游戏。
 
 ### 7. 反编译工具（ilspycmd）
 
@@ -421,9 +432,10 @@ dotnet ...\ilspycmd.dll -t 'STS2RitsuLib.Scaffolding.Content.ModCardTemplate' 'D
 - **附魔对卡牌的改写不会随「移除附魔」自动还原**：游戏清除附魔（`CardCmd.ClearEnchantment` → `CardModel.ClearEnchantmentInternal` → `EnchantmentModel.ClearInternal`）只摘除附魔引用，`EnchantmentModel` 里**没有任何 `UnmodifyCard` / 移除附魔回调**，所以 `OnEnchant` 的改写会留在原卡上：① 余烬 `TezcatarasEmber` 用 `EnergyCost.UpgradeBy` 把基础费用永久改写成 0 并加 `Eternal`；② 灵魂之力 `SoulsPower` 移除 `Exhaust`；③ 黏糊 `Goopy` / 稳定 `Steady` / 御准 `RoyallyApproved` 添加 `Exhaust` / `Retain` / `Innate`。原版没有移除附魔的机制所以碰不到，但本 Mod 的「轮回」「拟合」「换位」会清除并交换附魔。本 Mod 的处理方式：用两个 Harmony 补丁在**施加时**把「附魔前状态」记进附魔 `Props`，再由 `EnchantHelpers` 在清除后还原：
   - `Patches/TezcatarasEmberCostRecordPatch.cs` →「附魔前费用」→ `EnchantHelpers.TryGetEmberOriginalCost` / `RestoreCardAfterEmberRemoved`（只恢复费用；永恒改由下面的关键词快照还原，**不要再无条件 `RemoveKeyword(Eternal)`**——`RemoveKeyword` 直接改 `LocalKeywords`，会把卡牌自带的永恒一起删掉）。
   - `Patches/EnchantKeywordRecordPatch.cs`（挂在抽象基类 `EnchantmentModel.ModifyCard`，即 `OnEnchant` 的唯一调用点，施加 / 读档 / 交换都会走到）→「附魔前的本地关键词集合」→ `EnchantHelpers.TryGetKeywordsBeforeEnchant` / `RestoreCardKeywordsAfterEnchantmentRemoved`（与当前关键词双向求差：附魔移除掉的加回来、附魔添加的去掉）。
-  - `EnchantHelpers.SwapEnchantmentsBetweenTwoCards` 的固定顺序：`RemovedEnchantmentSideEffects.Capture(旧附魔)` → `CardCmd.ClearEnchantment` → `Restore(原卡)` → `ApplyEnchantment(新附魔)`。**还原必须排在施加新附魔之前**，否则新附魔添加的关键词会被当成"残留差异"删掉。
+  - `EnchantHelpers.ReplaceEnchantment`（单张牌的替换原语：交换 / 轮回 / 拟合 / 融会贯通都走它）的固定顺序：`RemovedEnchantmentSideEffects.Capture(旧附魔)` → `CardCmd.ClearEnchantment` → `Restore(原卡)` → `ApplyEnchantment(新附魔)`。**还原必须排在施加新附魔之前**，否则新附魔添加的关键词会被当成"残留差异"删掉。`SwapEnchantmentsBetweenTwoCards` 现在只负责「先把两张牌的附魔各自快照为全新实例，再各调一次 `ReplaceEnchantment`」（顺序执行与原先"两牌同时清除再分别施加"等价：两张牌的附魔实例互不相同，替换第一张不会影响第二张的快照记录）。
   - `EnchantmentModel.Props` 只是挂在模型实例上的内存袋：`SavedProperties.From` 只收集 `[SavedProperty]` 属性，所以它随 `RebuildEnchantment`（`ToSerializable`/`FromSerializable`）**不保留**——好在补丁会在每次 `ModifyCard` 时重写记录，因此交换链 A→B→C 不会读到上一张牌的旧记录；但反过来说，**记录只在"当前这次施加之后、这次清除之前"有效**，别指望它跨重建/跨存档读取。
-  - **以后任何「移除/交换附魔」的逻辑都必须走 `EnchantHelpers` 的交换路径（`SwapEnchantmentsBetweenTwoCards` / `SwapEnchantmentWithHandCard`），或复用 `RemovedEnchantmentSideEffects` 的 `Capture`/`Restore`**，不要直接 `CardCmd.ClearEnchantment`，否则 0 费 / 永恒 / 消耗 / 保留等改写会残留在原卡上。
+  - **以后任何「移除/交换附魔」的逻辑都必须走 `EnchantHelpers` 的交换路径（`SwapEnchantmentsBetweenTwoCards` / `SwapEnchantmentWithHandCard` / `ShuffleEnchantmentsInCards`，或直接复用 `ReplaceEnchantment`），或复用 `RemovedEnchantmentSideEffects` 的 `Capture`/`Restore`**，不要直接 `CardCmd.ClearEnchantment`，否则 0 费 / 永恒 / 消耗 / 保留等改写会残留在原卡上。
+  - `EnchantHelpers.ShuffleEnchantmentsInCards(cards, rng)`（融会贯通 Mastery）：≥2 张时按**随机错排**（`CreateRandomDerangement`，Fisher-Yates + 修复固定点）用两两交换把排列实现出来 → 每张牌必定换到"别人原来的附魔"；**恰 1 张时改为把这唯一一张牌的附魔重新充能**（`ReplaceEnchantment(card, RebuildEnchantment(card.Enchantment))`，一次性 Status 复位）；0 张时无事发生。
 - **RitsuLib Harmony 补丁必须显式注册**：新增 `IPatchMethod` 类后，必须在 `Entry.Initialize()` 里 `RitsuLibFramework.CreatePatcher(...)` + `patcher.RegisterPatch<T>()` + `patcher.PatchAll()`（参考 `AfterEnchantPatch` / `TezcatarasEmberCostRecordPatch` / `EnchantKeywordRecordPatch` / `InkyTargetPatch` 的注册）。不会自动发现；漏注册表现为「编译通过但补丁不生效」（启动日志里看不到对应的 `Patch application complete` 行）。
 - **墨影（Inky）的虚弱在原版有两个毛病**：① `Inky.OnPlay` 只对 `TargetType.AllEnemies` 用 `HittableEnemies`，其余一律取 `cardPlay.Target`；而 `RandomEnemy`（随机多段攻击牌的目标类型，如 光子映射 / 飞剑回旋镖 / 星尘）与 `Self`/`None`/`AnyPlayer` 等牌**不选目标**，`cardPlay.Target == null` → `[null]` 进 `PowerCmd.Apply` → `target.CanReceivePowers` 抛 `NullReferenceException`（原版墨影只由 BladeOfInk 发给 AnyEnemy/AllEnemies 的小刀，所以这条路径在原版没被踩到）。② 原版每次打牌最多只施加 1 层（每个目标一次），表达不了"每命中一次加一层虚弱"。本 Mod 用两个补丁解决（都在 `Entry.Initialize()` 里注册到 `inky-target` patcher）：
   - `Patches/InkyHitRecordPatch.cs`：前缀挂 `Hook.AfterDamageGiven`（**每次命中/每个目标都会触发一次**，含被完全格挡的命中），把"这张墨影牌本次打牌命中过的敌人"按 `(卡牌实例, CurrentPlayIndex)` 登记进 `InkyHitRegistry`（`ConditionalWeakTable` 弱引用，战斗结束自动回收）。**列表不去重**（命中几次记几次）。

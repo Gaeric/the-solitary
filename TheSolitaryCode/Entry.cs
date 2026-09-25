@@ -42,9 +42,10 @@ public partial class Entry
         // 映射 ID 延迟解析，放在内容注册之后即可。
         RitsuLibFramework.RegisterArchaicToothTranscendenceMapping<Sacrifice, Resurgence>(ModId);
 
-        // 事件关联：尘封魔典 DustyTome 优先选择角色先古卡池中的 黏糊魔典 StickyGrimoire
-        // （复苏 Resurgence 是古老牙齿的先古升级牌，会被 DustyTome 自动排除）。
-        RitsuLibFramework.RegisterDustyTomeCard<TheSolitaryCharacter, StickyGrimoire>(ModId);
+        // 事件关联：尘封魔典 DustyTome 优先选择角色先古卡池中的 启示 Revelation
+        // （替代已删除的黏糊魔典 StickyGrimoire；复苏 Resurgence 是古老牙齿的先古升级牌，
+        // 会被 DustyTome 自动排除）。
+        RitsuLibFramework.RegisterDustyTomeCard<TheSolitaryCharacter, Revelation>(ModId);
 
         // 事件关联：欧洛巴斯之触 TouchOfOrobas 把初始遗物 迅捷回路 SwiftCircuit 精炼成 极速回路 RapidCircuit。
         RitsuLibFramework.RegisterTouchOfOrobasRefinementMapping<SwiftCircuit, RapidCircuit>(ModId);
