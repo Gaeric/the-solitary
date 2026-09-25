@@ -12,9 +12,15 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 超渡（character.org）：任务牌，不能被打出；经历 7 场战斗后从牌组中移除，并获得 500 金币。开局作为初始卡加入牌组。
+// 超渡（character.org）：任务牌，不能被打出；经历 7 场普通战斗后从牌组中移除，并获得 500 金币。开局作为初始卡加入牌组。
+// "普通战斗" = 只数 RoomType.Monster 的战斗（判定同原版 鱼竿 FishingRod）：精英与首领战不计入。
+// 卡牌定位：**任务牌**（CardType.Quest + CardRarity.Quest + 注册进原版 QuestCardPool，与探寻 Dowsing / 愧疚 Guilty 同池）
+// → 不进卡牌奖励 / 商店 / 战斗生成 / 随机变化。
+// 历史：2026-09 曾一度改为基础牌（CardType.Skill + CardRarity.Basic + 角色卡池），以便被木雕 WoodCarvings 这类
+// "针对基础牌"的效果识别；随后按要求改回任务牌，因此卡面与行为都以任务牌为准。
 // 计数方式与原版诅咒 愧疚 Guilty 完全一致（它是原版唯一的"在 N 场战斗后从牌组移除"样板）：
 //   - 覆写 AfterCombatEnd(CombatRoom)：战斗结束时 +1，只有牌在牌组里才计数（战斗中抽到的克隆牌不算）；
+//   - 只统计"普通战斗"（RoomType.Monster），精英 / Boss 战不计入（同原版 鱼竿 FishingRod 的判定）；
 //   - [SavedProperty] 保存已历战斗数，{Combats:diff()} 显示"还差几场"（= RequiredCombats - 已历场数，同 Guilty）；
 //   - 达成后 CardPileCmd.RemoveFromDeck 从牌组移除（要求牌确实在牌组里）。
 // 结算顺序参考原版任务牌 宝藏图 SpoilsMap.OnQuestComplete：先给金币 → 记录任务完成 → 再移出牌组。
@@ -87,10 +93,17 @@ public sealed class Requiem : ModCardTemplate
 
 	/// <summary>
 	/// 战斗结束时累计场数（与愧疚 Guilty 完全一致）：只有这张牌在[gold]牌组[/gold]里时才计数
-	/// （战斗中抽到的克隆牌不算）。累计到 7 场后：获得 {Gold:diff()} 金币 → 记录任务完成 → 从牌组中移除。
+	/// （战斗中抽到的克隆牌不算）。累计到 7 场普通战斗后：获得 {Gold:diff()} 金币 → 记录任务完成 → 从牌组中移除。
 	/// </summary>
 	public override async Task AfterCombatEnd(CombatRoom room)
 	{
+		// 只统计"普通战斗"（RoomType.Monster）：精英 / Boss 战不计入（character.org：超渡改成 7 场普通战斗）。
+		// 判定与原版 鱼竿 FishingRod 完全一致（"每 N 场普通战斗"的样板），room.RoomType 即 Encounter.RoomType。
+		if (room.RoomType != RoomType.Monster)
+		{
+			return;
+		}
+
 		CardPile? pile = Pile;
 		if (pile == null || pile.Type != PileType.Deck)
 		{

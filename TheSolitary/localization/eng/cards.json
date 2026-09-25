@@ -262,14 +262,15 @@
   "THE_SOLITARY_CARD_WELLSPRING.description": "Gain {Energy:energyIcons()}.\nFor every 2 times you shuffle, the energy gained is reduced by 1.",
   "THE_SOLITARY_CARD_WELLSPRING.smartDescription": "Gain {Energy:energyIcons()}.\nFor every 2 times you shuffle, the energy gained is reduced by 1.",
   "THE_SOLITARY_CARD_DILIGENT_STUDY.title": "Diligent Study",
-  "THE_SOLITARY_CARD_DILIGENT_STUDY.description": "After entering {Types:diff()} more {Types:plural:type|types} of room, transforms into [gold]Erudition[/gold].",
-  "THE_SOLITARY_CARD_DILIGENT_STUDY.smartDescription": "After entering {Types:diff()} more {Types:plural:type|types} of room, transforms into [gold]Erudition[/gold].",
-  "THE_SOLITARY_CARD_DILIGENT_STUDY.missingRoom.description": "You haven't entered this type of room yet (Diligent Study needs it).",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.description": "After entering each type of room twice, transform this card into [gold]Erudition[/gold].",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.smartDescription": "After entering each type of room twice, transform this card into [gold]Erudition[/gold].",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.missingRoomTwice.description": "You still need to enter this type of room 2 more times.",
+  "THE_SOLITARY_CARD_DILIGENT_STUDY.missingRoomOnce.description": "You still need to enter this type of room 1 more time.",
   "THE_SOLITARY_CARD_ERUDITION.title": "Erudition",
   "THE_SOLITARY_CARD_ERUDITION.description": "Play 1 of {Cards:diff()} {IfUpgraded:show:[gold]Upgraded[/gold] |}[gold]Rare[/gold] [gold]Powers[/gold] from other characters.\nPermanently transform this card into the chosen Power and [gold]Enchant[/gold] it with [gold]Imbued[/gold].",
   "THE_SOLITARY_CARD_ERUDITION.smartDescription": "Play 1 of {Cards:diff()} {IfUpgraded:show:[gold]Upgraded[/gold] |}[gold]Rare[/gold] [gold]Powers[/gold] from other characters.\nPermanently transform this card into the chosen Power and [gold]Enchant[/gold] it with [gold]Imbued[/gold].",
   "THE_SOLITARY_CARD_ERUDITION.selectionScreenPrompt": "Choose a Power.",
   "THE_SOLITARY_CARD_REQUIEM.title": "Requiem",
-  "THE_SOLITARY_CARD_REQUIEM.description": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:combat|combats}, and gain {Gold:diff()} [gold]Gold[/gold].",
-  "THE_SOLITARY_CARD_REQUIEM.smartDescription": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:combat|combats}, and gain {Gold:diff()} [gold]Gold[/gold]."
+  "THE_SOLITARY_CARD_REQUIEM.description": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:normal combat|normal combats}, and gain {Gold:diff()} [gold]Gold[/gold].",
+  "THE_SOLITARY_CARD_REQUIEM.smartDescription": "Removed from your [gold]Deck[/gold] after {Combats:diff()} {Combats:plural:normal combat|normal combats}, and gain {Gold:diff()} [gold]Gold[/gold]."
 }
