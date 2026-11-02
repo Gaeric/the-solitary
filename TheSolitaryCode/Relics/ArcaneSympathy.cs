@@ -8,16 +8,17 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using TheSolitary.Cards;
+using TheSolitary.ArtEffects;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Relics;
 
-// 术元交感（稀有遗物）：你每打出 4 张术式，为手牌中的一张牌随机附魔。
+// 术元交感（稀有遗物）：你每触发 4 次术式，为手牌中的一张牌随机附魔。
 // 计数跨战斗累计（"每打出 N 张"语义，参考原版念珠 Nunchaku 的持久计数 + 模运算展示）。
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
-public sealed class ArcaneSympathy : ModRelicTemplate
+public sealed class ArcaneSympathy : ModRelicTemplate, IArtTriggerListener
 {
     // 触发阈值：每打出几张术式结算一次。
     private const int ArtsThreshold = 4;
@@ -69,10 +70,10 @@ public sealed class ArcaneSympathy : ModRelicTemplate
         InvokeDisplayAmountChanged();
     }
 
-    // 打出术式时累计；达到阈值后为手牌中的一张牌随机附魔（无可用目标则本次无事发生）。
-    public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    // 触发术式时累计；达到阈值后为手牌中的一张牌随机附魔（无可用目标则本次无事发生）。
+    public async Task AfterArtTriggered(PlayerChoiceContext choiceContext, ArtTriggerResult trigger)
     {
-        if (cardPlay.Card.Owner != base.Owner || !Arts.IsArt(cardPlay.Card))
+        if (trigger.Owner != base.Owner)
         {
             return;
         }

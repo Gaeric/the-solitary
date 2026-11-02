@@ -9,7 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 能元妙术（参考无尽刀刃 InfiniteBlades）：1 费 Power。
-// 回合开始时向手中加入一张随机术式+（升级版术式）。升级后获得固有。
+// 回合开始时随机触发一次术式+。升级后获得固有。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class ArtOfTheSource : ModCardTemplate
 {

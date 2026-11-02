@@ -8,11 +8,12 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.ArtEffects;
 
 namespace TheSolitary.Cards;
 
 // 混叠（character.org todo 蓝卡）：1 费技能，打出后消耗。
-// 将 3 张随机术式加入手牌（升级后生成的术式变为术式+）；为手牌中一张牌附魔本能（Instinct）。
+// 随机触发3次术式（升级后为术式+）；为手牌中一张牌附魔本能。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Aliasing : ModCardTemplate
 {
@@ -39,21 +40,21 @@ public sealed class Aliasing : ModCardTemplate
 	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-	// 基础数值：生成的术式数量（绑定 {Cards:diff()} 占位符）。
+	// 基础数值：术式触发次数（绑定 {Cards:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new CardsVar(3)
 	];
 
-	// 打出时：生成随机术式加入手牌，再为一张手牌附魔本能。
+	// 打出时：触发随机术式，再为一张手牌附魔本能。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
 
-		// 1. 生成 3 张随机术式加入手牌（升级后为术式+，由 IsUpgraded 控制，参考匣中术 ArtOfTheBox）。
+		// 1. 每次独立随机选择术式和敌人，升级由 IsUpgraded 控制。
 		for (int i = 0; i < DynamicVars.Cards.IntValue; i++)
 		{
-			await Arts.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
+			await ArtTrigger.TriggerRandom(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 			await Cmd.Wait(0.1f);
 		}
 
@@ -71,7 +72,7 @@ public sealed class Aliasing : ModCardTemplate
 			filter: CanEnchantInstinct,
 			source: this)).FirstOrDefault();
 
-		// 取消选择则跳过附魔（术式已生成）。
+		// 取消选择则跳过附魔（术式已结算）。
 		if (target != null)
 		{
 			CardCmd.Enchant<Instinct>(target, 1m);

@@ -8,15 +8,12 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 万物通元（character.org 金卡 #18）：3 费能力牌。
-// 每当你生成一张牌时，为它随机附魔一种附魔（升级后 2 费）。
-// 实现参考原版 Pillar of Creation / Smokestack 的“生成牌钩子” Power 模式
-// （Power 覆写 AfterCardGeneratedForCombat 响应玩家生成卡牌事件）。
+// 万物通元：2费金色能力，每触发5次术式，所有手牌附魔数值+1（仅本场战斗）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantedCreation : ModCardTemplate
 {
 	// 基础耗能。
-	private const int BaseEnergyCost = 3;
+	private const int BaseEnergyCost = 2;
 	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
 	// 卡牌稀有度（金卡 = Rare）。
@@ -42,9 +39,9 @@ public sealed class EnchantedCreation : ModCardTemplate
 		await PowerCmd.Apply<EnchantedCreationPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
 	}
 
-	// 升级：费用 3 -> 2。
+	// 升级：费用不变，获得固有。
 	protected override void OnUpgrade()
 	{
-		base.EnergyCost.UpgradeBy(-1);
+		AddKeyword(CardKeyword.Innate);
 	}
 }

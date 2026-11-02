@@ -9,17 +9,18 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using TheSolitary.Cards;
+using TheSolitary.ArtEffects;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Relics;
 
-// 四象之阵（商店遗物）：在每场战斗中，你打出四种不同的术式后，所有敌人失去 2 点力量与 2 点敏捷。
-// 五种术式各占一个 bit 位，用位掩码记录本场战斗已打出过哪些术式（可序列化，避免保存 HashSet）。
+// 四象之阵（商店遗物）：在每场战斗中，你触发四种不同的术式后，所有敌人失去 2 点力量与 2 点敏捷。
+// 五种术式各占一个 bit 位，用位掩码记录本场战斗已触发过哪些术式（可序列化，避免保存 HashSet）。
 // 每场战斗开始时清零，同一场战斗只触发一次；触发后遗物状态置为 Disabled，遗物图标变暗置灰标记已触发。
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
-public sealed class FourSymbolsFormation : ModRelicTemplate
+public sealed class FourSymbolsFormation : ModRelicTemplate, IArtTriggerListener
 {
     // 需要打出的不同术式种类数。
     private const int DistinctArtsRequired = 4;
@@ -27,7 +28,7 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
     // 力量 / 敏捷流失数值。
     private const decimal StatLoss = 2m;
 
-    // 本场战斗已打出的不同术式位掩码（5 种术式各占 1 bit）。
+    // 本场战斗已触发的不同术式位掩码（5 种术式各占 1 bit）。
     private int _artsMask;
 
     // 本场战斗是否已经触发过全体削弱。
@@ -35,7 +36,7 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
 
     public override RelicRarity Rarity => RelicRarity.Shop;
 
-    // 遗物角标显示本场战斗已打出的不同术式数（0~4）。
+    // 遗物角标显示本场战斗已触发的不同术式数（0~4）。
     public override bool ShowCounter => true;
 
     public override int DisplayAmount => CountBits(DistinctArtsMask);
@@ -91,15 +92,15 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
         return Task.CompletedTask;
     }
 
-    // 打出术式时记录种类；集齐四种不同术式后对所有敌人施加力量/敏捷流失。
-    public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    // 触发术式时记录种类；集齐四种不同术式后对所有敌人施加力量/敏捷流失。
+    public async Task AfterArtTriggered(PlayerChoiceContext choiceContext, ArtTriggerResult trigger)
     {
-        if (cardPlay.Card.Owner != base.Owner || !Arts.IsArt(cardPlay.Card) || DebuffTriggered)
+        if (trigger.Owner != base.Owner || DebuffTriggered)
         {
             return;
         }
 
-        int bit = ArtBit(cardPlay.Card);
+        int bit = 1 << (int)trigger.Kind;
         if (bit == 0)
         {
             return;
@@ -121,17 +122,6 @@ public sealed class FourSymbolsFormation : ModRelicTemplate
             await PowerCmd.Apply<DexterityPower>(choiceContext, enemy, -DynamicVars.Dexterity.BaseValue, base.Owner.Creature, null);
         }
     }
-
-    // 把术式牌映射到位掩码中的 1 bit（升级版仍是同类，类型判断不变）。
-    private static int ArtBit(CardModel card) => card switch
-    {
-        ArtOfDecay => 1 << 0,
-        ArtOfWilt => 1 << 1,
-        ArtOfBreach => 1 << 2,
-        ArtOfVenom => 1 << 3,
-        ArtOfDoom => 1 << 4,
-        _ => 0
-    };
 
     // 统计位掩码中置位的数量（Kernighan 算法）。
     private static int CountBits(int mask)

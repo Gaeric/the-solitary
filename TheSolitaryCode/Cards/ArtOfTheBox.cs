@@ -6,11 +6,12 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.ArtEffects;
 
 namespace TheSolitary.Cards;
 
 // 匣中术（character.org 基础卡 #1）：1 费攻击。
-// 造成 3 点伤害，将 2 张随机术式加入手牌；升级后伤害 5，生成的术式变为升级版（术式+）。
+// 造成3点伤害，随机触发2次术式；升级后触发术式+。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 1, Order = 1)]
 public sealed class ArtOfTheBox : ModCardTemplate
@@ -35,14 +36,14 @@ public sealed class ArtOfTheBox : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 基础数值：伤害 + 生成的术式数量（绑定 {Damage:diff()} / {Cards:diff()} 占位符）。
+	// 基础数值：伤害 + 术式触发次数（绑定 {Damage:diff()} / {Cards:diff()} 占位符）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new DamageVar(3m, ValueProp.Move),
 		new CardsVar(2)
 	];
 
-	// 打出时：先造成伤害，再循环生成随机术式加入手牌（本卡升级后生成升级版术式）。
+	// 打出时：先造成攻击伤害，再循环随机触发术式。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -54,7 +55,7 @@ public sealed class ArtOfTheBox : ModCardTemplate
 
 		for (int i = 0; i < DynamicVars.Cards.IntValue; i++)
 		{
-			await Arts.CreateRandomInHand(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
+			await ArtTrigger.TriggerRandom(Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 			await Cmd.Wait(0.1f);
 		}
 	}

@@ -9,9 +9,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 术式回想（新卡）：2 费能力牌，升级后 1 费。
-// 每当你生成一张术式时，使其获得重放（Replay：打出时额外打一次）。
-// 实现参考附魔造物 EnchantedCreation（Power 覆写 AfterCardGeneratedForCombat 钩子）＋
-// 原版变形 Transfigure（BaseReplayCount++ 施加重放）。
+// 所有术式效果额外触发一次；由独立 ArtTrigger 结算，不使用卡牌重放。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class SpellRecall : ModCardTemplate
 {

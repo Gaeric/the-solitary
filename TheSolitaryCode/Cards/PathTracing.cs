@@ -10,13 +10,13 @@ using MegaCrit.Sts2.Core.Models;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.ArtEffects;
 
 namespace TheSolitary.Cards;
 
 // 路径追踪（英文名 Path Tracing）：0 费技能。
-// 在这个回合内每打出过一张技能牌，就对一名随机敌人打出一张随机术式（统计的是本牌打出前已结算的技能牌）。
+// 在这个回合内每打出过一张技能牌，就对一名随机敌人随机触发一次术式（统计的是本牌打出前已结算的技能牌）。
 // 技能计数参考原版 连击 Finisher：CombatManager.Instance.History.CardPlaysFinished + HappenedThisTurn；
-// 随机术式生成与直接快速自动打出复用 Arts.CreateRandomArtAndAutoPlay（不进手牌，效果当场施放）。
 // 升级后打出的术式变为术式+（升级版）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class PathTracing : ModCardTemplate
@@ -41,7 +41,7 @@ public sealed class PathTracing : ModCardTemplate
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出时：统计本回合已打出的技能牌数量，每张生成一张随机术式（升级后为术式+）并自动打出（随机敌方目标）。
+	// 打出时：统计本回合已触发的技能牌数量，每张生成一张随机术式（升级后为术式+）并自动打出（随机敌方目标）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		await CreatureCmd.TriggerAnim(Owner.Creature, "Cast", Owner.Character.CastAnimDelay);
@@ -56,8 +56,7 @@ public sealed class PathTracing : ModCardTemplate
 		for (int i = 0; i < skillCount; i++)
 		{
 			// 生成一张随机术式并直接快速自动打出（不进手牌、无进手牌动画，直接播放打出效果）。
-			// 内部负责打出区节点清理，不会在 UI 中残留卡牌。
-			await Arts.CreateRandomArtAndAutoPlay(
+			await ArtTrigger.TriggerRandom(
 				Owner, combatState, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 		}
 	}

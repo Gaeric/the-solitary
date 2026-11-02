@@ -9,10 +9,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 全知形态（原术法归元，character.org 金卡 #14）：3 费能力牌。
-// 每当你打出一张附魔牌时，对一名随机敌人打出一张随机术式+（升级版术式）。
-// 升级后不改变耗能、不改动生成的术式（始终为术式+），而是本卡获得保留（Retain）。
-// 实现参考原版模仿学习 ImitationLearning（Power 覆写 AfterCardPlayed 钩子 + CardCmd.AutoPlay 随机目标自动打出），
-// 结构与术式回想 SpellRecall（能力牌 + Power 钩子）保持一致。
+// 每当你打出一张附魔牌时，随机触发一次术式+。
+// 升级后本卡获得保留，术式始终为升级版；Power 监听真实打牌事件。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class ArcaneReturn : ModCardTemplate
 {

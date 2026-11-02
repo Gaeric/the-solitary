@@ -6,17 +6,18 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Cards;
+using TheSolitary.ArtEffects;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Relics;
 
-// 凝术御甲（普通遗物）：每打出一张术式牌，获得 1 点格挡。
+// 凝术御甲（普通遗物）：每触发一次术式，获得 1 点格挡。
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
-public sealed class ArcaneAegis : ModRelicTemplate
+public sealed class ArcaneAegis : ModRelicTemplate, IArtTriggerListener
 {
-    // 每打出一张术式获得的格挡。
+    // 每触发一次术式获得的格挡。
     private const decimal BlockAmount = 1m;
 
     public override RelicRarity Rarity => RelicRarity.Common;
@@ -33,11 +34,11 @@ public sealed class ArcaneAegis : ModRelicTemplate
         IconOutlinePath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png",
         BigIconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png");
 
-    // 打出术式时获得格挡（术式判定复用 Arts.IsArt，与余弦/术式回想同款）。
+    // 每次术式实际触发时获得格挡，包含回想的额外结算。
     // ValueProp.Unpowered：来自遗物的格挡不享受力量/敏捷加成（与原版 Orichalcum 等遗物一致）。
-    public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    public async Task AfterArtTriggered(PlayerChoiceContext choiceContext, ArtTriggerResult trigger)
     {
-        if (cardPlay.Card.Owner == base.Owner && Arts.IsArt(cardPlay.Card))
+        if (trigger.Owner == base.Owner)
         {
             Flash();
             await CreatureCmd.GainBlock(base.Owner.Creature, DynamicVars.Block.BaseValue, ValueProp.Unpowered, null);

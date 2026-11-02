@@ -14,9 +14,8 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 奇点爆破（自定义卡）：3 费攻击（升级后 2 费）。
-// 本次战斗每生成过一张术式，造成 1 点伤害（单次伤害 = 术式生成数）；
+// 本次战斗每触发过一次术式，造成 1 点伤害（单次伤害 = 术式触发次数）；
 // 敌人每有一种负面效果，额外造成一次伤害（命中次数 = 1 + 负面效果种类数）。
-// 生成数由 ArtTrackerPower 在 Arts.CreateRandomInHand 中累计。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class SingularityBurst : ModCardTemplate
 {
@@ -44,7 +43,7 @@ public sealed class SingularityBurst : ModCardTemplate
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
 	// 基础数值：
-	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗生成的术式数量（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
+	// 单次伤害 = 基础(0) + ExtraDamage(1) × 本场战斗术式触发次数（绑定 {CalculatedDamage:diff()} / {ExtraDamage:diff()}）。
 	// 命中次数 = 基础 1 次 + 目标身上的负面效果类型数（绑定 {CalculatedHits:diff()}）。
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[

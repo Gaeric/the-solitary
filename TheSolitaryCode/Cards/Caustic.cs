@@ -10,14 +10,15 @@ using MegaCrit.Sts2.Core.Models.Powers;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.ArtEffects;
 
 namespace TheSolitary.Cards;
 
 // 焦散：7 费金卡（稀有）技能牌，目标为所有敌人，打出后消耗。
 // 所有敌人失去 2 点力量、2 点敏捷（升级后各 3 点）。
-// 每当你生成一张术式时，此牌耗能减少 1（参考火箭飞拳 RocketPunch 的 EnergyCost.AddUntilPlayed 减费机制）。
+// 每当你触发一次术式时，此牌耗能减少 1（参考火箭飞拳 RocketPunch 的 EnergyCost.AddUntilPlayed 减费机制）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
-public sealed class Caustic : ModCardTemplate
+public sealed class Caustic : ModCardTemplate, IArtTriggerListener
 {
 	// 基础耗能。
 	private const int BaseEnergyCost = 7;
@@ -56,19 +57,11 @@ public sealed class Caustic : ModCardTemplate
 		new PowerVar<DexterityPower>(2m)
 	];
 
-	// 每当你生成一张术式时，此牌耗能减少 1（参考火箭飞拳 RocketPunch：
+	// 每当你触发一次术式时，此牌耗能减少 1（参考火箭飞拳 RocketPunch：
 	// EnergyCost.AddUntilPlayed 使减费持续到本牌打出为止，打出后重置）。
-	public override Task AfterCardGeneratedForCombat(CardModel card, Player? creator)
+	public Task AfterArtTriggered(PlayerChoiceContext choiceContext, ArtTriggerResult trigger)
 	{
-		if (creator != base.Owner)
-		{
-			return Task.CompletedTask;
-		}
-		if (card.Owner != base.Owner)
-		{
-			return Task.CompletedTask;
-		}
-		if (!Arts.IsArt(card))
+		if (trigger.Owner != base.Owner)
 		{
 			return Task.CompletedTask;
 		}

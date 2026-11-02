@@ -1,60 +1,52 @@
-using System.Threading.Tasks;
-using MegaCrit.Sts2.Core.Entities.Cards;
-using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
-using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using TheSolitary.ArtEffects;
 using TheSolitary.Cards;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Powers;
 
-// 万物通元的 Power（参考原版 PillarOfCreationPower / SmokestackPower 的 AfterCardGeneratedForCombat 钩子）：
-// 每当拥有者生成一张牌时，为它随机附魔（随机附魔池与唤醒一致）。
-// 注：轮回/元能转置直接在原卡上交换附魔（不再通过 Transform 重建卡牌），
-// 不会触发生成牌钩子，因此不会对交换中的牌误附魔。
+// 万物通元：每个打出的副本独立累计5次术式，所有手牌数值型附魔+1，仅本场战斗。
 [RegisterPower]
-public sealed class EnchantedCreationPower : ModPowerTemplate
+public sealed class EnchantedCreationPower : ModPowerTemplate, IArtTriggerListener
 {
-	// 防止在附魔过程中再次触发“生成牌”钩子导致递归（参考灵魂绑定 SoulboundPower 的守卫模式）。
-	private bool _isEnchanting;
-
-	private bool IsEnchanting
-	{
-		get
-		{
-			return _isEnchanting;
-		}
-		set
-		{
-			AssertMutable();
-			_isEnchanting = value;
-		}
-	}
+	private const string TriggersLeftKey = "TriggersLeft";
+	private const int TriggerThreshold = 5;
 
 	public override PowerType Type => PowerType.Buff;
 
-	// 不计数值的二进制类型：效果是「每张生成的牌都被附魔」，叠多层没有额外效果，
-	// 因此不显示层数（原版 Barricade / Corruption 同款 PowerStackType.Single）。
-	public override PowerStackType StackType => PowerStackType.Single;
+	public override PowerStackType StackType => PowerStackType.Counter;
+	public override PowerInstanceType InstanceType => PowerInstanceType.Instanced;
+	public override int DisplayAmount => DynamicVars[TriggersLeftKey].IntValue;
+	protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar(TriggersLeftKey, TriggerThreshold)];
 
 	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
 	public override PowerAssetProfile AssetProfile => new(
 		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
 		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
 
-	// 只处理自己生成的牌；已附魔的牌与递归中的生成跳过。
-	public override Task AfterCardGeneratedForCombat(CardModel card, Player? creator)
+	public Task AfterArtTriggered(PlayerChoiceContext choiceContext, ArtTriggerResult trigger)
 	{
-		if (creator == null || creator.Creature != base.Owner || card.Enchantment != null || IsEnchanting)
+		if (trigger.Owner.Creature != Owner)
 		{
 			return Task.CompletedTask;
 		}
-
-		IsEnchanting = true;
+		DynamicVar left = DynamicVars[TriggersLeftKey];
+		left.BaseValue--;
+		InvokeDisplayAmountChanged();
+		if (left.IntValue > 0)
+		{
+			return Task.CompletedTask;
+		}
+		left.BaseValue = TriggerThreshold;
+		InvokeDisplayAmountChanged();
 		Flash();
-		RandomEnchantPool.EnchantRandomly(base.Owner.Player!.RunState.Rng.CombatCardSelection, card);
-		IsEnchanting = false;
+		foreach (var card in trigger.Owner.PlayerCombatState!.Hand.Cards.ToList())
+		{
+			EnchantHelpers.IncreaseEnchantmentValue(card, amount: 1, persistToDeckVersion: false);
+		}
 		return Task.CompletedTask;
 	}
 }

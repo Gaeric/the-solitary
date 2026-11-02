@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.ValueProps;
+using TheSolitary.Powers;
 
 namespace TheSolitary.ArtEffects;
 
@@ -47,6 +48,35 @@ public static class ArtTrigger
 		Player owner, ICombatState combatState, ArtKind kind, PlayerChoiceContext choiceContext,
 		bool upgraded = false, Creature? target = null)
 	{
+		// 一次来源触发只读取一次回想层数，额外结算不再经过此入口，避免递归。
+		int extraTriggers = Math.Max(0, (int)owner.Creature.GetPowerAmount<SpellRecallPower>());
+		if (extraTriggers > 0 && !CombatManager.Instance.IsOverOrEnding && GetTargets(owner, combatState).Count > 0)
+		{
+			owner.Creature.GetPower<SpellRecallPower>()?.Flash();
+		}
+		ArtTriggerResult? first = null;
+		for (int i = 0; i <= extraTriggers; i++)
+		{
+			// 首次目标严格校验；重复效果在原目标死亡后改为随机敌人。
+			if (i > 0 && target != null && !target.IsHittable)
+			{
+				target = null;
+			}
+			ArtTriggerResult? result = await TriggerOnce(owner, combatState, kind, choiceContext, upgraded, target);
+			if (result == null)
+			{
+				break;
+			}
+			first ??= result;
+			target = result.Target;
+		}
+		return first;
+	}
+
+	private static async Task<ArtTriggerResult?> TriggerOnce(
+		Player owner, ICombatState combatState, ArtKind kind, PlayerChoiceContext choiceContext,
+		bool upgraded, Creature? target)
+	{
 		ArtDefinition effect = ArtDefinition.Get(kind, upgraded);
 		List<Creature> enemies = GetTargets(owner, combatState);
 		if (CombatManager.Instance.IsOverOrEnding || enemies.Count == 0)
@@ -55,6 +85,10 @@ public static class ArtTrigger
 		}
 		ValidateTarget(target, enemies);
 		target ??= owner.RunState.Rng.CombatTargets.NextItem(enemies)!;
+		// 与原版 AfterCardPlayed 相同，先快照监听者；致死的这次术式也须完成通知。
+		var listeners = combatState.IterateHookListeners()
+			.Where(model => model is IArtTriggerListener).ToList();
+		await PowerCmd.Apply<ArtTrackerPower>(choiceContext, owner.Creature, 1m, null, null, silent: true);
 
 		ArtTriggerVfx.Play(target, effect);
 
@@ -85,8 +119,21 @@ public static class ArtTrigger
 			}
 		}
 
-		// 后续专用触发计数应由此结果接入，不能冒充 CardGenerated / AfterCardPlayed。
-		return new ArtTriggerResult(owner, kind, upgraded, target);
+		var result = new ArtTriggerResult(owner, kind, upgraded, target);
+		foreach (var model in listeners)
+		{
+			choiceContext.PushModel(model);
+			try
+			{
+				await ((IArtTriggerListener)model).AfterArtTriggered(choiceContext, result);
+				model.InvokeExecutionFinished();
+			}
+			finally
+			{
+				choiceContext.PopModel(model);
+			}
+		}
+		return result;
 	}
 
 	private static List<Creature> GetTargets(Player owner, ICombatState combatState)

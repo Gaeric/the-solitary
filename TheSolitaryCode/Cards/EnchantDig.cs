@@ -9,12 +9,12 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.ArtEffects;
 
 namespace TheSolitary.Cards;
 
 // 挖掘（character.org 白卡）：1 费攻击。
-// 造成 6 点伤害，抽 1 张牌（升级后 2 张）；每抽到一张附魔牌，随机打出一张术式（升级后为术式+）。
-// 随机术式生成与直接快速自动打出复用 Arts.CreateRandomArtAndAutoPlay（参考路径追踪 PathTracing，不进手牌）。
+// 造成 6 点伤害，抽 1 张牌（升级后 2 张）；每抽到一张附魔牌，随机触发一次术式（升级后为术式+）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantDig : ModCardTemplate
 {
@@ -45,7 +45,7 @@ public sealed class EnchantDig : ModCardTemplate
 		new CardsVar(1)
 	];
 
-	// 打出时：造成伤害；抽 N 张牌；每抽到一张附魔牌，随机打出一张术式（升级后为术式+）。
+	// 打出时：造成伤害；抽 N 张牌；每抽到一张附魔牌，随机触发一次术式（升级后为术式+）。
 	protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
@@ -60,11 +60,11 @@ public sealed class EnchantDig : ModCardTemplate
 		List<CardModel> drawn = (await CardPileCmd.Draw(
 			choiceContext, DynamicVars.Cards.BaseValue, Owner)).ToList();
 
-		// 3. 每抽到一张附魔牌，生成一张随机术式并直接自动打出（随机敌方目标，不进手牌，参考路径追踪）。
+		// 3. 每抽到一张附魔牌，随机触发一次术式（随机敌方目标，不进手牌，参考路径追踪）。
 		//    本卡升级后生成的术式为术式+（升级版），由 IsUpgraded 控制（与路径追踪 PathTracing 同款）。
 		foreach (CardModel card in drawn.Where(c => c.Enchantment != null))
 		{
-			await Arts.CreateRandomArtAndAutoPlay(
+			await ArtTrigger.TriggerRandom(
 				Owner, CombatState!, Owner.RunState.Rng.CombatCardGeneration, choiceContext, upgraded: IsUpgraded);
 		}
 	}

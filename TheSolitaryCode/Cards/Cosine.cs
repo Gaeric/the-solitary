@@ -10,8 +10,7 @@ using STS2RitsuLib.Scaffolding.Content;
 namespace TheSolitary.Cards;
 
 // 余弦（character.org todo 蓝卡）：1 费能力牌，升级后 0 费。
-// 每当你生成一张术式时，获得 2 点格挡。
-// 生成术式钩子由 CosinePower（AfterCardGeneratedForCombat + Arts.IsArt）实现。
+// 每触发一次术式，获得 2 点格挡；由 CosinePower 的专用术式钩子实现。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Cosine : ModCardTemplate
 {

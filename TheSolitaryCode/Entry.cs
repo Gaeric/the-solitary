@@ -38,6 +38,9 @@ public partial class Entry
         // 新增内容类后，只要 attribute 写对，通常不需要在入口里手动逐个注册。
         ModTypeDiscoveryHub.RegisterModAssembly(ModId, assembly);
 
+        // 凝华战后选牌附魔奖励：注册恢复工厂，支持奖励页面存档后继续。
+        Rewards.RandomEnchantmentReward.Register();
+
         // 事件关联：古老牙齿 ArchaicTooth 把初始卡 唤醒 Sacrifice 升级成先古卡 复苏 Resurgence。
         // 映射 ID 延迟解析，放在内容注册之后即可。
         RitsuLibFramework.RegisterArchaicToothTranscendenceMapping<Sacrifice, Resurgence>(ModId);
