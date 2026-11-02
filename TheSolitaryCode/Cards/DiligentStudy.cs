@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -15,16 +17,14 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 勤学（character.org）：任务牌，不能被打出；进入 5 种不同类型的房间各 2 次后转换为 博识。开局作为初始卡加入牌组。
+// 勤学：任务完成后获得一个稀有、一个罕见遗物并移出牌组。
 // 卡牌定位：**任务牌**（CardType.Quest + CardRarity.Quest + 注册进原版 QuestCardPool，与探寻 Dowsing 同池）
 // → 不进卡牌奖励 / 商店 / 战斗生成 / 随机变化。
 // 历史：2026-09 曾一度改为基础牌（CardType.Skill + CardRarity.Basic + 角色卡池），以便被木雕 WoodCarvings 这类
 // "针对基础牌"的效果变换；随后按要求改回任务牌，因此卡面与行为都以任务牌为准。
-// 转换关系完全对照原版 探寻 Dowsing → 富足 Abundance：
 //   - 费用 -1 / Unplayable / MaxUpgradeLevel = 0 / CanBeGeneratedInCombat = false；
 //   - 用 [SavedProperty] int RoomVisits 存"每种房型已经进入过几次"（每种 2 位、5 种共 10 位），
-//     BeforeRoomEntered 累计：5 种房型**各进入 2 次**（共 10 次）后 PlayerCmd.CompleteQuest +
-//     CardCmd.TransformTo<Erudition>（牌组原件被永久转换）；
+//     BeforeRoomEntered 累计：5 种房型各进入 2 次（共 10 次）后完成任务；
 //   - 悬停提示逐条列出"还没进满 2 次的房型"并写明还差几次（用原版房间名 + 本 Mod 说明）；
 //   - 注册进原版 QuestCardPool（与探寻同池），因此不会出现在卡牌奖励 / 商店 / 随机变化里；
 //   - 再用 RegisterCharacterStarterCard 把它作为初始卡加入本角色初始牌组（Order 2 = 排在打击/防御/唤醒/匣中术之后）。
@@ -112,17 +112,10 @@ public sealed class DiligentStudy : ModCardTemplate
 		new DynamicVar("Times", TotalRequiredVisits)
 	];
 
-	// 悬停提示：
-	// 1) 转换目标 博识 的卡牌预览（与探寻提示富足同款）；
-	// 2) 逐条列出"还没进满 2 次的房型"——标题用原版房间名（static_hover_tips 的 ROOM_*.title），
-	//    说明按"还差 2 次 / 还差 1 次"选本 Mod 文案，方便玩家一眼看出还差哪些房间、各差几次；
-	//    全部进满后这两类提示都会消失。
 	protected override IEnumerable<IHoverTip> AdditionalHoverTips
 	{
 		get
 		{
-			yield return HoverTipFactory.FromCard<Erudition>();
-
 			foreach ((int index, string roomTipKey) in RoomTips)
 			{
 				int remaining = RequiredVisitsPerType - VisitCountAt(RoomVisits, index);
@@ -163,7 +156,7 @@ public sealed class DiligentStudy : ModCardTemplate
 	/// 只有这张牌在[gold]牌组[/gold]里时才计数（战斗中抽到的克隆牌不算），
 	/// 且只统计 character.org 指定的 5 种房间（战斗 / 宝箱 / 商店 / 营火 / 事件），
 	/// 每种最多记 2 次（进满后再进同类房间不计数）。
-	/// 5 种房型各进满 2 次（共 10 次）后完成任务，并把这张牌转换为 博识。
+	/// 5 种房型各进满 2 次（共 10 次）后完成任务并获得遗物。
 	/// </summary>
 	public override async Task BeforeRoomEntered(AbstractRoom room)
 	{
@@ -193,9 +186,10 @@ public sealed class DiligentStudy : ModCardTemplate
 			return;
 		}
 
-		// 5 种房型各进满 2 次 → 完成任务并转换为 博识（与探寻 CompleteQuest + TransformTo 一致）。
+		await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner, RelicRarity.Rare).ToMutable(), Owner);
+		await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner, RelicRarity.Uncommon).ToMutable(), Owner);
 		PlayerCmd.CompleteQuest(this);
-		await CardCmd.TransformTo<Erudition>(this);
+		await CardPileCmd.RemoveFromDeck(this);
 	}
 
 	// 房间实例 → 计数下标（-1 = 不计数）。CombatRoom 覆盖普通/精英/Boss 三种战斗房。
