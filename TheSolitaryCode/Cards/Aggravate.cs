@@ -61,8 +61,8 @@ public sealed class Aggravate : ModCardTemplate
 			.Targeting(cardPlay.Target)
 			.Execute(choiceContext);
 
-		// 快照目标身上的所有 Debuff 型 Power（施加过程只加层数、不新增种类，集合不会变化）。
-		List<PowerModel> debuffs = cardPlay.Target.Powers.Where(p => p.Type == PowerType.Debuff).ToList();
+		var debuffs = cardPlay.Target.Powers.Where(DebuffHelpers.IsDebuff)
+			.Select(p => (Power: p, Direction: p.Amount < 0 ? -1m : 1m)).ToList();
 		if (debuffs.Count == 0)
 		{
 			return;
@@ -71,11 +71,12 @@ public sealed class Aggravate : ModCardTemplate
 		// 每种负面效果数值 + DebuffAmount × 负面效果种类数。
 		// 用 ModelDb.DebugPower + ToMutable 生成可变原型传给 PowerCmd.Apply：
 		// 已存在的负面效果会走叠加路径加层数；理论上可能存在的 Instanced 型负面效果也会安全地新增一层。
-		foreach (PowerModel debuff in debuffs)
+		int typeCount = debuffs.Select(p => p.Power.Id).Distinct().Count();
+		foreach (var debuff in debuffs)
 		{
 			await PowerCmd.Apply(choiceContext,
-				ModelDb.DebugPower(debuff.GetType()).ToMutable(),
-				cardPlay.Target, DynamicVars[DebuffAmountKey].BaseValue * debuffs.Count, Owner.Creature, this);
+				ModelDb.DebugPower(debuff.Power.GetType()).ToMutable(),
+				cardPlay.Target, debuff.Direction * DynamicVars[DebuffAmountKey].BaseValue * typeCount, Owner.Creature, this);
 		}
 	}
 

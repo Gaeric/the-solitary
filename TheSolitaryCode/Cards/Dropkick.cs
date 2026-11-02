@@ -50,7 +50,7 @@ public sealed class Dropkick : ModCardTemplate
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
 
-		bool hasDebuff = cardPlay.Target.Powers.Any(p => p.TypeForCurrentAmount == PowerType.Debuff);
+		bool hasDebuff = cardPlay.Target.Powers.Any(DebuffHelpers.IsDebuff);
 
 		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
 			.FromCard(this, cardPlay)

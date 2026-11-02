@@ -52,7 +52,7 @@ public sealed class CorrosiveFist : ModCardTemplate
 	{
 		ArgumentNullException.ThrowIfNull(cardPlay.Target);
 
-		bool hasDebuff = cardPlay.Target.Powers.Any(p => p.Type == PowerType.Debuff);
+		bool hasDebuff = cardPlay.Target.Powers.Any(DebuffHelpers.IsDebuff);
 
 		await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
 			.WithHitCount(hasDebuff ? 2 : 1)

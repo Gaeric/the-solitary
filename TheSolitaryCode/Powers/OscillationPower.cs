@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Cards;
 
 namespace TheSolitary.Powers;
 
@@ -44,7 +45,7 @@ public sealed class OscillationPower : ModPowerTemplate
 		}
 		// 统计所有存活敌人身上的负面效果总数（每种负面效果各算一次，与层数无关）。
 		int debuffCount = base.Owner.CombatState!.HittableEnemies
-			.Sum(e => e.Powers.Count(p => p.Type == PowerType.Debuff));
+			.Sum(DebuffHelpers.CountDebuffTypes);
 		if (debuffCount == 0)
 		{
 			return 1m;

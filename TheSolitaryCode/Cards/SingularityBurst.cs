@@ -78,7 +78,7 @@ public sealed class SingularityBurst : ModCardTemplate
 	}
 
 	/// <summary>
-	/// 统计目标身上不同的负面效果类型数（与瘟疫 Pestilence 相同的计数方式，参考原版 Rend）。
+	/// 按人工制品范围统计目标身上不同的负面效果类型数。
 	/// </summary>
 	private static int CountDistinctDebuffTypes(Creature? target)
 	{
@@ -86,10 +86,6 @@ public sealed class SingularityBurst : ModCardTemplate
 		{
 			return 0;
 		}
-		return target.Powers
-			.Where(p => p.TypeForCurrentAmount == PowerType.Debuff && p is not ITemporaryPower)
-			.Select(p => p.Id)
-			.Distinct()
-			.Count();
+		return DebuffHelpers.CountDebuffTypes(target);
 	}
 }

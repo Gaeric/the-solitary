@@ -52,7 +52,7 @@ public sealed class Contagion : ModCardTemplate
 
 		// 快照在造成伤害之前进行（敌人死亡后其 Power 可能被清理，无法再读取）。
 		List<(Type Type, int Amount)> debuffs = cardPlay.Target.Powers
-			.Where(p => p.Type == PowerType.Debuff)
+			.Where(DebuffHelpers.IsDebuff)
 			.Select(p => (p.GetType(), p.Amount))
 			.ToList();
 

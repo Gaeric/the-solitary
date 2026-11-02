@@ -28,8 +28,7 @@ public static class DebuffHelpers
 {
 	/// <summary>
 	/// 移除一个角色身上的全部负面效果，并返回每种被移除负面效果的种类与移除时的数值。
-	/// 「负面效果」判定与原版 Rend / Misery 一致：<see cref="PowerModel.TypeForCurrentAmount"/> 为
-	/// <see cref="PowerType.Debuff"/> 的 Power（包含临时负面效果实例，如临时力量）。
+	/// 判定与人工制品一致，包含可见的临时负面效果。
 	/// 逐个调用 <see cref="PowerCmd.Remove(PowerModel)"/>，以播放移除特效并触发 AfterRemoved 钩子。
 	/// </summary>
 	/// <param name="creature">要移除负面效果的角色。</param>
@@ -54,34 +53,29 @@ public static class DebuffHelpers
 
 	/// <summary>
 	/// 统计一个角色身上的负面效果类型数量（按 Power 的运行时类型去重）。
-	/// 判定与原版 Rend / 瘟疫 Pestilence 一致：<see cref="PowerModel.TypeForCurrentAmount"/> 为
-	/// <see cref="PowerType.Debuff"/> 的 Power，并排除临时性 Power（<see cref="ITemporaryPower"/>，
-	/// 避免临时负面效果与内层正式负面效果重复计数）。
+	/// 判定与人工制品一致，包含可见的临时负面效果。
 	/// </summary>
 	/// <param name="creature">要统计的角色。</param>
 	/// <returns>负面效果类型的数量。</returns>
 	public static int CountDebuffTypes(Creature creature)
 	{
 		return creature.Powers
-			.Where(IsCountableDebuff)
+			.Where(IsDebuff)
 			.Select(p => p.Id)
 			.Distinct()
 			.Count();
 	}
 
-	/// <summary>
-	/// 判定一个 Power 是否计入负面效果类型统计（参考瘟疫 Pestilence.ShouldCountPower）。
-	/// </summary>
-	private static bool IsCountableDebuff(PowerModel power)
+	public static bool IsDebuffForAmount(PowerModel power, decimal amount)
 	{
-		return power.TypeForCurrentAmount == PowerType.Debuff && power is not ITemporaryPower;
+		return power.IsVisible && power.GetTypeForAmount(amount) == PowerType.Debuff;
 	}
 
 	/// <summary>
 	/// 判定一个 Power 当前是否为负面效果。
 	/// </summary>
-	private static bool IsDebuff(PowerModel power)
+	public static bool IsDebuff(PowerModel power)
 	{
-		return power.TypeForCurrentAmount == PowerType.Debuff;
+		return IsDebuffForAmount(power, power.Amount);
 	}
 }

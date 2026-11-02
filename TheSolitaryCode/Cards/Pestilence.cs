@@ -46,11 +46,7 @@ public sealed class Pestilence : ModCardTemplate
 		new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) =>
 			target == null
 				? 0m
-				: target.Powers
-					.Where(ShouldCountPower)
-					.Select(p => p.Id)
-					.Distinct()
-					.Count())
+				: DebuffHelpers.CountDebuffTypes(target))
 	];
 
 	// 打出时：按计算出的总伤害攻击目标。
@@ -70,12 +66,4 @@ public sealed class Pestilence : ModCardTemplate
 		DynamicVars.ExtraDamage.UpgradeValueBy(3m);
 	}
 
-	/// <summary>
-	/// 计数条件：当前数值为负面效果的 Power；排除临时性 Power（参考原版 Rend，
-	/// 避免临时负面效果与内层正式负面效果重复计数）。
-	/// </summary>
-	private static bool ShouldCountPower(PowerModel power)
-	{
-		return power.TypeForCurrentAmount == PowerType.Debuff && power is not ITemporaryPower;
-	}
 }

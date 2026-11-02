@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Cards;
 
 namespace TheSolitary.Powers;
 
@@ -38,7 +39,7 @@ public sealed class FocusPower : ModPowerTemplate
 			return 1m;
 		}
 		// 统计目标身上的负面效果种类数（不限于攻击伤害——本卡影响全部伤害来源）。
-		int debuffCount = target.Powers.Count(p => p.Type == PowerType.Debuff);
+		int debuffCount = DebuffHelpers.CountDebuffTypes(target);
 		if (debuffCount == 0)
 		{
 			return 1m;
