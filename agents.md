@@ -130,10 +130,11 @@ TheSolitary 是基于 STS2-RitsuLib 的 Slay the Spire 2 角色 Mod，使用 **G
 - 先古卡图使用 **606×852 竖向**规格，仍通过 `PortraitPath` 设置。先古布局直接拉满矩形，不能使用普通横向图，也不应为此改 `VisualStyle`。
 - 已有先古卡图：`Revelation` 使用 `draw_talisman`，`Resurgence` 使用 `preach`。新选图检查实际占用及视觉区分度，不能只比较文件大小；重编码后同图大小可能不同，应用缩略像素特征并人工查看。
 - 不复制源工程的 `.import`、`.uid` 或 `.godot`。替换图片后检查并移除对应旧 `.png.import`，让 Godot 重新导入；卡图变化需导出 PCK 才能进游戏。
-- 当前角色使用观者 Spine 模型。导出使用支持本机扩展的**标准 Godot 4.5.1 .NET 版**，本机配置以 `local.props` 为准；模板里残留的 MegaDot 路径不可直接照用。
+- 战斗场景当前使用 `Sprite2D` 和 `TheSolitary/images/characters/TheSolitary_combat.png` 静态立绘；坐垫和核心暂合在同一张图中。修改大小时同步核对 `Bounds`、`CenterPos` 和提示位置，不沿用直立人物的中心点。`ref/` 是原画参考目录，不参与 PCK 导出。
+- 选人、营火和商店仍使用观者 Spine 模型。导出使用支持本机扩展的**标准 Godot 4.5.1 .NET 版**，本机配置以 `local.props` 为准；模板里残留的 MegaDot 路径不可直接照用。
 - 扩展位于 `d:\sts2_mods\the-solitary\bin\spine_godot_extension.gdextension` 及其 `windows` DLL 目录；已被 Git 忽略，克隆后需自行准备。不要改用游戏源码中的 Spine 插件。
 - 骨骼保持顶层 `res://animations/characters/watcher/`，当前扩展对嵌套 `res://TheSolitary/...` 的路径处理存在问题。
-- 战斗场景使用 `SpineSprite`，角色 `SetupCustomCreatureAnimator` 映射 `Idle` / `Attack` / `Cast` / `Hit` / `Dead` / `relaxed`；大小写不可改成游戏标准动画名。
+- 角色仍保留观者的 `SetupCustomCreatureAnimator` 映射 `Idle` / `Attack` / `Cast` / `Hit` / `Dead` / `relaxed`，静态战斗场景不会启用该映射。重新接入 Spine 时先核对骨骼动画名，不直接改成游戏标准名。
 
 ## 构建、验证与交付
 
