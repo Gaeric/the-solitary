@@ -17,15 +17,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Stagnation : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（全体敌人，无手动选敌）。
 	private const TargetType CardTarget = TargetType.AllEnemies;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Stagnation()
@@ -33,11 +28,9 @@ public sealed class Stagnation : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Stagnation.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 悬停提示：展示虚弱 / 易伤 / 缓慢的机制说明。

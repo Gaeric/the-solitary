@@ -14,15 +14,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class StarGazing : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（自身：作用于抽牌堆）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public StarGazing()
@@ -30,11 +25,9 @@ public sealed class StarGazing : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/StarGazing.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 打出时：依次从抽牌堆中找出能力牌、技能牌、攻击牌并自动打出。

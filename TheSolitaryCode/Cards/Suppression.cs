@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -23,15 +24,10 @@ public sealed class Suppression : ModCardTemplate
 	private const string AdroitAmountKey = "AdroitAmount";
 	private const int AdroitAmount = 3;
 
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（攻击）。
 	private const CardType CardKind = CardType.Attack;
-	// 卡牌稀有度（白卡 = Common）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
-	// 目标类型（任意敌人）。
 	private const TargetType CardTarget = TargetType.AnyEnemy;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Suppression()
@@ -39,11 +35,9 @@ public sealed class Suppression : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Suppression.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 基础数值：伤害 + 伶俐附魔层数（绑定 {Damage:diff()} 与 {AdroitAmount:diff()} 占位符）。
@@ -74,7 +68,7 @@ public sealed class Suppression : ModCardTemplate
 
 		// 为手牌中所有能附魔伶俐的技能牌附魔伶俐（状态/诅咒等会被 CanEnchant 拒绝）。
 		foreach (CardModel card in Owner.PlayerCombatState!.Hand.Cards
-			.Where(c => c.Type == CardType.Skill && CanEnchantAdroit(c))
+			.Where(c => c.Type == CardType.Skill && EnchantHelpers.CanEnchant<Adroit>(c))
 			.ToList())
 		{
 			CardCmd.Enchant<Adroit>(card, DynamicVars[AdroitAmountKey].BaseValue);
@@ -85,13 +79,5 @@ public sealed class Suppression : ModCardTemplate
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Damage.UpgradeValueBy(3m);
-	}
-
-	/// <summary>
-	/// 检查目标牌能否附魔伶俐（Adroit），与 CardCmd.Enchant 内部的 CanEnchant 检查一致。
-	/// </summary>
-	private static bool CanEnchantAdroit(CardModel card)
-	{
-		return ModelDb.Enchantment<Adroit>().ToMutable().CanEnchant(card);
 	}
 }

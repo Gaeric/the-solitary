@@ -15,15 +15,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Fuel : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（Self）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Fuel()
@@ -31,7 +26,6 @@ public sealed class Fuel : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Fuel.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

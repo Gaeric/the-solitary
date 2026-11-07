@@ -18,13 +18,9 @@ public sealed class GhostImage : ModCardTemplate
 {
 	// X 费：基础耗能显示为 0，实际消耗所有能量。
 	private const int BaseEnergyCost = 0;
-	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	// X 费：消耗所有能量，每 1 点能量生效一次。
@@ -35,7 +31,6 @@ public sealed class GhostImage : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/GhostImage.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

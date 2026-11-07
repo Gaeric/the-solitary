@@ -162,6 +162,14 @@ Copy-Item .\local.props.template .\local.props
 ```text
 TheSolitary/
 ├── TheSolitaryCode/   # C# 源码
+│   ├── Cards/           # 卡牌模型
+│   ├── Arts/            # 术式机制（TheSolitary.ArtEffects）
+│   ├── Enchantments/    # 共享附魔工具与随机池
+│   ├── Powers/          # 能力模型
+│   ├── Relics/          # 遗物模型
+│   ├── Characters/      # 角色及内容池
+│   ├── Patches/         # 兼容补丁
+│   └── Rewards/         # 自定义奖励
 ├── TheSolitary/       # Godot 资源、本地化和占位场景
 ├── TheSolitary.csproj
 ├── TheSolitary.json   # Mod manifest

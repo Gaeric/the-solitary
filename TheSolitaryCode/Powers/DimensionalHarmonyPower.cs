@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Models;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 using TheSolitary.Cards;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Powers;
 

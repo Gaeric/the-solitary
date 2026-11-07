@@ -19,15 +19,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Aggravate : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（攻击）。
 	private const CardType CardKind = CardType.Attack;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（任意敌人）。
 	private const TargetType CardTarget = TargetType.AnyEnemy;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 	// 负面效果数值增量的 DynamicVar 键名（绑定 {DebuffAmount:diff()} 占位符）。
 	private const string DebuffAmountKey = "DebuffAmount";
@@ -39,7 +34,6 @@ public sealed class Aggravate : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Aggravate.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

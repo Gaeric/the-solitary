@@ -20,15 +20,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Caustic : ModCardTemplate, IArtTriggerListener
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 7;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（所有敌人，无手动选敌）。
 	private const TargetType CardTarget = TargetType.AllEnemies;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Caustic()
@@ -36,7 +31,6 @@ public sealed class Caustic : ModCardTemplate, IArtTriggerListener
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Caustic.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

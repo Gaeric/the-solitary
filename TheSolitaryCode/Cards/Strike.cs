@@ -15,15 +15,11 @@ namespace TheSolitary.Cards;
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 4)]
 public sealed class Strike : ModCardTemplate
 {
-    // 基础耗能。
     private const int BaseEnergyCost = 1;
-    // 卡牌类型。
     private const CardType CardKind = CardType.Attack;
     // 卡牌稀有度。
     private const CardRarity CardRarityValue = CardRarity.Basic;
-    // 目标类型（AnyEnemy 表示任意敌人）。
     private const TargetType CardTarget = TargetType.AnyEnemy;
-    // 是否在卡牌图鉴中显示。
     private const bool ShowInCardLibrary = true;
 
     // 卡图资源；文件名与类名一致（TheSolitary/images/cards/Strike.png）。

@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -20,15 +21,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class StableRecall : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（Self：作用于己方弃牌堆/手牌）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public StableRecall()
@@ -36,10 +32,8 @@ public sealed class StableRecall : ModCardTemplate
 	{
 	}
 
-	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/StableRecall.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
@@ -49,7 +43,6 @@ public sealed class StableRecall : ModCardTemplate
 		new BlockVar(5m, ValueProp.Move)
 	];
 
-	// 打出后自动消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 悬停提示：稳定附魔（Steady：该牌获得保留）。
@@ -72,7 +65,7 @@ public sealed class StableRecall : ModCardTemplate
 			context: choiceContext,
 			pile: PileType.Discard.GetPile(Owner),
 			player: Owner,
-			filter: CanEnchantSteady)).FirstOrDefault();
+			filter: EnchantHelpers.CanEnchant<Steady>)).FirstOrDefault();
 
 		// 弃牌堆中没有可选的牌（例如空弃牌堆）时，跳过回收与附魔。
 		if (picked == null)
@@ -89,11 +82,5 @@ public sealed class StableRecall : ModCardTemplate
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(3m);
-	}
-
-	// 与 CardCmd.Enchant 内部的 CanEnchant 检查一致：只允许选择能附魔稳定的牌。
-	private static bool CanEnchantSteady(CardModel card)
-	{
-		return ModelDb.Enchantment<Steady>().ToMutable().CanEnchant(card);
 	}
 }

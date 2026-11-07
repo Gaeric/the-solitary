@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Rewards;
 using STS2RitsuLib.Combat.Rewards;
 using TheSolitary.Cards;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Rewards;
 

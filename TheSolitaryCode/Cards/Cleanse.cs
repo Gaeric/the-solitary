@@ -17,15 +17,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Cleanse : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（自身，无手动选敌）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Cleanse()
@@ -33,7 +28,6 @@ public sealed class Cleanse : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Cleanse.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

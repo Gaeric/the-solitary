@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Powers;
 
@@ -24,7 +25,6 @@ public sealed class SowingPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
-	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
 	public override PowerAssetProfile AssetProfile => new(
 		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
 		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
@@ -53,7 +53,7 @@ public sealed class SowingPower : ModPowerTemplate
 			pile: PileType.Draw.GetPile(base.Owner.Player),
 			player: base.Owner.Player,
 			prefs: new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1),
-			filter: CanEnchantSown)).FirstOrDefault();
+			filter: EnchantHelpers.CanEnchant<Sown>)).FirstOrDefault();
 
 		if (target != null)
 		{
@@ -62,11 +62,5 @@ public sealed class SowingPower : ModPowerTemplate
 
 		// 消耗一次洗牌触发次数（即使没有可附魔的牌，本次洗牌机会也已使用）。
 		base.SetAmount(base.Amount - 1);
-	}
-
-	// 与 CardCmd.Enchant 内部的 CanEnchant 检查一致：只允许选择能附魔播种的牌。
-	private static bool CanEnchantSown(CardModel card)
-	{
-		return ModelDb.Enchantment<Sown>().ToMutable().CanEnchant(card);
 	}
 }

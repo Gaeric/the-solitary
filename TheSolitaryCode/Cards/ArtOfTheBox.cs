@@ -16,15 +16,11 @@ namespace TheSolitary.Cards;
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 1, Order = 1)]
 public sealed class ArtOfTheBox : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（攻击）。
 	private const CardType CardKind = CardType.Attack;
 	// 卡牌稀有度（基础牌 = 初始卡，不出现在奖励/商店列表中）。
 	private const CardRarity CardRarityValue = CardRarity.Basic;
-	// 目标类型（任意敌人）。
 	private const TargetType CardTarget = TargetType.AnyEnemy;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public ArtOfTheBox()
@@ -32,7 +28,6 @@ public sealed class ArtOfTheBox : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

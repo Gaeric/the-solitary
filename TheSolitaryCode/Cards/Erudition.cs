@@ -15,6 +15,7 @@ using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -28,13 +29,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TokenCardPool))]
 public sealed class Erudition : ModCardTemplate
 {
-	// 基础耗能（0 费）。
 	private const int BaseEnergyCost = 0;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
 	// 卡牌稀有度（Token = 衍生牌，不参与奖励稀有度骰子）。
 	private const CardRarity CardRarityValue = CardRarity.Token;
-	// 目标类型（Self：效果作用于自己）。
 	private const TargetType CardTarget = TargetType.Self;
 	// 衍生牌不出现在卡牌图鉴中。
 	private const bool ShowInCardLibrary = false;
@@ -77,7 +75,6 @@ public sealed class Erudition : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Erudition.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -19,15 +20,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantGlam : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 0;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（Self：作用于己方抽牌堆）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public EnchantGlam()
@@ -35,10 +31,8 @@ public sealed class EnchantGlam : ModCardTemplate
 	{
 	}
 
-	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/EnchantGlam.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
@@ -72,7 +66,7 @@ public sealed class EnchantGlam : ModCardTemplate
 			context: choiceContext,
 			pile: PileType.Draw.GetPile(Owner),
 			player: Owner,
-			filter: CanEnchantGlam)).ToList();
+			filter: EnchantHelpers.CanEnchant<Glam>)).ToList();
 
 		foreach (CardModel card in selection)
 		{
@@ -84,11 +78,5 @@ public sealed class EnchantGlam : ModCardTemplate
 	protected override void OnUpgrade()
 	{
 		AddKeyword(CardKeyword.Innate);
-	}
-
-	// 与 CardCmd.Enchant 内部的 CanEnchant 检查一致：只允许选择能附魔华彩的牌。
-	private static bool CanEnchantGlam(CardModel card)
-	{
-		return ModelDb.Enchantment<Glam>().ToMutable().CanEnchant(card);
 	}
 }

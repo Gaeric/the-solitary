@@ -31,7 +31,6 @@ public sealed class SappingFormation : ModRelicTemplate
         new PowerVar<DexterityPower>(StatLoss)
     ];
 
-    // 图片资源统一放在 AssetProfile 里配置（三个路径先指向同一张图）。
     public override RelicAssetProfile AssetProfile => new(
         IconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png",
         IconOutlinePath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png",

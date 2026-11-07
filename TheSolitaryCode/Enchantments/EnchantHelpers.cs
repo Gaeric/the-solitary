@@ -18,12 +18,19 @@ using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
 using TheSolitary.Patches;
 
-namespace TheSolitary.Cards;
+namespace TheSolitary.Enchantments;
 
-// 共享工具：按附魔牌数量缩放效果的卡牌公用逻辑。
-// 供风暴 EnchantStorm、共轭 Conjugate 等卡牌复用，避免两处统计逻辑漂移。
+/// <summary>附魔查询、数值调整与交换；移除附魔时统一还原其对卡牌的改写。</summary>
 public static class EnchantHelpers
 {
+	/// <summary>
+	/// 与 CardCmd.Enchant 使用相同的可用性检查；每次创建可变实例，避免共享附魔状态。
+	/// </summary>
+	public static bool CanEnchant<T>(CardModel card) where T : EnchantmentModel
+	{
+		return ModelDb.Enchantment<T>().ToMutable().CanEnchant(card);
+	}
+
 	/// <summary>
 	/// 获取玩家当前所有战斗牌堆中的卡牌（手牌 / 抽牌堆 / 弃牌堆 / 消耗堆 / 打出堆）。
 	/// 战斗中牌组 Deck 的牌会以克隆形式存在于上述牌堆中，牌组原件通过 DeckVersion 引用回原牌，

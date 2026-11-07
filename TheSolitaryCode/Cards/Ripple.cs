@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -21,15 +22,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Ripple : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（白卡 = Common）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
-	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	// 本回合是否洗过牌（卡牌实例级标志，玩家回合开始时重置）。
@@ -40,10 +36,8 @@ public sealed class Ripple : ModCardTemplate
 	{
 	}
 
-	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Ripple.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

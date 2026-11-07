@@ -162,6 +162,14 @@ A full build runs two MSBuild targets after `Build`:
 ```text
 TheSolitary/
 ├── TheSolitaryCode/   # C# source
+│   ├── Cards/           # Card models
+│   ├── Arts/            # Art effects (TheSolitary.ArtEffects)
+│   ├── Enchantments/    # Shared enchantment helpers and random pool
+│   ├── Powers/          # Power models
+│   ├── Relics/          # Relic models
+│   ├── Characters/      # Character and content pools
+│   ├── Patches/         # Compatibility patches
+│   └── Rewards/         # Custom rewards
 ├── TheSolitary/       # Godot resources, localization, and placeholder scenes
 ├── TheSolitary.csproj
 ├── TheSolitary.json   # Mod manifest

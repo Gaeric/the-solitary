@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -48,7 +49,7 @@ public sealed class RingOfSoulReturn : ModCardTemplate
 
 	await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
 
-	if (!PileType.Draw.GetPile(Owner).Cards.Any(CanEnchantSoulsPower))
+	if (!PileType.Draw.GetPile(Owner).Cards.Any(EnchantHelpers.CanEnchant<SoulsPower>))
 	{
 	    return;
 	}
@@ -58,7 +59,7 @@ public sealed class RingOfSoulReturn : ModCardTemplate
 	    context: choiceContext,
 	    pile: PileType.Draw.GetPile(Owner),
 	    player: Owner,
-	    filter: CanEnchantSoulsPower)).FirstOrDefault();
+	    filter: EnchantHelpers.CanEnchant<SoulsPower>)).FirstOrDefault();
 
 	if (picked != null)
 	{
@@ -69,10 +70,5 @@ public sealed class RingOfSoulReturn : ModCardTemplate
     protected override void OnUpgrade()
     {
 	AddKeyword(CardKeyword.Innate);
-    }
-
-    private static bool CanEnchantSoulsPower(CardModel card)
-    {
-	return ModelDb.Enchantment<SoulsPower>().ToMutable().CanEnchant(card);
     }
 }

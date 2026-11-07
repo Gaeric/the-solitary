@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -51,7 +52,7 @@ public sealed class EmberShelter : ModCardTemplate
 			context: choiceContext,
 			player: Owner,
 			prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, 1),
-			filter: CanEnchantEmber,
+			filter: EnchantHelpers.CanEnchant<TezcatarasEmber>,
 			source: this)).FirstOrDefault();
 
 		if (target != null)
@@ -63,10 +64,5 @@ public sealed class EmberShelter : ModCardTemplate
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Block.UpgradeValueBy(3m);
-	}
-
-	private static bool CanEnchantEmber(CardModel card)
-	{
-		return ModelDb.Enchantment<TezcatarasEmber>().ToMutable().CanEnchant(card);
 	}
 }

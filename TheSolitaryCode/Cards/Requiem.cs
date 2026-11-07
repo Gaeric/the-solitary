@@ -38,11 +38,8 @@ public sealed class Requiem : ModCardTemplate
 
 	// 基础耗能（任务牌不可打出，-1 与探寻 / 愧疚一致）。
 	private const int BaseEnergyCost = -1;
-	// 卡牌类型（任务牌）。
 	private const CardType CardKind = CardType.Quest;
-	// 卡牌稀有度（任务牌：不参与奖励稀有度骰子）。
 	private const CardRarity CardRarityValue = CardRarity.Quest;
-	// 目标类型（不可打出 → 无目标）。
 	private const TargetType CardTarget = TargetType.None;
 	// 在卡牌图鉴中显示，方便玩家查阅任务规则。
 	private const bool ShowInCardLibrary = true;
@@ -55,7 +52,6 @@ public sealed class Requiem : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Requiem.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

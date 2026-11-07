@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Powers;
 
@@ -20,14 +21,13 @@ namespace TheSolitary.Powers;
 [RegisterPower]
 public sealed class KineticRecoveryPower : ModPowerTemplate
 {
-	// 施加的动量附魔数值（character.org 未指定，取基础值 1；可按需调整）。
+	// 施加的动量附魔数值。
 	private const int MomentumAmount = 3;
 
 	public override PowerType Type => PowerType.Buff;
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
-	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
 	public override PowerAssetProfile AssetProfile => new(
 		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
 		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
@@ -48,7 +48,7 @@ public sealed class KineticRecoveryPower : ModPowerTemplate
 		// 该攻击牌已带有其他附魔（或 Momentum 无法作用于它）时，跳过本次且不消耗层数，
 		// 等待下一张可附魔的攻击牌再施加。CardCmd.Enchant 内部会因 CanEnchant 失败抛异常，
 		// 必须先检查（与 Aliasing / EmberShelter / Suppression 等 CardCmd.Enchant 前的守卫一致）。
-		if (!ModelDb.Enchantment<Momentum>().ToMutable().CanEnchant(cardPlay.Card))
+		if (!EnchantHelpers.CanEnchant<Momentum>(cardPlay.Card))
 		{
 			return;
 		}

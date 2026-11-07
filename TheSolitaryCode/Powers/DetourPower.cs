@@ -18,7 +18,6 @@ public sealed class DetourPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
-	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
 	public override PowerAssetProfile AssetProfile => new(
 		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
 		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
@@ -28,11 +27,7 @@ public sealed class DetourPower : ModPowerTemplate
 	public override bool TryModifyEnergyCostInCombatLate(CardModel card, decimal originalCost, out decimal modifiedCost)
 	{
 		modifiedCost = originalCost;
-		if (card.Owner.Creature != base.Owner || card.Enchantment == null)
-		{
-			return false;
-		}
-		if (card.Pile?.Type is not (PileType.Hand or PileType.Play))
+		if (!AppliesTo(card))
 		{
 			return false;
 		}
@@ -43,14 +38,16 @@ public sealed class DetourPower : ModPowerTemplate
 	// 打出符合条件的附魔牌时，把剩余免费次数 -1（参考原版 FreeSkillPower.BeforeCardPlayed）。
 	public override async Task BeforeCardPlayed(CardPlay cardPlay)
 	{
-		if (cardPlay.Card.Owner.Creature != base.Owner || cardPlay.Card.Enchantment == null)
-		{
-			return;
-		}
-		if (cardPlay.Card.Pile?.Type is not (PileType.Hand or PileType.Play))
+		if (!AppliesTo(cardPlay.Card))
 		{
 			return;
 		}
 		await PowerCmd.Decrement(this);
+	}
+
+	private bool AppliesTo(CardModel card)
+	{
+		return card.Owner.Creature == base.Owner && card.Enchantment != null
+			&& card.Pile?.Type is (PileType.Hand or PileType.Play);
 	}
 }

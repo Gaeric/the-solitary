@@ -15,15 +15,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class ArtOfThePalm : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（Skill）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（白卡 = Common）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
-	// 目标类型（Self）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	// 本场战斗已打出的次数（参考 UpMySleeve 的计数）。
@@ -47,7 +42,6 @@ public sealed class ArtOfThePalm : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

@@ -17,13 +17,9 @@ public sealed class Scatter : ModCardTemplate
 {
 	// X 费：基础耗能显示为 0，实际消耗所有能量。
 	private const int BaseEnergyCost = 0;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon，参考原版 X 费卡 Skewer / 强化躯体）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	// X 费：消耗所有能量，每 1 点能量生效一次。
@@ -34,11 +30,9 @@ public sealed class Scatter : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Scatter.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
 	// 基础数值：每次获得 7 点格挡（升级后 9），绑定 {Block:diff()} 占位符。

@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -19,15 +20,10 @@ public sealed class Preparedness : ModCardTemplate
 	private const string AdroitAmountKey = "AdroitAmount";
 	private const int AdroitAmount = 3;
 
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（Self）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Preparedness()
@@ -35,7 +31,6 @@ public sealed class Preparedness : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Preparedness.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
@@ -58,7 +53,7 @@ public sealed class Preparedness : ModCardTemplate
 
 		// 只附魔能被伶俐附魔的牌：状态/诅咒等类型会被 CanEnchant 拒绝，已附魔的牌也会被排除，
 		// 避免 CardCmd.Enchant 因 CanEnchant 失败而抛异常。
-		foreach (CardModel card in drawn.Where(CanEnchantAdroit))
+		foreach (CardModel card in drawn.Where(EnchantHelpers.CanEnchant<Adroit>))
 		{
 			CardCmd.Enchant<Adroit>(card, DynamicVars[AdroitAmountKey].BaseValue);
 		}
@@ -68,13 +63,5 @@ public sealed class Preparedness : ModCardTemplate
 	protected override void OnUpgrade()
 	{
 		DynamicVars.Cards.UpgradeValueBy(1);
-	}
-
-	/// <summary>
-	/// 检查目标牌能否附魔伶俐（Adroit），与 CardCmd.Enchant 内部的 CanEnchant 检查一致。
-	/// </summary>
-	private static bool CanEnchantAdroit(CardModel card)
-	{
-		return ModelDb.Enchantment<Adroit>().ToMutable().CanEnchant(card);
 	}
 }

@@ -9,6 +9,7 @@ using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 using TheSolitary.ArtEffects;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Cards;
 
@@ -17,15 +18,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Aliasing : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（蓝卡 = Uncommon）。
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
-	// 目标类型（自身：生成术式 / 作用于手牌）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public Aliasing()
@@ -33,11 +29,9 @@ public sealed class Aliasing : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Aliasing.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 基础数值：术式触发次数（绑定 {Cards:diff()} 占位符）。
@@ -59,7 +53,7 @@ public sealed class Aliasing : ModCardTemplate
 		}
 
 		// 2. 手牌中没有能被本能附魔的牌时，跳过附魔（不弹选择界面）。
-		if (!Owner.PlayerCombatState!.Hand.Cards.Any(CanEnchantInstinct))
+		if (!Owner.PlayerCombatState!.Hand.Cards.Any(EnchantHelpers.CanEnchant<Instinct>))
 		{
 			return;
 		}
@@ -69,7 +63,7 @@ public sealed class Aliasing : ModCardTemplate
 			context: choiceContext,
 			player: Owner,
 			prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, 1),
-			filter: CanEnchantInstinct,
+			filter: EnchantHelpers.CanEnchant<Instinct>,
 			source: this)).FirstOrDefault();
 
 		// 取消选择则跳过附魔（术式已结算）。
@@ -77,15 +71,5 @@ public sealed class Aliasing : ModCardTemplate
 		{
 			CardCmd.Enchant<Instinct>(target, 1m);
 		}
-	}
-
-	// 升级：生成的术式变为升级版（术式+），由 IsUpgraded 控制，无需额外升级逻辑。
-
-	/// <summary>
-	/// 检查目标牌能否附魔本能（Instinct），与 CardCmd.Enchant 内部的 CanEnchant 检查一致。
-	/// </summary>
-	private static bool CanEnchantInstinct(CardModel card)
-	{
-		return ModelDb.Enchantment<Instinct>().ToMutable().CanEnchant(card);
 	}
 }

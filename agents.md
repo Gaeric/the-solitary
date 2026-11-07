@@ -96,6 +96,8 @@ Copy-Item .\local.props.template .\local.props
 - 资源路径统一使用 `$"{Entry.ResPath}/images/..."`，文件名用 `{GetType().Name}`（与 png 同名）。
 - 效果逻辑写 `protected override async Task OnPlay(...)`，用 `await ...Cmd...Execute(choiceContext)` 顺序执行；升级逻辑写 `protected override void OnUpgrade()`（`UpgradeValueBy(...)`）。
 - 代码注释使用中文；新增内容需同时补充本地化文本。
+- 注释优先解释约束和原因（事件顺序、存档、随机数同步、原版 API 限制），不重复翻译常量/属性名。
+- 跨卡牌、能力、遗物的附魔逻辑放在 `Enchantments/`（`TheSolitary.Enchantments`），可用性检查复用 `EnchantHelpers.CanEnchant<T>`；卡牌特有的类型限制仍留在调用方。内容模型保持原有 namespace，避免影响注册和存档标识。
 
 ## Project structure（目录结构）
 
@@ -104,9 +106,13 @@ the-solitary/
 ├── TheSolitaryCode/          # C# 源码（Mod 逻辑）
 │   ├── Entry.cs              # Mod 入口 [ModInitializer]
 │   ├── Characters/           # TheSolitaryCharacter + 卡池/遗物池/药水池
-│   ├── Cards/                # 卡牌类（Strike/Defend/轮回/负面效果符/无尽符/撒符等）
-│   ├── Powers/               # Power 类（EndlessCharmPower 等）
-│   └── Relics/               # 遗物类（SwiftCircuit 等）
+│   ├── Cards/                # 卡牌模型及卡牌专用的预览、负面效果工具
+│   ├── Arts/                 # 术式定义、触发、监听与特效（namespace: TheSolitary.ArtEffects）
+│   ├── Enchantments/         # 跨卡牌/能力/遗物复用的附魔工具和随机附魔池
+│   ├── Powers/               # 能力模型与事件响应
+│   ├── Relics/               # 遗物模型
+│   ├── Rewards/              # 自定义奖励
+│   └── Patches/              # 原版行为兼容与附魔状态记录补丁
 ├── TheSolitary/              # Godot 资源（images / localization / scenes），非 C#
 │   ├── localization/
 │   │   ├── eng/              # 英文：cards.json / characters.json / relics.json / powers.json / ancients.json
@@ -261,7 +267,7 @@ public override PowerInstanceType InstanceType => PowerInstanceType.Instanced;
 
 ### 4. 生成牌随机附魔（附魔造物 EnchantedCreation）
 
-- 随机附魔池抽成共享静态类 `TheSolitaryCode/Cards/RandomEnchantPool.cs`（`EnchantRandomly(Rng, CardModel)`），供献祭 Sacrifice / 附魔造物复用，避免两处池子漂移。
+- 随机附魔池抽成共享静态类 `TheSolitaryCode/Enchantments/RandomEnchantPool.cs`（`EnchantRandomly(Rng, CardModel)`），供献祭 Sacrifice / 附魔造物复用，避免两处池子漂移。
 - 池子：Sharp 2 / Momentum 1 / Instinct 1 / Spiral 1 / Adroit 2 / Nimble 2；先 `ModelDb.Enchantment<T>().ToMutable().CanEnchant(card)` 过滤，再用 `Rng.NextItem` 随机，最后 `CardCmd.Enchant<T>(card, amount)` 施加。
 
 ### 5. 原版措辞规范（查 `../sts2_20260821/localization/eng|zhs/cards.json`）

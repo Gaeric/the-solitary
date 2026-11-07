@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
+using TheSolitary.Enchantments;
 
 namespace TheSolitary.Relics;
 
@@ -34,14 +35,12 @@ public sealed class RapidCircuit : ModRelicTemplate
         new DynamicVar("SwiftAmount", SwiftAmount)
     ];
 
-    // 图片资源统一放在 AssetProfile 里配置（三个路径先指向同一张图）。
     public override RelicAssetProfile AssetProfile => new(
         IconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png",
         IconOutlinePath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png",
         BigIconPath: $"{Entry.ResPath}/images/relics/{GetType().Name}.png");
 
-    // 遗物实例跨整局运行存在，充能计数只在 AfterCardDrawn 里递减、从不恢复，
-    // 导致第一场战斗用完后就永远不再触发。每场战斗开始、回合初始抽牌之前重置回满。
+    // 遗物跨战斗保留；每场战斗的初始抽牌前重置充能。
     public override Task BeforeCombatStart()
     {
         base.DynamicVars.Cards.BaseValue = StartingCharges;
@@ -53,7 +52,7 @@ public sealed class RapidCircuit : ModRelicTemplate
         // 只有能被迅捷附魔的卡牌（非状态/诅咒、未被其他附魔占用等）才添加迅捷并消耗充能。
         // CardCmd.Enchant 内部会再次调用 CanEnchant，若卡牌不可附魔会直接抛异常，因此必须先检查。
         if (card.Owner == base.Owner && base.DynamicVars.Cards.BaseValue > 0
-            && ModelDb.Enchantment<Swift>().ToMutable().CanEnchant(card))
+            && EnchantHelpers.CanEnchant<Swift>(card))
         {
             CardCmd.Enchant<Swift>(card, SwiftAmount);
             base.DynamicVars.Cards.BaseValue--;

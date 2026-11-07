@@ -20,7 +20,6 @@ public sealed class SamplingPower : ModPowerTemplate
 
 	public override PowerStackType StackType => PowerStackType.Counter;
 
-	// 自定义图标（取材 WatcherBeautified 观者 Power 图标，128x128，小图与大图共用）。
 	public override PowerAssetProfile AssetProfile => new(
 		IconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png",
 		BigIconPath: $"{Entry.ResPath}/images/powers/{GetType().Name}.png");
@@ -28,20 +27,25 @@ public sealed class SamplingPower : ModPowerTemplate
 	// 战斗内计算打出次数时：拥有者打出的附魔牌打出次数 +1（参考复制 DuplicationPower.ModifyCardPlayCount）。
 	public override int ModifyCardPlayCount(CardModel card, Creature? target, int playCount)
 	{
-		if (card.Owner.Creature != base.Owner || card.Enchantment == null)
+		if (!AppliesTo(card))
 		{
 			return playCount;
 		}
 		return playCount + 1;
 	}
 
-	// 打出次数结算完毕后，把剩余免费次数 -1（参考复制 DuplicationPower.AfterModifyingCardPlayCount）。
+	// 打出次数结算完毕后，把剩余重复打出次数 -1（参考复制 DuplicationPower.AfterModifyingCardPlayCount）。
 	public override async Task AfterModifyingCardPlayCount(CardModel card)
 	{
-		if (card.Owner.Creature != base.Owner || card.Enchantment == null)
+		if (!AppliesTo(card))
 		{
 			return;
 		}
 		await PowerCmd.Decrement(this);
+	}
+
+	private bool AppliesTo(CardModel card)
+	{
+		return card.Owner.Creature == base.Owner && card.Enchantment != null;
 	}
 }

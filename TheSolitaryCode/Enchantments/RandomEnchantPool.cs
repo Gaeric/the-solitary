@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 using MegaCrit.Sts2.Core.Random;
 
-namespace TheSolitary.Cards;
+namespace TheSolitary.Enchantments;
 
 // 共享随机附魔池（character.org 的随机附魔池）：锋利 / 动量 / 本能 / 涡旋 / 伶俐 / 灵巧。
 // 供唤醒、维度调和及凝华战后奖励等随机附魔来源复用。
@@ -18,12 +18,12 @@ public static class RandomEnchantPool
 	// character.org 随机附魔池。
 	private static readonly Entry[] Pool =
 	[
-		new(CanEnchant<Sharp>, ApplyEnchant<Sharp>, 3m),
-		new(CanEnchant<Momentum>, ApplyEnchant<Momentum>, 3m),
-		new(CanEnchant<Instinct>, ApplyEnchant<Instinct>, 1m),
-		new(CanEnchant<Spiral>, ApplyEnchant<Spiral>, 1m),
-		new(CanEnchant<Adroit>, ApplyEnchant<Adroit>, 2m),
-		new(CanEnchant<Nimble>, ApplyEnchant<Nimble>, 2m)
+		new(EnchantHelpers.CanEnchant<Sharp>, ApplyEnchant<Sharp>, 3m),
+		new(EnchantHelpers.CanEnchant<Momentum>, ApplyEnchant<Momentum>, 3m),
+		new(EnchantHelpers.CanEnchant<Instinct>, ApplyEnchant<Instinct>, 1m),
+		new(EnchantHelpers.CanEnchant<Spiral>, ApplyEnchant<Spiral>, 1m),
+		new(EnchantHelpers.CanEnchant<Adroit>, ApplyEnchant<Adroit>, 2m),
+		new(EnchantHelpers.CanEnchant<Nimble>, ApplyEnchant<Nimble>, 2m)
 	];
 
 	/// <summary>
@@ -52,14 +52,6 @@ public static class RandomEnchantPool
 	public static bool CanEnchantRandomly(CardModel card)
 	{
 		return Pool.Any(entry => entry.CanEnchant(card));
-	}
-
-	/// <summary>
-	/// 用与 CardCmd.Enchant 相同的方式检查该附魔能否作用于目标牌。
-	/// </summary>
-	private static bool CanEnchant<T>(CardModel card) where T : EnchantmentModel
-	{
-		return ModelDb.Enchantment<T>().ToMutable().CanEnchant(card);
 	}
 
 	/// <summary>

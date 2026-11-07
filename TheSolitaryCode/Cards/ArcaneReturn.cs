@@ -14,15 +14,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class ArcaneReturn : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 3;
-	// 卡牌类型（能力）。
 	private const CardType CardKind = CardType.Power;
-	// 卡牌稀有度（金卡 = Rare）。
 	private const CardRarity CardRarityValue = CardRarity.Rare;
-	// 目标类型（自身）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public ArcaneReturn()
@@ -30,7 +25,6 @@ public sealed class ArcaneReturn : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/ArcaneReturn.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

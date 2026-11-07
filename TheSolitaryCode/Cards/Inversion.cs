@@ -19,15 +19,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Inversion : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（攻击）。
 	private const CardType CardKind = CardType.Attack;
-	// 卡牌稀有度（白卡 = Common）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
-	// 目标类型（全体敌人）。
 	private const TargetType CardTarget = TargetType.AllEnemies;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 	// 每次洗牌减少的基础伤害。
 	private const int DamageReductionPerShuffle = 2;
@@ -37,7 +32,6 @@ public sealed class Inversion : ModCardTemplate
 	{
 	}
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/Inversion.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 

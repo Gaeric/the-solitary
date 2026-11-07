@@ -18,15 +18,10 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class DeepDetection : ModCardTemplate
 {
-	// 基础耗能。
 	private const int BaseEnergyCost = 1;
-	// 卡牌类型（技能）。
 	private const CardType CardKind = CardType.Skill;
-	// 卡牌稀有度（白卡 = Common）。
 	private const CardRarity CardRarityValue = CardRarity.Common;
-	// 目标类型（自身：作用于己方弃牌堆/手牌）。
 	private const TargetType CardTarget = TargetType.Self;
-	// 是否在卡牌图鉴中显示。
 	private const bool ShowInCardLibrary = true;
 
 	public DeepDetection()
@@ -34,14 +29,11 @@ public sealed class DeepDetection : ModCardTemplate
 	{
 	}
 
-	// 获得格挡，按格挡牌参与力量/敏捷等计算。
 	public override bool GainsBlock => true;
 
-	// 卡图资源；文件名与类名一致（TheSolitary/images/cards/DeepDetection.png）。
 	public override CardAssetProfile AssetProfile => new(
 		PortraitPath: $"{Entry.ResPath}/images/cards/{GetType().Name}.png");
 
-	// 打出后消耗。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
 	// 基础数值：格挡 + 回收附魔牌时获得的能量（绑定 {Block:diff()} / {Energy:energyIcons()} 占位符）。
