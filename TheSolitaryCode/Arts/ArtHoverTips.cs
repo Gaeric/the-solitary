@@ -28,7 +28,9 @@ public static class ArtHoverTips
 				_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "未知的术式类型。")
 			};
 			LocString line = Text("referenceLine");
-			line.Add("Name", new LocString("cards", $"THE_SOLITARY_CARD_{cardKey}.title"));
+			string name = Text(cardKey + ".title").GetFormattedText();
+			// 名称与术式特效共用配色，数值与负面名称保持默认颜色以便阅读。
+			line.Add("Name", $"[color=#{normal.Color.ToHtml(false)}]{name}[/color]");
 			line.Add("Damage", FormatValue(normal.Damage, enhanced.Damage, upgraded));
 			line.Add("PowerAmount", FormatValue(normal.PowerAmount, enhanced.PowerAmount, upgraded));
 			line.Add("Effect", new LocString("powers", $"{powerKey}.title"));
