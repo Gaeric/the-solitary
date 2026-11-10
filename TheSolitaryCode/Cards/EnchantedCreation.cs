@@ -1,6 +1,8 @@
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
+using TheSolitary.ArtEffects;
 using TheSolitary.Characters;
 using TheSolitary.Powers;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -12,6 +14,8 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantedCreation : ModCardTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
 	private const int BaseEnergyCost = 2;
 	private const CardType CardKind = CardType.Power;
 	private const CardRarity CardRarityValue = CardRarity.Rare;

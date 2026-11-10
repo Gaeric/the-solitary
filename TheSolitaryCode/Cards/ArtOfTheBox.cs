@@ -1,6 +1,7 @@
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.ValueProps;
 using TheSolitary.Characters;
@@ -16,6 +17,8 @@ namespace TheSolitary.Cards;
 [RegisterCharacterStarterCard(typeof(TheSolitaryCharacter), 1, Order = 1)]
 public sealed class ArtOfTheBox : ModCardTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create(IsUpgraded);
+
 	private const int BaseEnergyCost = 1;
 	private const CardType CardKind = CardType.Attack;
 	// 卡牌稀有度（基础牌 = 初始卡，不出现在奖励/商店列表中）。

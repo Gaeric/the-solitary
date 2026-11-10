@@ -1,4 +1,5 @@
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using TheSolitary.ArtEffects;
@@ -13,6 +14,8 @@ namespace TheSolitary.Powers;
 [RegisterPower]
 public sealed class EnchantedCreationPower : ModPowerTemplate, IArtTriggerListener
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
 	private const string TriggersLeftKey = "TriggersLeft";
 	private const int TriggerThreshold = 5;
 

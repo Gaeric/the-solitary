@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using TheSolitary.Cards;
@@ -21,6 +22,8 @@ namespace TheSolitary.Relics;
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
 public sealed class ArcaneSympathy : ModRelicTemplate, IArtTriggerListener
 {
+    protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
     // 触发阈值：每打出几张术式结算一次。
     private const int ArtsThreshold = 4;
 

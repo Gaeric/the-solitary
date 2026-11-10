@@ -1,4 +1,6 @@
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.HoverTips;
+using TheSolitary.ArtEffects;
 using STS2RitsuLib.Interop.AutoRegistration;
 using STS2RitsuLib.Scaffolding.Content;
 
@@ -8,6 +10,8 @@ namespace TheSolitary.Powers;
 [RegisterPower]
 public sealed class SpellRecallPower : ModPowerTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
 	public override PowerType Type => PowerType.Buff;
 
 	public override PowerStackType StackType => PowerStackType.Counter;

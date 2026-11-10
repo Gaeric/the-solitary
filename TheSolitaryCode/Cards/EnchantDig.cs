@@ -3,6 +3,7 @@ using System.Linq;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -18,6 +19,8 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class EnchantDig : ModCardTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create(IsUpgraded);
+
 	private const int BaseEnergyCost = 1;
 	private const CardType CardKind = CardType.Attack;
 	private const CardRarity CardRarityValue = CardRarity.Common;

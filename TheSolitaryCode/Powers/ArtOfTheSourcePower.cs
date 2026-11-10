@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using TheSolitary.Cards;
 using TheSolitary.ArtEffects;
@@ -15,6 +16,8 @@ namespace TheSolitary.Powers;
 [RegisterPower]
 public sealed class ArtOfTheSourcePower : ModPowerTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create(upgraded: true);
+
 	public override PowerType Type => PowerType.Buff;
 
 	public override PowerStackType StackType => PowerStackType.Counter;

@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.ValueProps;
+using TheSolitary.Cards;
 using TheSolitary.Powers;
 
 namespace TheSolitary.ArtEffects;
@@ -93,7 +94,9 @@ public static class ArtTrigger
 		ArtTriggerVfx.Play(target, effect);
 
 		// Unpowered 且三种来源全部为空：不走攻击伤害，不继承来源卡的附魔或重放。
-		await CreatureCmd.Damage(choiceContext, target, effect.Damage, ValueProp.Unpowered,
+		// 每次结算重新统计目标的负面种类；本次随后施加的负面只影响后续术式（含回想）。
+		decimal damage = effect.Damage + DebuffHelpers.CountDebuffTypes(target);
+		await CreatureCmd.Damage(choiceContext, target, damage, ValueProp.Unpowered,
 			dealer: null, cardSource: null, cardPlay: null);
 
 		// 与旧术式一致，先伤害再挂负面；致死或战斗已结束时不再向目标施加 Power。

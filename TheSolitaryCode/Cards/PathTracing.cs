@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Combat.History.Entries;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using TheSolitary.Characters;
 using STS2RitsuLib.Interop.AutoRegistration;
@@ -21,6 +22,8 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class PathTracing : ModCardTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create(IsUpgraded);
+
 	private const int BaseEnergyCost = 0;
 	private const CardType CardKind = CardType.Skill;
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;

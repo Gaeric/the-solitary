@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -22,6 +23,8 @@ namespace TheSolitary.Relics;
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
 public sealed class FourSymbolsFormation : ModRelicTemplate, IArtTriggerListener
 {
+    protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
     // 需要打出的不同术式种类数。
     private const int DistinctArtsRequired = 4;
 

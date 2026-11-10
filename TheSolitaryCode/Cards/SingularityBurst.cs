@@ -3,6 +3,8 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
+using TheSolitary.ArtEffects;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -19,6 +21,8 @@ namespace TheSolitary.Cards;
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class SingularityBurst : ModCardTemplate
 {
+	protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create();
+
 	// 命中次数对应的 DynamicVar 键名。
 	private const string CalculatedHitsKey = "CalculatedHits";
 

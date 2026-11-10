@@ -45,9 +45,9 @@
     <ItemGroup>
         <!-- 中文：排除 Godot、IDE 和构建输出目录，避免本地生成文件参与编译。 -->
         <!-- English: Exclude Godot, IDE, and build output directories so local generated files are not compiled. -->
-        <Compile Remove=".godot/**;.idea/**;.vs/**;bin/**;obj/**"/>
-        <EmbeddedResource Remove=".godot/**;.idea/**;.vs/**;bin/**;obj/**"/>
-        <None Remove=".godot/**;.idea/**;.vs/**;bin/**;obj/**"/>
+        <Compile Remove=".godot/**;.idea/**;.vs/**;.tools/**;bin/**;obj/**"/>
+        <EmbeddedResource Remove=".godot/**;.idea/**;.vs/**;.tools/**;bin/**;obj/**"/>
+        <None Remove=".godot/**;.idea/**;.vs/**;.tools/**;bin/**;obj/**"/>
 
         <AdditionalFiles Include="TheSolitary/localization/**/*.json"/>
 

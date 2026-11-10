@@ -37,11 +37,12 @@ public sealed class Caustic : ModCardTemplate, IArtTriggerListener
 	// 打出后消耗（关键词自动显示在卡面，不必写进描述）。
 	public override IEnumerable<CardKeyword> CanonicalKeywords => [CardKeyword.Exhaust];
 
-	// 悬停提示：力量 / 敏捷。
+	// 保留力量 / 敏捷解释，并补充术式规则与速查。
 	protected override IEnumerable<IHoverTip> AdditionalHoverTips =>
 	[
 		HoverTipFactory.FromPower<StrengthPower>(),
-		HoverTipFactory.FromPower<DexterityPower>()
+		HoverTipFactory.FromPower<DexterityPower>(),
+		.. ArtHoverTips.Create()
 	];
 
 	// 基础数值：力量流失 / 敏捷流失（升级后各 3）。

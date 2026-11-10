@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using TheSolitary.Cards;
 using TheSolitary.ArtEffects;
 using TheSolitary.Characters;
@@ -14,6 +15,8 @@ namespace TheSolitary.Relics;
 [RegisterRelic(typeof(TheSolitaryRelicPool))]
 public sealed class BackAndForth : ModRelicTemplate
 {
+    protected override IEnumerable<IHoverTip> AdditionalHoverTips => ArtHoverTips.Create(upgraded: false);
+
     public override RelicRarity Rarity => RelicRarity.Uncommon;
 
     public override RelicAssetProfile AssetProfile => new(
