@@ -9,15 +9,10 @@ using STS2RitsuLib.Scaffolding.Content;
 
 namespace TheSolitary.Cards;
 
-// 辐照（新卡）：2 费能力牌（蓝卡）。
-// 每当你打出一张附魔牌，对所有敌人造成 2 点伤害（升级后 3 点）。
-// "所有敌人" = 战斗中所有可命中敌人，Power 端用 CombatState.HittableEnemies 选取。
-// 全体敌人伤害参考原版速行者 SpeedsterPower（SpeedsterPower.AfterCardDrawn 里 CreatureCmd.Damage 打全体敌人）。
-// 能力牌 + 持续 Power 的模式参考光栅 Raster（RasterPower 做实际触发）。
 [RegisterCard(typeof(TheSolitaryCardPool))]
 public sealed class Irradiation : ModCardTemplate
 {
-	private const int BaseEnergyCost = 2;
+	private const int BaseEnergyCost = 1;
 	private const CardType CardKind = CardType.Power;
 	private const CardRarity CardRarityValue = CardRarity.Uncommon;
 	private const TargetType CardTarget = TargetType.Self;
@@ -45,7 +40,6 @@ public sealed class Irradiation : ModCardTemplate
 			DynamicVars["IrradiationPower"].BaseValue, Owner.Creature, this);
 	}
 
-	// 升级：伤害 2 -> 3。
 	protected override void OnUpgrade()
 	{
 		DynamicVars["IrradiationPower"].UpgradeValueBy(1m);

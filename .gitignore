@@ -13,3 +13,4 @@ local.props
 *.log
 
 .tools/
+ref/
